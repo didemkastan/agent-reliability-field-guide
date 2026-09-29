@@ -88,6 +88,20 @@ The Handoff Receipt fields can be stored as structured data. The system adds Age
 
 Automation **moves the information**; it does not remove the need for verification.
 
+## A handoff does not automatically start the next agent
+
+A shared workspace such as GitHub can give agents access to the same files and task records. However, Agent A creating a file or handoff record does not mean that Agent B will automatically start working.
+
+There are three separate parts:
+
+- **Handoff:** Defines what information is passed to the next agent.
+- **Trigger:** Determines when the next agent is started.
+- **Orchestrator:** Manages which agent is next and what task information it receives.
+
+Without automation, the user starts the first agent, reviews the handoff record, and starts the next agent with that record. With automation, an event such as a task status change or pull request in GitHub can be used to trigger the next step.
+
+**In short:** The shared workspace carries the information; the trigger starts the agent; the handoff record tells the agent what it needs to continue.
+
 ## When does the human act?
 
 Without direct agent-to-agent transfer, the user typically:
