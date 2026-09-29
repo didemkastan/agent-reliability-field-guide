@@ -4,6 +4,8 @@
 
 This template is used when transferring a task from one agent or person to another so that the current state, completed changes, and remaining checks are not lost.
 
+> **This template is not an official standard from any particular product or platform. It combines the principles used in this guide to help preserve version, change, verification, coverage, and next-step information during agent handoffs.**
+
 ## Who fills it out?
 
 The agent or person handing off the task completes the record. It is not only a summary of completed work; it should clearly show where the next party needs to continue.
