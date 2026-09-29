@@ -2,14 +2,19 @@
 
 ## 📚 Start Reading
 
-Click a topic below to open its content.
+The order below matches the **Guide scope**. Published sections can be opened by clicking their titles.
 
-- [1. Source of Truth](guide/01-source-of-truth/README_EN.md) — Make sure work is based on the correct file and current version.
-- [2. Agent Handoffs](guide/03-agent-handoffs/README_EN.md) — Transfer work to another agent together with the information it needs.
-- [3. Verification](guide/04-verification/README_EN.md) — Understand the difference between reporting “done” and actually verifying the result.
-- [4. Handoff Receipt Template](patterns/handoff-receipt_EN.md) — A ready-to-use structure for recording a handoff.
+1. [**Source of Truth**](guide/01-source-of-truth/README_EN.md) — Make sure work is based on the correct file and current version.
+2. **Safe Changes** — Coming soon.
+3. [**Agent Handoffs**](guide/03-agent-handoffs/README_EN.md) — Transfer work to another agent together with the information it needs.
+4. [**Handoff Receipt Template**](patterns/handoff-receipt_EN.md) — A ready-to-use structure for recording a handoff.
+5. [**Verification**](guide/04-verification/README_EN.md) — Understand the difference between reporting “done” and actually verifying the result.
+6. **Retries** — Coming soon.
+7. **Memory & Context** — Coming soon.
+8. **Security & Authority** — Coming soon.
+9. **Observability** — Coming soon.
 
-> This list will be updated as new sections are added.
+> As new sections are published, their titles will become clickable.
 
 [🇹🇷 Türkçe](README.md)
 
