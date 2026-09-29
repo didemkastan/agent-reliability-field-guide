@@ -64,3 +64,5 @@ In more automated workflows, this check should not rely only on a prompt. The sy
 This check is important when the same file can be modified by multiple people, agents, branches, or automations, or when it can be updated from different working environments.
 
 For small experiments where one person works alone and changes can easily be discarded, a lighter check may be enough.
+
+**Example:** One person is testing a small configuration change in a local experiment file, and the pre-change version is already restorable. In this case, instead of recording a separate VERSION or HASH at every step, it may be enough to check the current file immediately before the change, confirm that only the intended file was modified, and review the result afterward. If the result is unexpected, the change is reverted.
