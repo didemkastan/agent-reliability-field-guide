@@ -1,59 +1,59 @@
-# Verification
+# Verification (Doğrulama)
 
-[🇹🇷 Türkçe](README_TR.md)
+[🇬🇧 English](README_EN.md)
 
-## Why verification matters
+## Doğrulama neden önemlidir?
 
-An agent saying “done” tells us what the agent believes happened. It does not prove that the expected result actually occurred.
+Bir agentın “tamamlandı” demesi, işlemin gerçekten doğru sonuç verdiğini kanıtlamaz. Bu yalnızca agentın kendi değerlendirmesidir.
 
-A useful workflow keeps four things separate:
+Bu nedenle dört bilgiyi birbirinden ayırmak faydalıdır:
 
-- **OBSERVED** — What was directly seen in a tool, file, test, or system result.
-- **INTERPRETED** — What the agent thinks that observation means.
-- **ACTION** — What was changed or executed.
-- **VERIFIED** — What was checked after the action to confirm the result.
+- **OBSERVED (Gözlemlenen)** — Araçta, dosyada, testte veya sistem sonucunda doğrudan görülen bilgi.
+- **INTERPRETED (Yorumlanan)** — Agentın gördüğü bilgiden çıkardığı anlam.
+- **ACTION (Yapılan işlem)** — Değiştirilen veya çalıştırılan işlem.
+- **VERIFIED (Doğrulanan)** — İşlemden sonra sonucun gerçekten oluşup oluşmadığını kontrol eden kanıt.
 
-## Synthetic example
+## Sentetik örnek
 
-An agent changes a configuration file to enable a fictional feature.
+Bir agent, hayali bir özelliği açmak için ayar dosyasını değiştiriyor.
 
-- **OBSERVED:** The file currently contains `feature_enabled: false`.
-- **INTERPRETED:** The feature appears to be disabled by this setting.
-- **ACTION:** The value is changed to `true`.
-- **VERIFIED:** The file is read again and the relevant test is run successfully.
+- **OBSERVED (Gözlemlenen):** Dosyada `feature_enabled: false` değeri var.
+- **INTERPRETED (Yorumlanan):** Bu ayar özelliğin kapalı olduğunu gösteriyor.
+- **ACTION (Yapılan işlem):** Değer `true` olarak değiştiriliyor.
+- **VERIFIED (Doğrulanan):** Dosya yeniden okunuyor ve ilgili test başarıyla çalıştırılıyor.
 
-The action and the verification are different steps. A successful file write does not automatically prove that the feature works.
+Dosyayı değiştirmek ile değişikliğin doğru çalıştığını doğrulamak aynı işlem değildir. Dosyanın başarıyla kaydedilmesi, özelliğin çalıştığını tek başına göstermez.
 
-## Verify the artifact and its environment
+## Artifact (Çıktı) ve environment (çalışma ortamı) birlikte kontrol edilmelidir
 
-A result can depend on more than the file itself. Runtime version, operating system, dependencies, or configuration may change the outcome.
+Aynı dosya farklı ortamlarda farklı sonuç verebilir. Kullanılan çalışma sürümü, işletim sistemi, bağımlılıklar veya ayarlar sonucu etkileyebilir.
 
-For important checks, record:
+Önemli kontrollerde şu bilgiler kaydedilebilir:
 
-- the artifact or version that was tested;
-- the environment in which it was tested;
-- the check that was performed;
-- the verifier or verification source.
+- hangi dosyanın veya sürümün test edildiği;
+- testin hangi ortamda çalıştırıldığı;
+- hangi kontrolün yapıldığı;
+- doğrulamanın hangi kaynağa dayandığı.
 
-## Result verification and path verification
+## RESULT_VERIFIED (Sonuç doğrulandı) ve PATH_VERIFIED (İzlenen yol doğrulandı)
 
-Two questions are useful:
+İki ayrı soru sorulur:
 
-1. **RESULT_VERIFIED** — Did we get the expected result?
-2. **PATH_VERIFIED** — Did we reach that result through the intended and acceptable process?
+1. **RESULT_VERIFIED (Sonuç doğrulandı)** — Beklenen sonuç oluştu mu?
+2. **PATH_VERIFIED (İzlenen yol doğrulandı)** — Bu sonuca beklenen ve kabul edilen adımlar izlenerek mi ulaşıldı?
 
-Example: a generated file may look correct, but if the required test was skipped, the result may be visible while the intended verification path is incomplete.
+Örneğin oluşturulan bir dosya doğru görünebilir. Ancak yapılması gereken test atlandıysa sonuç görünürde doğru olsa bile doğrulama süreci tamamlanmış sayılmaz.
 
-## What can go wrong?
+## Ne ters gidebilir?
 
-If these steps are mixed together, an interpretation can slowly become treated as evidence. A confident status message may then hide a missing test or an unchecked assumption.
+Bu bilgiler birbirine karışırsa agentın yorumu zamanla kanıt gibi kabul edilebilir. Böylece yapılmamış bir test veya kontrol edilmemiş bir varsayım gözden kaçabilir.
 
-## Practical rule
+## Temel kural
 
-> **Treat “done” as a status statement. Treat verification as a separate check supported by observable evidence.**
+> **“Tamamlandı” ifadesini durum bilgisi olarak kabul et. Doğrulamayı ise görülebilen bir sonuca veya teste dayanan ayrı bir kontrol olarak yap.**
 
-## When is this useful?
+## Ne zaman kullanılır?
 
-This distinction is especially useful when an agent changes files, runs tests, creates builds, calls external tools, or hands work to another agent.
+Bu ayrım özellikle agent dosya değiştirdiğinde, test çalıştırdığında, çıktı oluşturduğunda, başka bir araç kullandığında veya işi başka bir agenta devrettiğinde önemlidir.
 
-For low-risk, disposable experiments, a lighter check may be enough.
+Düşük riskli ve geçici denemelerde daha kısa bir kontrol yeterli olabilir.
