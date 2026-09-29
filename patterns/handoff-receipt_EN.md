@@ -14,7 +14,7 @@ The agent or person handing off the task completes the record. It is not only a 
 
 It can be used when a task moves to another agent or person, continues in a different session, or requires another party to complete the remaining checks.
 
-The handing-off party first completes the checks it can perform and then creates the handoff receipt.
+The party handing off the task first completes the checks it can perform and then creates the handoff receipt.
 
 ## Where is it stored?
 
@@ -26,7 +26,7 @@ The location depends on the working environment:
 
 The existence of a handoff receipt does not automatically start the next agent. Automated transitions require a separate trigger and orchestration mechanism.
 
-## Ready-to-use example template
+## Ready-to-use template
 
 ```text
 HANDOFF RECEIPT
