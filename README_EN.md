@@ -2,7 +2,7 @@
 
 ## 📚 Start Reading
 
-The order below matches the **Guide scope**. Published sections can be opened by clicking their titles.
+Published sections can be opened by clicking their titles.
 
 1. [**Source of Truth**](guide/01-source-of-truth/README_EN.md) — Make sure work is based on the correct file and current version.
 2. [**Agent Handoffs**](guide/03-agent-handoffs/README_EN.md) — Transfer work to another agent together with the information it needs.
