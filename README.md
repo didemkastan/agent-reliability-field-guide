@@ -1,4 +1,4 @@
-# Agent Reliability Field Guide
+# Agent Reliability Field Guide (Agent Güvenilirliği Uygulama Rehberi)
 
 ## 📚 Rehbere Başla
 
@@ -7,7 +7,7 @@ Konu başlıklarına tıklayarak içeriğe ulaşabilirsiniz.
 - [1. Gerçeğin Kaynağı](guide/01-source-of-truth/README.md) — Doğru dosya ve doğru sürümle çalışmayı güvence altına alma.
 - [2. Agentlar Arası Görev Devri](guide/03-agent-handoffs/README.md) — Bir agentın yaptığı işi diğerine gerekli bilgilerle birlikte aktarma.
 - [3. Verification (Doğrulama)](guide/04-verification/README.md) — “Tamamlandı” demek ile sonucu gerçekten doğrulamak arasındaki fark.
-- [Handoff Receipt (Görev Devri Kayıt Şablonu)](patterns/handoff-receipt.md) — Görev devrinde kullanılabilecek hazır kayıt yapısı.
+- [4. Handoff Receipt (Görev Devri Kayıt Şablonu)](patterns/handoff-receipt.md) — Görev devrinde kullanılabilecek hazır kayıt yapısı.
 
 > Yeni bölümler eklendikçe bu liste güncellenecektir.
 
