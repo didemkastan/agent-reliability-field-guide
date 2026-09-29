@@ -7,7 +7,7 @@ Agent A can finish its task correctly and Agent B can still fail because an impo
 
 The failure is not always inside an agent. Sometimes it is **between** agents.
 
-## Plain-language rule
+## Core rule
 > **A handoff should say what changed, what must not change, what was actually verified, and what was not checked.**
 
 ## Minimal handoff receipt
