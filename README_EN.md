@@ -5,10 +5,10 @@
 The order below matches the **Guide scope**. Published sections can be opened by clicking their titles.
 
 1. [**Source of Truth**](guide/01-source-of-truth/README_EN.md) — Make sure work is based on the correct file and current version.
-2. **Safe Changes** — Coming soon.
-3. [**Agent Handoffs**](guide/03-agent-handoffs/README_EN.md) — Transfer work to another agent together with the information it needs.
-4. [**Handoff Receipt Template**](patterns/handoff-receipt_EN.md) — A ready-to-use structure for recording a handoff.
-5. [**Verification**](guide/04-verification/README_EN.md) — Understand the difference between reporting “done” and actually verifying the result.
+2. [**Agent Handoffs**](guide/03-agent-handoffs/README_EN.md) — Transfer work to another agent together with the information it needs.
+3. [**Handoff Receipt Template**](patterns/handoff-receipt_EN.md) — A ready-to-use structure for recording a handoff.
+4. [**Verification**](guide/04-verification/README_EN.md) — Understand the difference between reporting “done” and actually verifying the result.
+5. **Safe Changes** — Coming soon.
 6. **Retries** — Coming soon.
 7. **Memory & Context** — Coming soon.
 8. **Security & Authority** — Coming soon.
@@ -39,10 +39,10 @@ Not every topic requires every step, so only the sections that are useful for th
 The guide is being developed to cover the areas below. Sections that are currently published are available from the **Start Reading** list at the top of this page.
 
 1. **Source of truth** — provenance, canonical versions, and decision records.
-2. **Safe changes** — preventing changes based on outdated information or the wrong version.
-3. **Agent handoffs** — transferring required information and making completed and skipped checks visible.
-4. **Handoff Receipt Template** — transferring the current state, completed changes, verified results, skipped checks, and next action through a standard record.
-5. **Verification** — separating observations, interpretations, actions, and verification results.
+2. **Agent handoffs** — transferring required information and making completed and skipped checks visible.
+3. **Handoff Receipt Template** — transferring the current state, completed changes, verified results, skipped checks, and next action through a standard record.
+4. **Verification** — separating observations, interpretations, actions, and verification results.
+5. **Safe changes** — preventing changes based on outdated information or the wrong version.
 6. **Retries** — retrying with information from the previous failure and stopping when needed.
 7. **Memory & context** — managing temporary information, changed sources, incorrect records, and conflicts.
 8. **Security & authority** — limiting permissions to what is needed and rechecking authority when necessary.
