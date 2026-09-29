@@ -15,7 +15,7 @@ Konu başlıklarına tıklayarak içeriğe ulaşabilirsiniz.
 
 > **Güvenilir AI agentlar hiç hata yapmayan agentlar değildir. Ne olduğunu, neden olduğunu, neyin doğrulandığını ve neyin hâlâ belirsiz olduğunu gösterebilen sistemlerdir.**
 
-Doğrulanması, izlenmesi, hatadan toparlanması ve güvenilmesi daha kolay AI-agent iş akışları oluşturmak için hazırlanmış pratik ve iki dilli bir rehber.
+Bu rehber, AI agent iş akışlarının daha güvenilir, izlenebilir ve doğrulanabilir şekilde oluşturulmasına katkı sağlamak amacıyla hazırlanmıştır. İçeriğin daha fazla kişiye ulaşabilmesi ve farklı topluluklar tarafından kullanılabilmesi için Türkçe ve İngilizce olarak sunulmaktadır.
 
 ## Bu rehberin amacı
 
