@@ -17,7 +17,7 @@ Open the documents directly without browsing through folders:
 
 A practical, bilingual field guide for building AI-agent workflows that are easier to verify, trace, recover, and trust.
 
-## Why this guide exists
+## Purpose of this guide
 
 Agent systems can fail in surprisingly ordinary ways: an agent edits an outdated file, two agents overwrite each other's work, a retry repeats the same broken assumption, or a confident “done” message is mistaken for verification.
 
