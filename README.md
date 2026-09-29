@@ -23,11 +23,15 @@ Agent sistemlerinde farklı nedenlerle sorunlar ortaya çıkabilir. Bir agent g�
 
 Bu rehber, bu tür sorunları önlemeye ve yönetmeye yardımcı olacak uygulanabilir yöntemler sunmayı amaçlar.
 
-Her yöntem aynı yapı içinde ele alınır:
+Yöntemler mümkün olduğunda benzer bir akışla anlatılır:
 
-**Problem → Açıklama → Sentetik örnek → Ne ters gidebilir? → Pratik yöntem → Doğrulama → Ne zaman gereksiz olabilir?**
+**Problem → Temel kural → Örnek → Nasıl uygulanır? → Kullanılabilir prompt veya şablon → Otomasyonda kullanım → Ne zaman kullanılır?**
 
-## Ana konular
+Her konu aynı adımları gerektirmediği için yalnızca ihtiyaç duyulan bölümler kullanılır.
+
+## Rehberin kapsamı
+
+Rehber aşağıdaki alanları kapsayacak şekilde geliştirilmektedir. Şu anda yayımlanmış bölümlere sayfanın başındaki **Rehbere Başla** listesinden ulaşılabilir.
 
 1. **Gerçeğin kaynağı** — provenance (bilginin kaynağı ve geçmişi), canonical version (esas alınan sürüm) ve karar kayıtları.
 2. **Güvenli değişiklik** — güncel olmayan bilgilerle işlem yapılmasını ve yanlış sürüm üzerinde değişiklik yapılmasını önleme.
