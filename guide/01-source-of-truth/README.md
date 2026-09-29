@@ -1,35 +1,35 @@
-# Source of Truth
+# Gerçeğin Kaynağı
 
-[🇹🇷 Türkçe](README_TR.md)
+[🇬🇧 English](README_EN.md)
 
-## The problem
-An agent can produce a perfectly reasonable change against the wrong version of a file.
+## Problem
+Bir agent tamamen mantıklı bir değişikliği yanlış dosya sürümü üzerinde hazırlayabilir.
 
-Imagine Agent A reads version 4. Agent B then creates version 5. Agent A does not notice and writes its change using the old state. Nothing about Agent A's reasoning has to be bad for the result to be wrong.
+Agent A'nın 4. sürümü okuduğunu düşünün. Ardından Agent B 5. sürümü oluşturuyor. Agent A bunu fark etmeden eski duruma göre hazırladığı değişikliği yazıyor. Burada Agent A'nın kötü düşünmesi gerekmez; yalnızca baktığı dünya eskimiştir.
 
-## Plain-language rule
-> **Before changing something, know which version is the source of truth—and confirm it is still the same version immediately before writing.**
+## İnsan dilindeki kural
+> **Bir şeyi değiştirmeden önce hangi sürümün gerçek kaynak olduğunu bil; yazmadan hemen önce de hâlâ aynı sürüm olduğunu kontrol et.**
 
-## Practical pattern
-Keep a small record for critical work: SOURCE, VERSION, STATUS, VERIFIED_BY, and a HASH or another stable version identifier.
+## Pratik yöntem
+Kritik çalışmalarda SOURCE, VERSION, STATUS, VERIFIED_BY ve HASH veya benzeri kararlı bir sürüm kimliği tutulabilir.
 
-Before a write:
-1. Read the current artifact.
-2. Record its version/hash.
-3. Prepare the change.
-4. Re-check the live version/hash.
-5. If it changed, stop and re-read instead of overwriting.
+Yazmadan önce:
+1. Güncel artifact'i oku.
+2. Sürüm/hash bilgisini kaydet.
+3. Değişikliği hazırla.
+4. Yazmadan hemen önce canlı sürüm/hash'i tekrar kontrol et.
+5. Değişmişse üzerine yazma; dur ve yeniden oku.
 
-## Synthetic example
-Two agents work on a fictional file called `settings.yaml`.
+## Sentetik örnek
+İki agent tamamen hayali bir `settings.yaml` dosyasında çalışıyor.
 
-Agent A reads hash `abc123`. Agent B updates the file, producing hash `def456`. Before Agent A writes, it checks again and sees `def456`.
+Agent A `abc123` hash'ini okuyor. Agent B dosyayı güncelliyor ve yeni hash `def456` oluyor. Agent A yazmadan önce tekrar kontrol ediyor ve artık `def456` gördüğünü fark ediyor.
 
-**Correct behavior:** stop, reload, and rebuild the change.
+**Doğru davranış:** dur, güncel dosyayı yeniden oku ve değişikliği yeniden hazırla.
 
-**Unsafe behavior:** write the patch prepared for `abc123` over `def456`.
+**Riskli davranış:** `abc123` için hazırlanmış değişikliği `def456` üzerine yaz.
 
-## When to use it
-Use this whenever multiple people, agents, branches, automations, or machines can change the same artifact.
+## Ne zaman kullanılır?
+Aynı artifact'i birden fazla insan, agent, branch, otomasyon veya bilgisayar değiştirebiliyorsa değerlidir.
 
-For a tiny single-user experiment with disposable files, the full record may be unnecessary.
+Tek kişinin kullandığı, kaybolması sorun olmayan küçük bir deneyde bütün kayıt yapısı gereksiz olabilir.
