@@ -103,4 +103,4 @@ Kullanıcı bu kuralı özellikle agenttan **bir şeyi değiştirmesini veya do�
 
 Bu ayrım özellikle agent dosya değiştirdiğinde, test çalıştırdığında, çıktı oluşturduğunda, başka bir araç kullandığında veya işi başka bir agenta devrettiğinde önemlidir.
 
-Düşük riskli ve kolayca geri alınabilen denemelerde daha kısa bir kontrol yeterli olabilir.
+Düşük riskli ve kolayca geri alınabilen işlemlerde daha kısa bir kontrol yeterli olabilir. Örneğin bir README dosyasındaki yazım hatasını düzeltirken değişikliğin dosyada doğru göründüğünü yeniden kontrol etmek yeterli olabilir; ayrıca kapsamlı bir test çalıştırmak gerekmeyebilir.
