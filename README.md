@@ -55,7 +55,7 @@ Buradaki her yöntem aynı ölçüde veya her projede kullanılmak zorunda deği
 
 Bu repository'de **özel proje verisi, şirket bilgisi, müşteri verisi, şirket içi kod, özel konuşmalar, kimlik bilgileri veya gizli loglar yayımlanmaz.**
 
-Örnekler sentetik veya genelleştirilmiş olacaktır. Herkese açık fikirler yöntemlere ilham verebilir; rehberin asıl değeri özel veya sahipli içeriği kopyalamak değil, fikirleri bir araya getirmek, değerlendirmek, test etmek ve uygulanabilir hale getirmektir.
+Örnekler, gerçek kişi, şirket veya özel proje verisi içermeyecek şekilde genelleştirilmiştir. Herkese açık fikirler yöntemlere ilham verebilir; rehberin asıl değeri özel veya sahipli içeriği kopyalamak değil, fikirleri bir araya getirmek, değerlendirmek, test etmek ve uygulanabilir hale getirmektir.
 
 ## Durum
 
