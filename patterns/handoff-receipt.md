@@ -26,7 +26,7 @@ Kullanım şekli çalışma ortamına göre değişebilir:
 
 Görev devri kaydının bulunması sonraki agentı kendiliğinden başlatmaz. Otomatik geçiş isteniyorsa ayrıca bir tetikleyici ve orkestrasyon mekanizması gerekir.
 
-## Kullanıma hazır şablon
+## Kullanıma hazır örnek şablon
 
 ```text
 HANDOFF RECEIPT
