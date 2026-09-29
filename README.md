@@ -5,10 +5,10 @@
 Aşağıdaki sıra, **Rehberin kapsamı** ile aynıdır. Yayımlanmış bölümlere başlıklarına tıklayarak ulaşabilirsiniz.
 
 1. [**Gerçeğin Kaynağı**](guide/01-source-of-truth/README.md) — Doğru dosya ve doğru sürümle çalışmayı güvence altına alma.
-2. **Güvenli Değişiklik** — Yakında.
-3. [**Agentlar Arası Görev Devri**](guide/03-agent-handoffs/README.md) — Bir agentın yaptığı işi diğerine gerekli bilgilerle birlikte aktarma.
-4. [**Handoff Receipt (Görev Devri Kayıt Şablonu)**](patterns/handoff-receipt.md) — Görev devrinde kullanılabilecek hazır kayıt yapısı.
-5. [**Verification (Doğrulama)**](guide/04-verification/README.md) — “Tamamlandı” demek ile sonucu gerçekten doğrulamak arasındaki fark.
+2. [**Agentlar Arası Görev Devri**](guide/03-agent-handoffs/README.md) — Bir agentın yaptığı işi diğerine gerekli bilgilerle birlikte aktarma.
+3. [**Handoff Receipt (Görev Devri Kayıt Şablonu)**](patterns/handoff-receipt.md) — Görev devrinde kullanılabilecek hazır kayıt yapısı.
+4. [**Verification (Doğrulama)**](guide/04-verification/README.md) — “Tamamlandı” demek ile sonucu gerçekten doğrulamak arasındaki fark.
+5. **Güvenli Değişiklik** — Yakında.
 6. **Retry (Yeniden deneme)** — Yakında.
 7. **Memory & Context (Hafıza ve bağlam)** — Yakında.
 8. **Security & Authority (Güvenlik ve yetki)** — Yakında.
@@ -39,10 +39,10 @@ Her konu aynı adımları gerektirmediği için yalnızca ihtiyaç duyulan böl�
 Rehber aşağıdaki alanları kapsayacak şekilde geliştirilmektedir. Şu anda yayımlanmış bölümlere sayfanın başındaki **Rehbere Başla** listesinden ulaşılabilir.
 
 1. **Gerçeğin kaynağı** — provenance (bilginin kaynağı ve geçmişi), canonical version (esas alınan sürüm) ve karar kayıtları.
-2. **Güvenli değişiklik** — güncel olmayan bilgilerle işlem yapılmasını ve yanlış sürüm üzerinde değişiklik yapılmasını önleme.
-3. **Agentlar arası görev devri** — gerekli bilgilerin aktarılması, yapılan kontrollerin belirtilmesi ve eksik kalan kontrollerin görünür olması.
-4. **Handoff Receipt (Görev Devri Kayıt Şablonu)** — görev devrinde mevcut durumu, yapılan değişiklikleri, doğrulananları, eksik kontrolleri ve sonraki adımı standart bir kayıtla aktarma.
-5. **Verification (Doğrulama)** — gözlem, yorum, yapılan işlem ve doğrulama sonucunu birbirinden ayırma.
+2. **Agentlar arası görev devri** — gerekli bilgilerin aktarılması, yapılan kontrollerin belirtilmesi ve eksik kalan kontrollerin görünür olması.
+3. **Handoff Receipt (Görev Devri Kayıt Şablonu)** — görev devrinde mevcut durumu, yapılan değişiklikleri, doğrulananları, eksik kontrolleri ve sonraki adımı standart bir kayıtla aktarma.
+4. **Verification (Doğrulama)** — gözlem, yorum, yapılan işlem ve doğrulama sonucunu birbirinden ayırma.
+5. **Güvenli değişiklik** — güncel olmayan bilgilerle işlem yapılmasını ve yanlış sürüm üzerinde değişiklik yapılmasını önleme.
 6. **Retry (Yeniden deneme)** — aynı hatayı tekrarlamak yerine hata nedenini dikkate alarak yeniden deneme ve gerektiğinde işlemi durdurma.
 7. **Memory & Context (Hafıza ve bağlam)** — geçici bilgilerin, değişen kaynakların, hatalı kayıtların ve bilgi çakışmalarının yönetimi.
 8. **Security & Authority (Güvenlik ve yetki)** — yalnızca gerekli yetkilerin verilmesi ve yetkinin gerektiğinde yeniden kontrol edilmesi.
