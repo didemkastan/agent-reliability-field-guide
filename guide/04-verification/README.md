@@ -13,7 +13,7 @@ Bu nedenle aşağıdaki dört bilgi ayrı tutulabilir:
 - **ACTION (Yapılan işlem)** — Gerçekleştirilen değişiklik veya çalıştırılan işlem.
 - **VERIFIED (Doğrulanan)** — Yapılan işlemden sonra beklenen sonucun oluştuğunu gösteren kontrol sonucu.
 
-## Sentetik örnek
+## Örnek
 
 Bir agent, hayali bir özelliği etkinleştirmek için ayar dosyasını değiştiriyor.
 
@@ -51,6 +51,18 @@ Gözlem, yorum ve doğrulama birbirinden ayrılmazsa bir varsayım zamanla doğr
 ## Temel kural
 
 > **“Tamamlandı” bilgisi işlemin bittiğini gösterir. Sonucun doğru olduğunu kabul etmek için ayrıca doğrulama yapılmalıdır.**
+
+## Nasıl uygulanır?
+
+Agenttan yaptığı çalışmayı gözlem, yorum, işlem ve doğrulama olarak ayrı ayrı raporlaması istenebilir.
+
+Örneğin:
+
+> **Bu görevde OBSERVED (Gözlemlenen), INTERPRETED (Yorumlanan), ACTION (Yapılan işlem) ve VERIFIED (Doğrulanan) bilgilerini ayrı ayrı yaz. Yapılan işlemi tek başına başarı kanıtı olarak kullanma. VERIFIED alanında sonucu doğrulayan test, dosya kontrolü, komut sonucu veya başka bir kanıtı belirt. Doğrulama yapılmadıysa bunu açıkça yaz.**
+
+Önemli görevlerde hangi dosya veya sürümün kontrol edildiği ve doğrulamanın hangi çalışma ortamında yapıldığı da kaydedilebilir.
+
+Daha otomatik iş akışlarında bu alanlar ayrı ayrı saklanabilir. Böylece agentın durum mesajı gerçek test veya doğrulama sonucunun yerine geçmez.
 
 ## Ne zaman kullanılır?
 
