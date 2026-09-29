@@ -1,5 +1,16 @@
 # Agent Reliability Field Guide
 
+## 📚 Rehbere Başla
+
+Klasörlerde gezinmeden doğrudan okumak için:
+
+- [1. Gerçeğin Kaynağı](guide/01-source-of-truth/README.md) — Doğru dosya ve doğru sürümle çalışmayı güvence altına alma.
+- [2. Agentlar Arası Görev Devri](guide/03-agent-handoffs/README.md) — Bir agentın yaptığı işi diğerine eksiksiz aktarma.
+- [3. Verification (Doğrulama)](guide/04-verification/README.md) — “Tamamlandı” demek ile gerçekten doğrulamak arasındaki fark.
+- [Handoff Receipt (Görev Devri Kayıt Şablonu)](patterns/handoff-receipt.md) — Görev devrinde kullanılabilecek hazır kayıt yapısı.
+
+> Yeni bölümler eklendikçe bu liste güncellenecektir.
+
 [🇬🇧 English](README_EN.md)
 
 > **Güvenilir AI agentlar hiç hata yapmayan agentlar değildir. Ne olduğunu, neden olduğunu, neyin doğrulandığını ve neyin hâlâ belirsiz olduğunu gösterebilen sistemlerdir.**
