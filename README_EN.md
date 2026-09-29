@@ -39,6 +39,14 @@ Each method follows the same structure:
 8. **Security & authority** — limiting permissions to what is needed and rechecking authority when necessary.
 9. **Observability** — recording actions and verification results so they can be reviewed later.
 
+## How this guide came together
+
+While preparing this guide, I reviewed experiences, recurring problems, and solution ideas shared in public AI-agent communities. I selected ideas that seemed useful, combined related approaches, and evaluated suitable ones by trying them in my own projects.
+
+I then turned the experience and practical methods I found useful into this guide by simplifying and connecting them, and where appropriate supporting them with examples, prompts, and ready-to-use templates.
+
+Not every method in this guide needs to be used to the same extent or in every project. My basic approach is to select a method when a real need appears, try it on a small scale, verify the result, and include it in the workflow when it provides practical value.
+
 ## Safety & privacy
 
 This repository does **not** publish private project data, company information, customer data, internal code, private conversations, credentials, or confidential logs.
