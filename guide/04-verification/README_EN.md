@@ -15,7 +15,7 @@ Keep these four pieces of information separate:
 
 ## Example
 
-An agent changes a configuration file to enable a fictional feature.
+An agent changes a configuration file to enable a feature.
 
 - **OBSERVED:** The file contains `feature_enabled: false`.
 - **INTERPRETED:** This value indicates that the feature is disabled.
