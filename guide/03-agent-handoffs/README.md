@@ -88,6 +88,20 @@ Bu durumda Handoff Receipt alanları yapılandırılmış veri olarak saklanabil
 
 Otomasyon **bilgiyi taşır**; doğrulama ihtiyacını ortadan kaldırmaz.
 
+## Görev devri sonraki agentı otomatik olarak başlatmaz
+
+GitHub gibi ortak bir çalışma alanı agentların aynı dosyalara ve görev kayıtlarına erişmesini sağlayabilir. Ancak Agent A'nın bir dosya veya görev devri kaydı oluşturması, Agent B'nin kendiliğinden çalışmaya başlayacağı anlamına gelmez.
+
+Burada üç ayrı parça vardır:
+
+- **Handoff (Görev devri):** Sonraki agenta hangi bilginin aktarılacağını belirler.
+- **Trigger (Tetikleyici):** Sonraki agentın ne zaman çalıştırılacağını belirler.
+- **Orchestrator (Orkestratör):** Hangi agentın sırada olduğunu ve ona hangi görev bilgilerinin verileceğini yönetir.
+
+Otomatik bir sistem yoksa kullanıcı ilk agentı çalıştırır, görev devri kaydını kontrol eder ve sonraki agentı bu kayıtla başlatır. Otomatik bir sistem varsa örneğin GitHub'daki bir görev durumu, pull request veya başka bir olay sonraki adımı tetiklemek için kullanılabilir.
+
+**Kısaca:** Ortak dosya bilgiyi paylaşır; tetikleyici agentı başlatır; görev devri kaydı ise agentın ne yapacağını anlamasını sağlar.
+
 ## İnsan ne zaman devreye girer?
 
 Doğrudan agent-to-agent aktarım yoksa kullanıcı şu noktalarda devreye girer:
