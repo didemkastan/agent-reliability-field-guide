@@ -15,7 +15,7 @@ Bu nedenle aşağıdaki dört bilgi ayrı tutulabilir:
 
 ## Örnek
 
-Bir agent, hayali bir özelliği etkinleştirmek için ayar dosyasını değiştiriyor.
+Bir agent, bir özelliği etkinleştirmek için ayar dosyasını değiştiriyor.
 
 - **OBSERVED (Gözlemlenen):** Dosyada `feature_enabled: false` değeri bulunuyor.
 - **INTERPRETED (Yorumlanan):** Bu değer özelliğin kapalı olduğunu gösteriyor.
@@ -54,15 +54,37 @@ Gözlem, yorum ve doğrulama birbirinden ayrılmazsa bir varsayım zamanla doğr
 
 ## Nasıl uygulanır?
 
-Agenttan yaptığı çalışmayı gözlem, yorum, işlem ve doğrulama olarak ayrı ayrı raporlaması istenebilir.
+Bu doğrulama kuralının nereye yazılacağı, agentla nasıl çalışıldığına bağlıdır. Her durumda aynı promptu her mesajda tekrar yazmak gerekmez.
+
+### 1. Tek bir görev için chat içinde
+
+Agentla yalnızca belirli bir görev üzerinde çalışılıyorsa talimat doğrudan görevin verildiği chat mesajına eklenebilir. Özellikle dosya değişikliği, test, build veya başka bir doğrulama gerektiren işlem istenirken kullanılması uygundur.
 
 Örneğin:
 
 > **Bu görevde OBSERVED (Gözlemlenen), INTERPRETED (Yorumlanan), ACTION (Yapılan işlem) ve VERIFIED (Doğrulanan) bilgilerini ayrı ayrı yaz. Yapılan işlemi tek başına başarı kanıtı olarak kullanma. VERIFIED alanında sonucu doğrulayan test, dosya kontrolü, komut sonucu veya başka bir kanıtı belirt. Doğrulama yapılmadıysa bunu açıkça yaz.**
 
-Önemli görevlerde hangi dosya veya sürümün kontrol edildiği ve doğrulamanın hangi çalışma ortamında yapıldığı da kaydedilebilir.
+Bu kullanımda ayrıca bir dosya oluşturmak zorunlu değildir. Talimat yalnızca o görev için chat içinde verilebilir.
 
-Daha otomatik iş akışlarında bu alanlar ayrı ayrı saklanabilir. Böylece agentın durum mesajı gerçek test veya doğrulama sonucunun yerine geçmez.
+### 2. Aynı projede sürekli kullanılacaksa
+
+Aynı doğrulama kuralının projedeki birçok görevde uygulanması isteniyorsa kural, kullanılan agentın gerçekten okuyacağı kalıcı proje talimatına eklenebilir.
+
+Bu dosyanın adı kullanılan araca göre değişebilir. Örneğin bazı araçlar `AGENTS.md` veya kendilerine ait proje talimat dosyalarını okuyabilir. Kural normal bir `README.md` içine da yazılabilir ancak **agentın README dosyasını her görevde otomatik olarak okuyacağı varsayılmamalıdır**. Önce kullanılan aracın hangi talimat dosyasını otomatik okuduğu kontrol edilmelidir.
+
+Bu yöntemde kullanıcı her görevde aynı promptu yeniden yazmak yerine görevi verir. Agent proje talimatını okuyarak doğrulama kuralını uygular.
+
+### 3. Otomatik agent iş akışında
+
+Bir workflow veya orchestrator (orkestratör) agentı otomatik olarak çalıştırıyorsa doğrulama kuralı agenta gönderilen görev talimatının kalıcı bir parçası yapılabilir.
+
+Sistem agenttan OBSERVED, INTERPRETED, ACTION ve VERIFIED alanlarını ayrı üretmesini isteyebilir ve bu sonuçları yapılandırılmış alanlarda saklayabilir. Böylece yalnızca “tamamlandı” mesajı alınması başarı olarak kabul edilmez.
+
+### Kullanıcı ne zaman bu kuralı kullanmalı?
+
+Kullanıcı bu kuralı özellikle agenttan **bir şeyi değiştirmesini veya doğru çalıştığını göstermesini istediğinde** devreye almalıdır. Dosya veya kod değişikliği, test, build, yapılandırma değişikliği, araç kullanımı ve başka bir agenta devredilecek işler buna örnektir.
+
+Önemli görevlerde doğrulama kaydına hangi dosya veya sürümün kontrol edildiği ve kontrolün hangi çalışma ortamında yapıldığı da eklenebilir.
 
 ## Ne zaman kullanılır?
 
