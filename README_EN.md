@@ -23,11 +23,15 @@ Agent systems can run into problems for many reasons. An agent may work on an ou
 
 This guide presents practical methods that can help prevent and manage these situations.
 
-Each method follows the same structure:
+Where appropriate, methods follow a similar practical flow:
 
-**Problem → Explanation → Example → What can go wrong? → Practical method → Verification → When it may be unnecessary**
+**Problem → Core rule → Example → How to apply it → Usable prompt or template → Use in automation → When to use it**
 
-## Core areas
+Not every topic requires every step, so only the sections that are useful for that method are included.
+
+## Guide scope
+
+The guide is being developed to cover the areas below. Sections that are currently published are available from the **Start Reading** list at the top of this page.
 
 1. **Source of truth** — provenance, canonical versions, and decision records.
 2. **Safe changes** — preventing changes based on outdated information or the wrong version.
