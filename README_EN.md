@@ -72,4 +72,6 @@ Examples are synthetic or generalized. Public ideas may inspire a method, but th
 
 ## License
 
-License selection will be finalized before the first stable release.
+Except where otherwise noted, original content in this repository is licensed under the **Creative Commons Attribution 4.0 International (CC BY 4.0)** license.
+
+The content may be shared and adapted provided that appropriate credit is given, a link to the license is included, and changes are indicated where applicable. See [LICENSE](LICENSE) for details.
