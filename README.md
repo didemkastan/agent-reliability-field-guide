@@ -5,8 +5,8 @@
 Konu başlıklarına tıklayarak içeriğe ulaşabilirsiniz.
 
 - [1. Gerçeğin Kaynağı](guide/01-source-of-truth/README.md) — Doğru dosya ve doğru sürümle çalışmayı güvence altına alma.
-- [2. Agentlar Arası Görev Devri](guide/03-agent-handoffs/README.md) — Bir agentın yaptığı işi diğerine eksiksiz aktarma.
-- [3. Verification (Doğrulama)](guide/04-verification/README.md) — “Tamamlandı” demek ile gerçekten doğrulamak arasındaki fark.
+- [2. Agentlar Arası Görev Devri](guide/03-agent-handoffs/README.md) — Bir agentın yaptığı işi diğerine gerekli bilgilerle birlikte aktarma.
+- [3. Verification (Doğrulama)](guide/04-verification/README.md) — “Tamamlandı” demek ile sonucu gerçekten doğrulamak arasındaki fark.
 - [Handoff Receipt (Görev Devri Kayıt Şablonu)](patterns/handoff-receipt.md) — Görev devrinde kullanılabilecek hazır kayıt yapısı.
 
 > Yeni bölümler eklendikçe bu liste güncellenecektir.
@@ -19,38 +19,38 @@ Bu rehber, AI agent iş akışlarının daha güvenilir, izlenebilir ve doğrula
 
 ## Bu rehberin amacı
 
-Agent sistemleri bazen oldukça sıradan nedenlerle hata verir: bir agent eski bir dosyayı değiştirir, iki agent birbirinin çalışmasını ezer, retry aynı yanlış varsayımı tekrarlar veya kendinden emin bir “tamamlandı” mesajı doğrulama sanılır.
+Agent sistemlerinde farklı nedenlerle sorunlar ortaya çıkabilir. Bir agent güncel olmayan bir dosya üzerinde çalışabilir, iki agent aynı dosyada birbirinin yaptığı değişiklikleri etkileyebilir, bir retry (yeniden deneme) aynı hatalı varsayımla tekrar çalışabilir veya “tamamlandı” bilgisi yeterli kontrol yapılmadan doğru kabul edilebilir.
 
-Bu rehber, bu hata desenlerini önlemeye ve yönetmeye yardımcı olacak uygulanabilir yöntemler sunmayı amaçlar.
+Bu rehber, bu tür sorunları önlemeye ve yönetmeye yardımcı olacak uygulanabilir yöntemler sunmayı amaçlar.
 
-Her yöntem tutarlı bir yapıyla ele alınır:
+Her yöntem aynı yapı içinde ele alınır:
 
 **Problem → Açıklama → Sentetik örnek → Ne ters gidebilir? → Pratik yöntem → Doğrulama → Ne zaman gereksiz olabilir?**
 
 ## Ana konular
 
-1. **Gerçeğin kaynağı** — provenance, canonical sürüm ve karar kayıtları.
-2. **Güvenli değişiklik** — eski durumla işlem yapmayı ve yanlış onayı önleme.
-3. **Agentlar arası görev devri** — açık context, kapsam kanıtı ve atlanan kontroller.
-4. **Doğrulama** — gözlem, yorum, işlem ve kanıtı birbirinden ayırma.
-5. **Hata & retry** — bilinçli tekrar, retry sınırı ve gerçek hata kaynağını bulma.
-6. **Hafıza & context** — geçici bilgi, geçersizleştirme, yanlış bilgi kaydı ve çakışma yönetimi.
-7. **Güvenlik & yetki** — minimum yetki, kapsamlı izin ve yeniden doğrulama.
-8. **Observability** — güvenilir olay kayıtları ve doğrulanabilir çalışma izi.
+1. **Gerçeğin kaynağı** — provenance (bilginin kaynağı ve geçmişi), canonical version (esas alınan sürüm) ve karar kayıtları.
+2. **Güvenli değişiklik** — güncel olmayan bilgilerle işlem yapılmasını ve yanlış sürüm üzerinde değişiklik yapılmasını önleme.
+3. **Agentlar arası görev devri** — gerekli bilgilerin aktarılması, yapılan kontrollerin belirtilmesi ve eksik kalan kontrollerin görünür olması.
+4. **Verification (Doğrulama)** — gözlem, yorum, yapılan işlem ve doğrulama sonucunu birbirinden ayırma.
+5. **Retry (Yeniden deneme)** — aynı hatayı tekrarlamak yerine hata nedenini dikkate alarak yeniden deneme ve gerektiğinde işlemi durdurma.
+6. **Memory & Context (Hafıza ve bağlam)** — geçici bilgilerin, değişen kaynakların, hatalı kayıtların ve bilgi çakışmalarının yönetimi.
+7. **Security & Authority (Güvenlik ve yetki)** — yalnızca gerekli yetkilerin verilmesi ve yetkinin gerektiğinde yeniden kontrol edilmesi.
+8. **Observability (İzlenebilirlik)** — yapılan işlemlerin ve doğrulama sonuçlarının sonradan kontrol edilebilecek şekilde kaydedilmesi.
 
 ## Güvenlik ve gizlilik
 
 Bu repository'de **özel proje verisi, şirket bilgisi, müşteri verisi, şirket içi kod, özel konuşmalar, kimlik bilgileri veya gizli loglar yayımlanmaz.**
 
-Örnekler sentetik veya genelleştirilmiş olacaktır. Herkese açık fikirler yöntemlere ilham verebilir; rehberin asıl değeri özel veya sahipli içeriği kopyalamak değil, fikirleri sentezlemek, sadeleştirmek, test etmek ve uygulanabilir hale getirmektir.
+Örnekler sentetik veya genelleştirilmiş olacaktır. Herkese açık fikirler yöntemlere ilham verebilir; rehberin asıl değeri özel veya sahipli içeriği kopyalamak değil, fikirleri bir araya getirmek, değerlendirmek, test etmek ve uygulanabilir hale getirmektir.
 
 ## Durum
 
-🚧 **Rehberin ilk sürümü hazırlanıyor.** Yapı adım adım geliştirilecek. Yalnızca farklı ve uygulanabilir fayda sağlayan yöntemler eklenecek.
+🚧 **Rehberin ilk sürümü hazırlanıyor.** Yeni bölümler ihtiyaç ve kullanım alanına göre eklenecektir.
 
 ## Temel ilke
 
-> **Bir yöntemi yeni olduğu için kullanma. Gerçek ihtiyaç ortaya çıktığında küçük ölçekte dene, faydasını doğrula ve ancak bundan sonra çalışma sisteminin parçası yap.**
+> **Bir yöntemi yalnızca yeni olduğu için kullanma. İhtiyaç ortaya çıktığında önce küçük ölçekte dene, faydasını doğrula ve uygun olduğunda çalışma sistemine dahil et.**
 
 ## Dil
 
