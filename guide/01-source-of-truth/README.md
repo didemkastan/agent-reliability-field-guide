@@ -64,3 +64,5 @@ Daha otomatik iş akışlarında aynı kontrol yalnızca prompt (talimat) ile b�
 Aynı dosya birden fazla kişi, agent, branch (dal) veya otomasyon tarafından değiştirilebiliyorsa ya da dosya farklı çalışma ortamlarında güncellenebiliyorsa bu kontrol önemlidir.
 
 Tek kişinin çalıştığı ve yapılan değişikliklerin kolayca geri alınabildiği küçük denemelerde daha kısa bir kontrol yeterli olabilir.
+
+**Örnek:** Tek bir kişi, yerel bir deneme dosyasında küçük bir ayar değişikliğini test ediyor ve dosyanın değişiklikten önceki sürümü zaten geri yüklenebilir durumda. Bu durumda her adım için ayrı VERSION veya HASH kaydı tutmak yerine, değişiklikten hemen önce dosyanın güncel halini kontrol etmek, yalnızca amaçlanan dosyanın değiştirildiğinden emin olmak ve işlemden sonra sonucu yeniden gözden geçirmek yeterli olabilir. Beklenmeyen bir sonuç oluşursa değişiklik geri alınır.
