@@ -21,7 +21,7 @@ Bu rehber, AI agent iş akışlarının daha güvenilir, izlenebilir ve doğrula
 
 Agent sistemleri bazen oldukça sıradan nedenlerle hata verir: bir agent eski bir dosyayı değiştirir, iki agent birbirinin çalışmasını ezer, retry aynı yanlış varsayımı tekrarlar veya kendinden emin bir “tamamlandı” mesajı doğrulama sanılır.
 
-Bu rehber, bu hata desenlerini basit mühendislik yöntemlerine dönüştürmeyi amaçlar.
+Bu rehber, bu hata desenlerini önlemeye ve yönetmeye yardımcı olacak uygulanabilir yöntemler sunmayı amaçlar.
 
 Her yöntem tutarlı bir yapıyla ele alınır:
 
