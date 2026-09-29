@@ -103,4 +103,4 @@ For important tasks, also record the file or version that was checked and the en
 
 This distinction is especially useful when an agent changes files, runs tests, creates outputs, uses another tool, or hands work to another agent.
 
-For low-risk experiments that can easily be reversed, a shorter check may be enough.
+For low-risk and easily reversible changes, a shorter check may be enough. For example, after correcting a typo in a README file, checking that the updated text appears correctly may be sufficient; running a comprehensive test suite may not be necessary.
