@@ -78,7 +78,20 @@ Bu yöntemde kullanıcı her görevde aynı promptu yeniden yazmak yerine görev
 
 Bir workflow veya orchestrator (orkestratör) agentı otomatik olarak çalıştırıyorsa doğrulama kuralı agenta gönderilen görev talimatının kalıcı bir parçası yapılabilir.
 
-Sistem agenttan OBSERVED, INTERPRETED, ACTION ve VERIFIED alanlarını ayrı üretmesini isteyebilir ve bu sonuçları yapılandırılmış alanlarda saklayabilir. Böylece yalnızca “tamamlandı” mesajı alınması başarı olarak kabul edilmez.
+Sistem agenttan OBSERVED (Gözlemlenen), INTERPRETED (Yorumlanan), ACTION (Yapılan işlem) ve VERIFIED (Doğrulanan) bilgilerini ayrı alanlar halinde üretmesini isteyebilir. Bu bilgiler kullanılan sisteme göre JSON çıktısında, görev kaydında veya agentların erişebildiği ortak bir çalışma dosyasında tutulabilir. Böylece yalnızca “tamamlandı” mesajı alınması başarı olarak kabul edilmez.
+
+Örneğin otomatik sistem aşağıdaki gibi bir çıktı üretebilir:
+
+```json
+{
+  "OBSERVED": "Ayar dosyasında feature_enabled: false değeri bulundu.",
+  "INTERPRETED": "Özellik mevcut ayara göre kapalı.",
+  "ACTION": "feature_enabled değeri true olarak değiştirildi.",
+  "VERIFIED": "Dosya yeniden kontrol edildi ve ilgili test başarıyla tamamlandı."
+}
+```
+
+Bu örnekte her bilgi ayrı bir alanda tutulduğu için sistem yapılan işlem ile doğrulama sonucunu birbirinden ayırabilir. `VERIFIED` alanı boşsa veya doğrulamanın yapılmadığını belirtiyorsa görev yalnızca agentın “tamamlandı” demesine dayanarak doğrulanmış kabul edilmemelidir.
 
 ### Kullanıcı ne zaman bu kuralı kullanmalı?
 
