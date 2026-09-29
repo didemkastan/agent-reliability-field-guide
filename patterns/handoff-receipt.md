@@ -4,6 +4,8 @@
 
 Bu şablon, bir görevin bir agenttan başka bir agenta veya kişiye devredilirken mevcut durumun, yapılan değişikliklerin ve kalan kontrollerin kaybolmadan aktarılması için kullanılır.
 
+> **Bu şablon belirli bir ürün veya platforma ait resmî bir standart değildir. Agentlar arası görev devrinde sürüm, değişiklik, doğrulama, kapsam ve sonraki adım bilgilerinin kaybolmasını önlemek amacıyla bu rehberde kullanılan ilkelerin bir araya getirilmesiyle hazırlanmıştır.**
+
 ## Kim doldurur?
 
 Görevi devreden agent veya kişi doldurur. Kayıt, yapılan işi yalnızca özetlemek için değil, görevi devralacak tarafın nereden devam edeceğini açıkça göstermek için hazırlanır.
@@ -27,26 +29,26 @@ Görev devri kaydının bulunması sonraki agentı kendiliğinden başlatmaz. Ot
 ## Kullanıma hazır şablon
 
 ```text
-HANDOFF RECEIPT (GÖREV DEVRİ KAYDI)
+HANDOFF RECEIPT
 
-TASK_ID (Görev kimliği):
-INPUT_VERSION (Başlangıç sürümü):
-OUTPUT_VERSION (Çıktı sürümü):
+TASK_ID:
+INPUT_VERSION:
+OUTPUT_VERSION:
 
-CHANGED (Değiştirilenler):
-PRESERVE (Korunacaklar):
+CHANGED:
+PRESERVE:
 
-VERIFIED (Doğrulananlar):
-SKIPPED_CHECKS (Yapılmayan kontroller):
+VERIFIED:
+SKIPPED_CHECKS:
 
-EXPECTED_ITEMS (Beklenen öğeler):
-OBSERVED_ITEMS (Gözlemlenen öğeler):
-CHECKED_ITEMS (Kontrol edilen öğeler):
-SKIPPED_ITEMS (Atlanan öğeler):
-COVERAGE_STATUS (Kapsam durumu):
+EXPECTED_ITEMS:
+OBSERVED_ITEMS:
+CHECKED_ITEMS:
+SKIPPED_ITEMS:
+COVERAGE_STATUS:
 
-NEXT_AGENT (Sonraki agent):
-NEXT_ACTION (Sonraki işlem):
+NEXT_AGENT:
+NEXT_ACTION:
 ```
 
 ## Alanlar ne anlama gelir?
