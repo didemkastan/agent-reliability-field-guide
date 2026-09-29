@@ -39,7 +39,7 @@ The existence of a backup alone is not enough. It should be clear which file can
 
 ## Example
 
-Two agents are working on a fictional `settings.yaml` file.
+Two agents are working on a `settings.yaml` file.
 
 Agent A opens the version with hash `abc123`. Agent B then updates the file, changing the hash to `def456`. Before saving its work, Agent A checks the file again and sees that it has changed.
 
