@@ -7,7 +7,7 @@ Agent A görevini doğru tamamlayabilir; buna rağmen Agent B, devir sırasında
 
 Yani hata her zaman agentın **içinde** değildir. Bazen agentların **arasındadır**.
 
-## İnsan dilindeki kural
+## Temel kural
 > **Bir görev devri neyin değiştiğini, neyin kesinlikle korunacağını, gerçekte neyin doğrulandığını ve neyin kontrol edilmediğini açıkça söylemelidir.**
 
 ## Minimum handoff kaydı
