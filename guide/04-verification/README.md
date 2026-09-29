@@ -70,7 +70,7 @@ Bu kullanımda ayrıca bir dosya oluşturmak zorunlu değildir. Talimat yalnızc
 
 Aynı doğrulama kuralının projedeki birçok görevde uygulanması isteniyorsa kural, kullanılan agentın gerçekten okuyacağı kalıcı proje talimatına eklenebilir.
 
-Bu dosyanın adı kullanılan araca göre değişebilir. Örneğin bazı araçlar `AGENTS.md` veya kendilerine ait proje talimat dosyalarını okuyabilir. Kural normal bir `README.md` içine da yazılabilir ancak **agentın README dosyasını her görevde otomatik olarak okuyacağı varsayılmamalıdır**. Önce kullanılan aracın hangi talimat dosyasını otomatik okuduğu kontrol edilmelidir.
+Bu dosyanın adı kullanılan araca göre değişebilir. Örneğin bazı araçlar `AGENTS.md` veya kendilerine ait proje talimat dosyalarını okuyabilir. Kural normal bir `README.md` içine de yazılabilir ancak **agentın README dosyasını her görevde otomatik olarak okuyacağı varsayılmamalıdır**. Önce kullanılan aracın hangi talimat dosyasını otomatik okuduğu kontrol edilmelidir.
 
 Bu yöntemde kullanıcı her görevde aynı promptu yeniden yazmak yerine görevi verir. Agent proje talimatını okuyarak doğrulama kuralını uygular.
 
