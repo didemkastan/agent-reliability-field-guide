@@ -7,7 +7,7 @@ Bir agent tamamen mantıklı bir değişikliği yanlış dosya sürümü üzerin
 
 Agent A'nın 4. sürümü okuduğunu düşünün. Ardından Agent B 5. sürümü oluşturuyor. Agent A bunu fark etmeden eski duruma göre hazırladığı değişikliği yazıyor. Burada Agent A'nın kötü düşünmesi gerekmez; yalnızca baktığı dünya eskimiştir.
 
-## İnsan dilindeki kural
+## Temel kural
 > **Bir şeyi değiştirmeden önce hangi sürümün gerçek kaynak olduğunu bil; yazmadan hemen önce de hâlâ aynı sürüm olduğunu kontrol et.**
 
 ## Pratik yöntem
