@@ -1,5 +1,16 @@
 # Agent Reliability Field Guide
 
+## 📚 Start Reading
+
+Open the documents directly without browsing through folders:
+
+- [1. Source of Truth](guide/01-source-of-truth/README_EN.md) — Make sure work starts from the correct file and version.
+- [2. Agent Handoffs](guide/03-agent-handoffs/README_EN.md) — Transfer work between agents without losing important information.
+- [3. Verification](guide/04-verification/README_EN.md) — Separate a “done” status from actual verification.
+- [Handoff Receipt Template](patterns/handoff-receipt.md) — A ready-to-use structure for recording a handoff.
+
+> This list will be updated as new sections are added.
+
 [🇹🇷 Türkçe](README.md)
 
 > **Reliable AI agents are not agents that never make mistakes. They are systems that can show what happened, why it happened, what was verified, and what remains uncertain.**
