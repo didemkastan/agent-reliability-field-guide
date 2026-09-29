@@ -2,7 +2,7 @@
 
 ## 📚 Rehbere Başla
 
-Klasörlerde gezinmeden doğrudan okumak için:
+Konu başlıklarına tıklayarak içeriğe ulaşabilirsiniz.
 
 - [1. Gerçeğin Kaynağı](guide/01-source-of-truth/README.md) — Doğru dosya ve doğru sürümle çalışmayı güvence altına alma.
 - [2. Agentlar Arası Görev Devri](guide/03-agent-handoffs/README.md) — Bir agentın yaptığı işi diğerine eksiksiz aktarma.
