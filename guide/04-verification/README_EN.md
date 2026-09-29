@@ -78,7 +78,20 @@ With this approach, the user assigns the task without repeating the same verific
 
 If a workflow or orchestrator starts the agent automatically, make the verification rule a persistent part of the task instructions sent to the agent.
 
-The system can require separate OBSERVED, INTERPRETED, ACTION, and VERIFIED fields and store them as structured data. A simple “done” message is then not treated as proof of success.
+The system can require OBSERVED, INTERPRETED, ACTION, and VERIFIED to be produced as separate fields. Depending on the system, these values can be stored in JSON output, a task record, or a shared workspace file that the agents can access. A simple “done” message is then not treated as proof of success.
+
+For example, an automated system could produce an output like this:
+
+```json
+{
+  "OBSERVED": "The configuration file contains feature_enabled: false.",
+  "INTERPRETED": "The feature is disabled according to the current setting.",
+  "ACTION": "The feature_enabled value was changed to true.",
+  "VERIFIED": "The file was checked again and the relevant test completed successfully."
+}
+```
+
+Because each piece of information is stored separately, the system can distinguish the action from the verification result. If the `VERIFIED` field is empty or states that verification was not performed, the task should not be treated as verified only because the agent reported “done.”
 
 ### When should the user apply this rule?
 
