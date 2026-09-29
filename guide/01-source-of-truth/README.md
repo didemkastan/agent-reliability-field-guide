@@ -5,7 +5,7 @@
 ## Problem
 Bir agent tamamen mantıklı bir değişikliği yanlış dosya sürümü üzerinde hazırlayabilir.
 
-Agent A'nın 4. sürümü okuduğunu düşünün. Ardından Agent B 5. sürümü oluşturuyor. Agent A bunu fark etmeden eski duruma göre hazırladığı değişikliği yazıyor. Burada Agent A'nın kötü düşünmesi gerekmez; yalnızca baktığı dünya eskimiştir.
+Agent A'nın 4. sürüm üzerinde çalıştığını düşünün. Bu sırada Agent B dosyayı güncelleyerek 5. sürümü oluşturuyor. Agent A bu değişikliği fark etmezse hazırladığı işlemi artık güncel olmayan 4. sürüme göre tamamlayabilir. Yapılan işlem kendi içinde doğru olsa bile eski sürüme dayandığı için güncel dosyada hataya veya veri kaybına yol açabilir.
 
 ## Temel kural
 > **Bir şeyi değiştirmeden önce hangi sürümün gerçek kaynak olduğunu bil; yazmadan hemen önce de hâlâ aynı sürüm olduğunu kontrol et.**
