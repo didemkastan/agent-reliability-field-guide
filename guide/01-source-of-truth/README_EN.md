@@ -7,7 +7,7 @@ An agent can produce a perfectly reasonable change against the wrong version of 
 
 Imagine Agent A reads version 4. Agent B then creates version 5. Agent A does not notice and writes its change using the old state. Nothing about Agent A's reasoning has to be bad for the result to be wrong.
 
-## Plain-language rule
+## Core rule
 > **Before changing something, know which version is the source of truth—and confirm it is still the same version immediately before writing.**
 
 ## Practical pattern
