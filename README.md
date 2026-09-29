@@ -39,6 +39,14 @@ Her yöntem aynı yapı içinde ele alınır:
 8. **Security & Authority (Güvenlik ve yetki)** — yalnızca gerekli yetkilerin verilmesi ve yetkinin gerektiğinde yeniden kontrol edilmesi.
 9. **Observability (İzlenebilirlik)** — yapılan işlemlerin ve doğrulama sonuçlarının sonradan kontrol edilebilecek şekilde kaydedilmesi.
 
+## Bu rehber nasıl oluştu?
+
+Bu rehberi hazırlarken herkese açık AI agent topluluklarında paylaşılan deneyimleri, karşılaşılan sorunları ve çözüm fikirlerini inceledim. Kullanışlı bulduğum fikirleri ayıkladım, benzer yaklaşımları bir araya getirdim ve uygun olanları kendi projelerimde deneyerek işe yararlılıklarını değerlendirdim.
+
+Bu süreçte edindiğim deneyimleri ve uygulanabilir bulduğum yöntemleri sadeleştirerek, birbirleriyle ilişkilendirerek ve gerektiğinde örnekler, promptlar ve kullanıma hazır şablonlarla destekleyerek bu rehber yapısına dönüştürdüm.
+
+Buradaki her yöntem aynı ölçüde veya her projede kullanılmak zorunda değildir. Temel yaklaşımım; bir ihtiyaç ortaya çıktığında uygun yöntemi seçmek, küçük ölçekte denemek, sonucunu doğrulamak ve gerçekten fayda sağlıyorsa çalışma sürecine dahil etmektir.
+
 ## Güvenlik ve gizlilik
 
 Bu repository'de **özel proje verisi, şirket bilgisi, müşteri verisi, şirket içi kod, özel konuşmalar, kimlik bilgileri veya gizli loglar yayımlanmaz.**
