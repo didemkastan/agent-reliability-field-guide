@@ -22,7 +22,20 @@ When making a change:
 2. Record its version or hash.
 3. Prepare the change.
 4. Check the version or hash again immediately before saving.
-5. If the file changed in the meantime, stop, review the current version, and prepare the change again.
+5. Confirm that the files affected by the change and required for recovery have a restorable version.
+6. If the file changed in the meantime, stop, review the current version, and prepare the change again.
+
+## Rollback Point
+
+A backup should not mean creating unnecessary copies of every file. Protect the files that will be directly affected by the change and are needed to return to the previous state if something goes wrong.
+
+**For projects using Git:** Check the working tree before making the change. Confirm that the version you may need to restore exists in commit history. If important changes have not yet been recorded, protect them with a safe commit, branch, or another appropriate Git method before overwriting anything.
+
+**For projects without Git:** Copy the current version of the file that will be changed to a separate backup directory. Include a timestamp or version in the filename so it is clear which backup was created before which change. For example: `settings.before-change.2026-09-29.yaml`.
+
+The existence of a backup alone is not enough. It should be clear which file can be restored, and the backup should be stored separately from the location affected by the change.
+
+> **The goal is not to create as many backups as possible. The goal is to create the recovery point needed before a risky change.**
 
 ## Example
 
@@ -40,7 +53,7 @@ This method can be added to an AI agent's task instructions when the agent works
 
 A starting instruction can be:
 
-> **Before making a change, check the current file version and record its version or hash. Check it again immediately before saving. If the version or hash has changed, do not overwrite the file. Review the current version and prepare the change again.**
+> **Before making a change, check the current file version and hash. Confirm that the files affected by the change and required for recovery have a restorable version; if not, create an appropriate rollback point. Check the file again immediately before saving. If the version or hash has changed, do not overwrite it. Review the current version and prepare the change again.**
 
 This instruction can be used with ChatGPT, Claude, Codex, or similar agents that work with files and code.
 
