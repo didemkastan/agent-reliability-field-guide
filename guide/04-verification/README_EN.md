@@ -54,15 +54,37 @@ If observation, interpretation, and verification are not separated, an assumptio
 
 ## How to apply it
 
-Ask the agent to report its work using separate observation, interpretation, action, and verification fields.
+Where this verification rule should be placed depends on how the agent is being used. The same prompt does not need to be repeated in every message.
+
+### 1. In the chat for a single task
+
+If the agent is being used for one specific task, add the instruction directly to the chat message that assigns the task. This is useful for file changes, tests, builds, or other work that requires verification.
 
 For example:
 
 > **For this task, report OBSERVED, INTERPRETED, ACTION, and VERIFIED separately. Do not use the action itself as proof of success. In VERIFIED, include the test, file check, command result, or other evidence used to confirm the outcome. If verification was not performed, state that clearly.**
 
-For important tasks, also record the version or artifact that was checked and the environment where the verification ran.
+A separate file is not required in this case. The instruction can apply only to that task in the chat.
 
-In automated workflows, these fields can be stored separately so that a status message cannot replace an actual test or verification result.
+### 2. As a persistent rule for a project
+
+If the same verification rule should apply to many tasks in a project, place it in a persistent project instruction that the agent is actually configured to read.
+
+The filename depends on the tool. Some tools may read an `AGENTS.md` or another dedicated project instruction file. The rule can also be documented in a normal `README.md`, but **do not assume that every agent automatically reads the README as task instructions**. First confirm which instruction files the tool actually loads.
+
+With this approach, the user assigns the task without repeating the same verification prompt every time. The agent reads the project instructions and applies the rule.
+
+### 3. In an automated agent workflow
+
+If a workflow or orchestrator starts the agent automatically, make the verification rule a persistent part of the task instructions sent to the agent.
+
+The system can require separate OBSERVED, INTERPRETED, ACTION, and VERIFIED fields and store them as structured data. A simple “done” message is then not treated as proof of success.
+
+### When should the user apply this rule?
+
+Use it especially when asking an agent to **change something or demonstrate that something works correctly**. Examples include file or code changes, tests, builds, configuration changes, tool use, and work that will later be handed to another agent.
+
+For important tasks, also record the file or version that was checked and the environment in which verification was performed.
 
 ## When to use it
 
