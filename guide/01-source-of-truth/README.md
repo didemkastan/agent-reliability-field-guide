@@ -39,7 +39,7 @@ Yedeğin varlığı tek başına yeterli değildir. Gerektiğinde hangi dosyanı
 
 ## Örnek
 
-İki agent hayali bir `settings.yaml` dosyasında çalışıyor.
+İki agent bir `settings.yaml` dosyasında çalışıyor.
 
 Agent A dosyanın `abc123` hash değerine sahip sürümünü açıyor. Bu sırada Agent B dosyayı güncelliyor ve hash değeri `def456` oluyor. Agent A değişikliğini kaydetmeden önce dosyayı tekrar kontrol ettiğinde sürümün değiştiğini görüyor.
 
