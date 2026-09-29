@@ -12,9 +12,9 @@ Agent sistemleri bazen oldukça sıradan nedenlerle hata verir: bir agent eski b
 
 Bu rehber, bu hata desenlerini basit mühendislik yöntemlerine dönüştürmeyi amaçlar.
 
-Önce insanın anlayacağı dille ilerleriz. Her yöntem şu sırayı takip eder:
+Her yöntem tutarlı bir yapıyla ele alınır:
 
-**Problem → Basit açıklama → Sentetik örnek → Ne ters gidebilir? → Pratik yöntem → Nasıl doğrulanır? → Ne zaman gereksiz olabilir?**
+**Problem → Açıklama → Sentetik örnek → Ne ters gidebilir? → Pratik yöntem → Doğrulama → Ne zaman gereksiz olabilir?**
 
 ## Ana konular
 
