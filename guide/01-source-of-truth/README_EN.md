@@ -53,14 +53,14 @@ This method can be added to an AI agent's task instructions when the agent works
 
 A starting instruction can be:
 
-> **Before making a change, check the current file version and hash. Confirm that the files affected by the change and required for recovery have a restorable version; if not, create an appropriate rollback point. Check the file again immediately before saving. If the version or hash has changed, do not overwrite it. Review the current version and prepare the change again.**
+> **Before making a change, check the current file version and hash. Confirm that the files affected by the change and required for recovery have a restorable version. If you have file-system or Git access, create the required rollback point yourself and verify that it was created. If you do not have that access, do not assume a backup exists; ask the user to create a rollback point or stop the change. Check the file again immediately before saving. If the version or hash has changed, do not overwrite it. Review the current version and prepare the change again.**
 
-This instruction can be used with ChatGPT, Claude, Codex, or similar agents that work with files and code.
+This instruction can be used with ChatGPT, Claude, Codex, or similar agents that work with files and code. If the agent has permission to work with the file system or Git, it can also create the backup or rollback point itself. If it does not have that permission, it should not treat the step as completed.
 
 In more automated workflows, this check should not rely only on a prompt. The system can compare the file's version or hash before work begins and immediately before the change is saved. If the values differ, the write can be stopped and the agent can be required to reload the current file.
 
 ## When to use it
 
-This check is useful when multiple people, agents, branches, automations, or machines can modify the same file.
+This check is important when the same file can be modified by multiple people, agents, branches, or automations, or when it can be updated from different working environments.
 
 For small experiments where one person works alone and changes can easily be discarded, a lighter check may be enough.
