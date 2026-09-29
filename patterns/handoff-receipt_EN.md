@@ -51,6 +51,44 @@ NEXT_AGENT:
 NEXT_ACTION:
 ```
 
+## Filled example
+
+Below is a simple example showing how the template can be completed:
+
+```text
+HANDOFF RECEIPT
+
+TASK_ID: DOC-014
+INPUT_VERSION: v1.2
+OUTPUT_VERSION: v1.3
+
+CHANGED:
+- Corrected the installation command in README.md.
+- Added the missing configuration example.
+
+PRESERVE:
+- Do not change the existing folder structure.
+- Keep the current command names unchanged.
+
+VERIFIED:
+- README.md was reopened and the changes were confirmed.
+- The installation command was run successfully.
+
+SKIPPED_CHECKS:
+- Windows environment was not tested.
+
+EXPECTED_ITEMS: 3
+OBSERVED_ITEMS: 3
+CHECKED_ITEMS: 2
+SKIPPED_ITEMS: 1
+COVERAGE_STATUS: 2/3 checked
+
+NEXT_AGENT: Agent B
+NEXT_ACTION: Run the installation command in a Windows environment and record the result.
+```
+
+This example makes both completed work and the remaining check visible. The receiving agent can see where to continue without treating an unperformed check as verified.
+
 ## What do the fields mean?
 
 - **TASK_ID:** Identifier of the task being transferred.
