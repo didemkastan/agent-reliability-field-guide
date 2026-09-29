@@ -51,6 +51,44 @@ NEXT_AGENT:
 NEXT_ACTION:
 ```
 
+## Doldurulmuş örnek
+
+Aşağıda şablonun nasıl doldurulabileceğini gösteren basit bir örnek yer alır:
+
+```text
+HANDOFF RECEIPT
+
+TASK_ID: DOC-014
+INPUT_VERSION: v1.2
+OUTPUT_VERSION: v1.3
+
+CHANGED:
+- README.md içindeki kurulum komutu düzeltildi.
+- Eksik yapılandırma örneği eklendi.
+
+PRESERVE:
+- Mevcut klasör yapısı değiştirilmemeli.
+- Kullanılan komut adları korunmalı.
+
+VERIFIED:
+- README.md yeniden açılarak değişiklikler kontrol edildi.
+- Kurulum komutu başarıyla çalıştırıldı.
+
+SKIPPED_CHECKS:
+- Windows ortamında test yapılmadı.
+
+EXPECTED_ITEMS: 3
+OBSERVED_ITEMS: 3
+CHECKED_ITEMS: 2
+SKIPPED_ITEMS: 1
+COVERAGE_STATUS: 2/3 kontrol edildi
+
+NEXT_AGENT: Agent B
+NEXT_ACTION: Kurulum komutunu Windows ortamında çalıştır ve sonucu kaydet.
+```
+
+Bu örnekte hem tamamlanan işler hem de eksik kalan kontrol görünür durumdadır. Görevi devralan agent, yapılmamış bir kontrolü doğrulanmış kabul etmeden nereden devam edeceğini görebilir.
+
 ## Alanlar ne anlama gelir?
 
 - **TASK_ID:** Devredilen görevin kimliği.
