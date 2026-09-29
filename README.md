@@ -1,51 +1,51 @@
 # Agent Reliability Field Guide
 
-[🇹🇷 Türkçe](README_TR.md)
+[🇬🇧 English](README_EN.md)
 
-> **Reliable AI agents are not agents that never make mistakes. They are systems that can show what happened, why it happened, what was verified, and what remains uncertain.**
+> **Güvenilir AI agentlar hiç hata yapmayan agentlar değildir. Ne olduğunu, neden olduğunu, neyin doğrulandığını ve neyin hâlâ belirsiz olduğunu gösterebilen sistemlerdir.**
 
-A practical, bilingual field guide for building AI-agent workflows that are easier to verify, trace, recover, and trust.
+Doğrulanması, izlenmesi, hatadan toparlanması ve güvenilmesi daha kolay AI-agent iş akışları oluşturmak için hazırlanmış pratik ve iki dilli bir rehber.
 
-## Why this guide exists
+## Bu rehber neden var?
 
-Agent systems can fail in surprisingly ordinary ways: an agent edits an outdated file, two agents overwrite each other's work, a retry repeats the same broken assumption, or a confident “done” message is mistaken for verification.
+Agent sistemleri bazen oldukça sıradan nedenlerle hata verir: bir agent eski bir dosyayı değiştirir, iki agent birbirinin çalışmasını ezer, retry aynı yanlış varsayımı tekrarlar veya kendinden emin bir “tamamlandı” mesajı doğrulama sanılır.
 
-This guide turns those failure patterns into simple engineering practices.
+Bu rehber, bu hata desenlerini basit mühendislik yöntemlerine dönüştürmeyi amaçlar.
 
-Each pattern follows a consistent structure:
+Her yöntem tutarlı bir yapıyla ele alınır:
 
-**Problem → Explanation → Synthetic example → What can go wrong → Practical pattern → Verification → When it may be unnecessary**
+**Problem → Açıklama → Sentetik örnek → Ne ters gidebilir? → Pratik yöntem → Doğrulama → Ne zaman gereksiz olabilir?**
 
-## Core areas
+## Ana konular
 
-1. **Source of truth** — provenance, canonical versions, decision records.
-2. **Safe changes** — stale-state protection and approval-to-execution checks.
-3. **Agent handoffs** — explicit context, coverage receipts, skipped checks.
-4. **Verification** — separating observations, interpretations, actions, and evidence.
-5. **Errors & retries** — informed retries, retry budgets, root-error targeting.
-6. **Memory & context** — provisional memory, invalidation, tombstones, conflict handling.
-7. **Security & authority** — least privilege, scoped authority, revalidation.
-8. **Observability** — durable evidence and trustworthy execution traces.
+1. **Gerçeğin kaynağı** — provenance, canonical sürüm ve karar kayıtları.
+2. **Güvenli değişiklik** — eski durumla işlem yapmayı ve yanlış onayı önleme.
+3. **Agentlar arası görev devri** — açık context, kapsam kanıtı ve atlanan kontroller.
+4. **Doğrulama** — gözlem, yorum, işlem ve kanıtı birbirinden ayırma.
+5. **Hata & retry** — bilinçli tekrar, retry sınırı ve gerçek hata kaynağını bulma.
+6. **Hafıza & context** — geçici bilgi, geçersizleştirme, yanlış bilgi kaydı ve çakışma yönetimi.
+7. **Güvenlik & yetki** — minimum yetki, kapsamlı izin ve yeniden doğrulama.
+8. **Observability** — güvenilir olay kayıtları ve doğrulanabilir çalışma izi.
 
-## Safety & privacy
+## Güvenlik ve gizlilik
 
-This repository does **not** publish private project data, company information, customer data, internal code, private conversations, credentials, or confidential logs.
+Bu repository'de **özel proje verisi, şirket bilgisi, müşteri verisi, şirket içi kod, özel konuşmalar, kimlik bilgileri veya gizli loglar yayımlanmaz.**
 
-Examples are synthetic or generalized. Public ideas may inspire a pattern, but the value of this guide is in synthesis, explanation, testing, and practical application—not copying private or proprietary material.
+Örnekler sentetik veya genelleştirilmiş olacaktır. Herkese açık fikirler yöntemlere ilham verebilir; rehberin asıl değeri özel veya sahipli içeriği kopyalamak değil, fikirleri sentezlemek, sadeleştirmek, test etmek ve uygulanabilir hale getirmektir.
 
-## Status
+## Durum
 
-🚧 **Early field-guide build.** The structure is being developed incrementally. Patterns will be added only when they provide a distinct, practical benefit.
+🚧 **Rehberin ilk sürümü hazırlanıyor.** Yapı adım adım geliştirilecek. Yalnızca farklı ve uygulanabilir fayda sağlayan yöntemler eklenecek.
 
-## Guiding principle
+## Temel ilke
 
-> **Do not adopt a pattern because it is new. Adopt it when a real need appears, test it on a small scale, verify the benefit, and only then make it part of the workflow.**
+> **Bir yöntemi yeni olduğu için kullanma. Gerçek ihtiyaç ortaya çıktığında küçük ölçekte dene, faydasını doğrula ve ancak bundan sonra çalışma sisteminin parçası yap.**
 
-## Language
+## Dil
 
-- English: this file
-- Türkçe: [README_TR.md](README_TR.md)
+- Türkçe: bu dosya
+- English: [README_EN.md](README_EN.md)
 
-## License
+## Lisans
 
-License selection will be finalized before the first stable release.
+İlk kararlı sürümden önce lisans seçimi kesinleştirilecektir.
