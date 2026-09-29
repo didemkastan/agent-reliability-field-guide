@@ -55,7 +55,7 @@ Not every method in this guide needs to be used to the same extent or in every p
 
 This repository does **not** publish private project data, company information, customer data, internal code, private conversations, credentials, or confidential logs.
 
-Examples are synthetic or generalized. Public ideas may inspire a method, but the value of this guide comes from bringing ideas together, evaluating them, testing them, and making them practical without exposing private or proprietary material.
+Examples are generalized so they do not contain real person, company, or private project data. Public ideas may inspire a method, but the value of this guide comes from bringing ideas together, evaluating them, testing them, and making them practical without exposing private or proprietary material.
 
 ## Status
 
