@@ -2,14 +2,19 @@
 
 ## 📚 Rehbere Başla
 
-Konu başlıklarına tıklayarak içeriğe ulaşabilirsiniz.
+Aşağıdaki sıra, **Rehberin kapsamı** ile aynıdır. Yayımlanmış bölümlere başlıklarına tıklayarak ulaşabilirsiniz.
 
-- [1. Gerçeğin Kaynağı](guide/01-source-of-truth/README.md) — Doğru dosya ve doğru sürümle çalışmayı güvence altına alma.
-- [2. Agentlar Arası Görev Devri](guide/03-agent-handoffs/README.md) — Bir agentın yaptığı işi diğerine gerekli bilgilerle birlikte aktarma.
-- [3. Verification (Doğrulama)](guide/04-verification/README.md) — “Tamamlandı” demek ile sonucu gerçekten doğrulamak arasındaki fark.
-- [4. Handoff Receipt (Görev Devri Kayıt Şablonu)](patterns/handoff-receipt.md) — Görev devrinde kullanılabilecek hazır kayıt yapısı.
+1. [**Gerçeğin Kaynağı**](guide/01-source-of-truth/README.md) — Doğru dosya ve doğru sürümle çalışmayı güvence altına alma.
+2. **Güvenli Değişiklik** — Yakında.
+3. [**Agentlar Arası Görev Devri**](guide/03-agent-handoffs/README.md) — Bir agentın yaptığı işi diğerine gerekli bilgilerle birlikte aktarma.
+4. [**Handoff Receipt (Görev Devri Kayıt Şablonu)**](patterns/handoff-receipt.md) — Görev devrinde kullanılabilecek hazır kayıt yapısı.
+5. [**Verification (Doğrulama)**](guide/04-verification/README.md) — “Tamamlandı” demek ile sonucu gerçekten doğrulamak arasındaki fark.
+6. **Retry (Yeniden deneme)** — Yakında.
+7. **Memory & Context (Hafıza ve bağlam)** — Yakında.
+8. **Security & Authority (Güvenlik ve yetki)** — Yakında.
+9. **Observability (İzlenebilirlik)** — Yakında.
 
-> Yeni bölümler eklendikçe bu liste güncellenecektir.
+> Yeni bölümler yayımlandıkça ilgili başlıklar tıklanabilir hale getirilecektir.
 
 [🇬🇧 English](README_EN.md)
 
