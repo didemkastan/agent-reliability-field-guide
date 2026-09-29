@@ -2,34 +2,52 @@
 
 [🇹🇷 Türkçe](README.md)
 
-## The problem
-An agent can produce a perfectly reasonable change against the wrong version of a file.
+## Problem
 
-Imagine Agent A reads version 4. Agent B then creates version 5. Agent A does not notice and writes its change using the old state. Nothing about Agent A's reasoning has to be bad for the result to be wrong.
+An agent may prepare a correct change and still produce the wrong result if it is working on an outdated version of a file.
+
+Suppose Agent A is working on version 4. While that work is in progress, Agent B updates the file and creates version 5. If Agent A does not notice the update, it may finish its work using version 4. The prepared change may be correct on its own, but applying it to the newer file could overwrite new changes or cause data loss.
 
 ## Core rule
-> **Before changing something, know which version is the source of truth—and confirm it is still the same version immediately before writing.**
 
-## Practical pattern
-Keep a small record for critical work: SOURCE, VERSION, STATUS, VERIFIED_BY, and a HASH or another stable version identifier.
+> **Before changing a file, identify the version being used as the source of truth. Immediately before saving the change, confirm that the file is still on that version.**
 
-Before a write:
-1. Read the current artifact.
-2. Record its version/hash.
+## Practical method
+
+For important files, record information such as SOURCE, VERSION, STATUS, VERIFIED_BY, and HASH.
+
+When making a change:
+
+1. Check the current version of the file.
+2. Record its version or hash.
 3. Prepare the change.
-4. Re-check the live version/hash.
-5. If it changed, stop and re-read instead of overwriting.
+4. Check the version or hash again immediately before saving.
+5. If the file changed in the meantime, stop, review the current version, and prepare the change again.
 
-## Synthetic example
-Two agents work on a fictional file called `settings.yaml`.
+## Example
 
-Agent A reads hash `abc123`. Agent B updates the file, producing hash `def456`. Before Agent A writes, it checks again and sees `def456`.
+Two agents are working on a fictional `settings.yaml` file.
 
-**Correct behavior:** stop, reload, and rebuild the change.
+Agent A opens the version with hash `abc123`. Agent B then updates the file, changing the hash to `def456`. Before saving its work, Agent A checks the file again and sees that it has changed.
 
-**Unsafe behavior:** write the patch prepared for `abc123` over `def456`.
+**Correct action:** Review the current file and prepare the change against the new version.
+
+**Risky action:** Apply the change prepared for `abc123` directly over the newer `def456` version.
+
+## How to apply it
+
+This method can be added to an AI agent's task instructions when the agent works with files or code, especially when another agent, person, or automation may change the same files.
+
+A starting instruction can be:
+
+> **Before making a change, check the current file version and record its version or hash. Check it again immediately before saving. If the version or hash has changed, do not overwrite the file. Review the current version and prepare the change again.**
+
+This instruction can be used with ChatGPT, Claude, Codex, or similar agents that work with files and code.
+
+In more automated workflows, this check should not rely only on a prompt. The system can compare the file's version or hash before work begins and immediately before the change is saved. If the values differ, the write can be stopped and the agent can be required to reload the current file.
 
 ## When to use it
-Use this whenever multiple people, agents, branches, automations, or machines can change the same artifact.
 
-For a tiny single-user experiment with disposable files, the full record may be unnecessary.
+This check is useful when multiple people, agents, branches, automations, or machines can modify the same file.
+
+For small experiments where one person works alone and changes can easily be discarded, a lighter check may be enough.
