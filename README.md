@@ -72,4 +72,6 @@ Bu repository'de **özel proje verisi, şirket bilgisi, müşteri verisi, şirke
 
 ## Lisans
 
-İlk kararlı sürümden önce lisans seçimi kesinleştirilecektir.
+Aksi belirtilmedikçe bu repository'deki özgün içerik **Creative Commons Attribution 4.0 International (CC BY 4.0)** lisansı altında sunulmaktadır.
+
+İçerik paylaşılabilir ve uyarlanabilir; uygun şekilde atıf verilmesi, lisans bağlantısının belirtilmesi ve değişiklik yapıldıysa bunun ifade edilmesi gerekir. Ayrıntılar için [LICENSE](LICENSE) dosyasına bakabilirsiniz.
