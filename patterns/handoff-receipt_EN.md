@@ -26,7 +26,7 @@ The location depends on the working environment:
 
 The existence of a handoff receipt does not automatically start the next agent. Automated transitions require a separate trigger and orchestration mechanism.
 
-## Ready-to-use template
+## Ready-to-use example template
 
 ```text
 HANDOFF RECEIPT
