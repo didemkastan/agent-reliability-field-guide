@@ -2,7 +2,7 @@
 
 ## 📚 Rehbere Başla
 
-Aşağıdaki sıra, **Rehberin kapsamı** ile aynıdır. Yayımlanmış bölümlere başlıklarına tıklayarak ulaşabilirsiniz.
+Yayımlanmış bölümlere başlıklarına tıklayarak ulaşabilirsiniz.
 
 1. [**Gerçeğin Kaynağı**](guide/01-source-of-truth/README.md) — Doğru dosya ve doğru sürümle çalışmayı güvence altına alma.
 2. [**Agentlar Arası Görev Devri**](guide/03-agent-handoffs/README.md) — Bir agentın yaptığı işi diğerine gerekli bilgilerle birlikte aktarma.
