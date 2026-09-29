@@ -1,27 +1,27 @@
-# Agent Handoffs
+# Agentlar Arası Görev Devri
 
-[🇹🇷 Türkçe](README_TR.md)
+[🇬🇧 English](README_EN.md)
 
-## The problem
-Agent A can finish its task correctly and Agent B can still fail because an important constraint disappeared during the handoff.
+## Problem
+Agent A görevini doğru tamamlayabilir; buna rağmen Agent B, devir sırasında önemli bir kısıt kaybolduğu için hata yapabilir.
 
-The failure is not always inside an agent. Sometimes it is **between** agents.
+Yani hata her zaman agentın **içinde** değildir. Bazen agentların **arasındadır**.
 
-## Plain-language rule
-> **A handoff should say what changed, what must not change, what was actually verified, and what was not checked.**
+## İnsan dilindeki kural
+> **Bir görev devri neyin değiştiğini, neyin kesinlikle korunacağını, gerçekte neyin doğrulandığını ve neyin kontrol edilmediğini açıkça söylemelidir.**
 
-## Minimal handoff receipt
-TASK_ID · INPUT_VERSION · OUTPUT_VERSION · CHANGED · PRESERVE · VERIFIED · SKIPPED_CHECKS · NEXT_AGENT
+## Minimum handoff kaydı
+TASK_ID · INPUT_VERSION · OUTPUT_VERSION · DEĞİŞENLER · KORUNACAKLAR · DOĞRULANANLAR · SKIPPED_CHECKS · NEXT_AGENT
 
-## Coverage matters
-“Checked everything” is not evidence of coverage. For bounded tasks, record EXPECTED_ITEMS, OBSERVED_ITEMS, CHECKED_ITEMS, SKIPPED_ITEMS, and COVERAGE_STATUS.
+## Kapsam da kanıtlanmalı
+“Her şeyi kontrol ettim” ifadesi kapsam kanıtı değildir. Sınırları belli görevlerde EXPECTED_ITEMS, OBSERVED_ITEMS, CHECKED_ITEMS, SKIPPED_ITEMS ve COVERAGE_STATUS tutulabilir.
 
-If 12 files were expected and only 10 were inspected, the receipt should make that visible.
+12 dosya beklenirken yalnız 10 dosya incelendiyse bu durum kayıtta görünmelidir.
 
-## Synthetic example
-Agent A updates three synthetic configuration files but tests only two. A useful handoff says: 3 files changed; 2 tested; 1 not executed; reason: required runtime unavailable.
+## Sentetik örnek
+Agent A üç hayali configuration dosyasını değiştiriyor fakat yalnız ikisini test edebiliyor. İyi bir görev devri: 3 dosya değişti; 2 dosya test edildi; 1 dosya çalıştırılmadı; nedeni gerekli runtime'ın mevcut olmaması.
 
-Agent B now knows exactly where verification must continue.
+Böylece Agent B doğrulamaya nereden devam edeceğini bilir.
 
-## When to use it
-Use structured handoffs when work crosses agents, sessions, machines, or people. For a one-step disposable task, a formal receipt may be overkill.
+## Ne zaman kullanılır?
+İş agentlar, oturumlar, bilgisayarlar veya insanlar arasında devrediliyorsa yapılandırılmış handoff değerlidir. Tek adımlık ve kaybolması önemsiz bir işte ayrıntılı receipt gereksiz olabilir.
