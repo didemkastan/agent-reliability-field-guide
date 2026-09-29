@@ -12,9 +12,9 @@ Agent systems can fail in surprisingly ordinary ways: an agent edits an outdated
 
 This guide turns those failure patterns into simple engineering practices.
 
-It is written for people first. Each pattern will answer:
+Each pattern follows a consistent structure:
 
-**Problem → Plain-language explanation → Synthetic example → What can go wrong → Practical pattern → How to verify it → When it may be unnecessary**
+**Problem → Explanation → Synthetic example → What can go wrong → Practical pattern → Verification → When it may be unnecessary**
 
 ## Core areas
 
