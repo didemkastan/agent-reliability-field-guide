@@ -17,7 +17,7 @@ Klasörlerde gezinmeden doğrudan okumak için:
 
 Doğrulanması, izlenmesi, hatadan toparlanması ve güvenilmesi daha kolay AI-agent iş akışları oluşturmak için hazırlanmış pratik ve iki dilli bir rehber.
 
-## Bu rehber neden var?
+## Bu rehberin amacı
 
 Agent sistemleri bazen oldukça sıradan nedenlerle hata verir: bir agent eski bir dosyayı değiştirir, iki agent birbirinin çalışmasını ezer, retry aynı yanlış varsayımı tekrarlar veya kendinden emin bir “tamamlandı” mesajı doğrulama sanılır.
 
