@@ -358,9 +358,9 @@ Burada iki farklı yön bilgisi vardır: **`RETURN_TO`**, Gemini'nin sonucunu il
 
 Bu örnekte iki farklı çalışma biçimini ayırmak gerekir.
 
-#### Manuel veya yarı otomatik geçiş
+#### GitHub'a bağlı olmayan agenttan sonucu geri alma
 
-Agentlar arasında otomatik bir tetikleyici henüz kurulmamışsa Gemini, ChatGPT'yi veya Codex'i kendiliğinden başlatmaz. Geçişi kullanıcı yapar:
+Bu örnekte Gemini GitHub'daki ortak çalışma alanına doğrudan bağlı değildir. Bu nedenle görev paketi ve gerekli dosyalar kullanıcı tarafından Gemini'ye verilmiştir. Gemini testi tamamladığında ürettiği sonuç da kullanıcı tarafından ChatGPT / orkestratöre aktarılır:
 
 ```text
 Gemini testi tamamlar
