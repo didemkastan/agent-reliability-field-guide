@@ -1,4 +1,4 @@
-# Güvenli Değişiklik
+# Güvenli Değişiklik ve Agent Otomasyonu
 
 [🇬🇧 English](README_EN.md)
 
