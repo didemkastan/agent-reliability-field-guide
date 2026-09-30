@@ -160,6 +160,41 @@ This makes the instruction source visible instead of merely assuming that the ag
 
 In an automated multi-agent system, the orchestrator can handle this step by passing the shared rules and task-specific boundaries to the agent performing the work. If the task is handed to another agent, the relevant scope and protected areas travel with the handoff record.
 
+### Example: task flow with ChatGPT, Codex, Claude, and GitHub
+
+Suppose ChatGPT, Codex, and Claude are used together on the same software project. GitHub is not an agent in this example; it is the shared workspace where project files, versions, and change history are maintained.
+
+A simple division of work could look like this:
+
+```text
+GitHub
+└── Canonical project files + AGENTS.md
+              ↓
+ChatGPT
+└── Analyzes the request and prepares the task boundary.
+    TASK / CHANGE / PRESERVE / DO NOT
+              ↓
+Codex
+└── Receives the rules and task boundary.
+    Makes the required code change.
+    Produces CHANGED / PRESERVED / SCOPE_STATUS.
+              ↓
+GitHub
+└── The change and current version are recorded in the shared workspace.
+              ↓
+Claude
+└── Receives the current version and handoff record.
+    Reviews the change and the areas that should have been preserved.
+    Reports missing or unexpected changes.
+              ↓
+GitHub
+└── The verified result and current project state are preserved.
+```
+
+In this example, ChatGPT handles task preparation and routing, Codex performs the implementation, and Claude provides a second review. These roles do not have to be fixed; they can change according to the task. What matters is that every agent receives the same canonical rules and the current task state.
+
+For this flow to run automatically, an **orchestrator or triggering mechanism** is also required. Giving multiple agents access to the same GitHub repository does not, by itself, cause one agent to start automatically when another finishes.
+
 ## Use in automation
 
 In an automated workflow, expected files can be defined before the task starts. After the task, the system can compare that list with the files that actually changed.
