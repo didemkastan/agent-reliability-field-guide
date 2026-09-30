@@ -354,21 +354,44 @@ RETURN_TO: ChatGPT / Orkestratör
 NEXT_AGENT: Codex
 ```
 
-Burada iki farklı yön bilgisi vardır: **`RETURN_TO`**, Gemini'nin sonucunu ilk olarak kime teslim edeceğini; **`NEXT_AGENT`** ise orkestratörün doğrulama veya uygulama için görevi daha sonra hangi agenta yönlendireceğini gösterir.
+Burada iki farklı yön bilgisi vardır: **`RETURN_TO`**, Gemini'nin sonucunu ilk olarak kime teslim edeceğini; **`NEXT_AGENT`** ise kontrol tamamlandıktan sonra görevin hangi agenta devam edeceğini gösterir.
 
-Bu örnekte Gemini'nin yanıtı önce **ChatGPT / orkestratöre** geri verilir (`RETURN_TO`). ChatGPT `TASK_ID`, `INPUT_VERSION`, bulgu, kanıt ve yapılmayan kontrolleri koruyarak yeni görev paketini hazırlar ve ardından Codex'e (`NEXT_AGENT`) aktarır. Gemini'nin çıktısı doğrudan kod değişikliği talimatı olarak kullanılmaz.
+Bu örnekte iki farklı çalışma biçimini ayırmak gerekir.
 
-#### Gemini sonucunu Codex'e aktarma
+#### Manuel veya yarı otomatik geçiş
 
-Codex'e yalnızca “Gemini hata buldu, düzelt” demek yeterli değildir. Bulguyla birlikte hangi sürümün incelendiği ve hangi kontrollerin yapılmadığı da aktarılmalıdır.
+Agentlar arasında otomatik bir tetikleyici henüz kurulmamışsa Gemini, ChatGPT'yi veya Codex'i kendiliğinden başlatmaz. Geçişi kullanıcı yapar:
 
-Örnek prompt:
+```text
+Gemini testi tamamlar
+        ↓
+Kullanıcı Gemini sonucunu ChatGPT'ye verir
+        ↓
+ChatGPT / Orkestratör
+TASK_ID ve INPUT_VERSION'ı okur
+        ↓
+GitHub'dan CURRENT_VERSION'ı kontrol eder
+        ↓
+INPUT_VERSION ↔ CURRENT_VERSION karşılaştırılır
+        ↓
+Codex için güncel görev paketi hazırlanır
+        ↓
+Kullanıcı görev paketini Codex'e verir
+        ↓
+Codex bulguyu doğrular
+        ↓
+gerekirse minimum düzeltme + test
+        ↓
+GitHub
+```
 
-> **TASK_ID UI-024 için dış tester aşağıdaki bulguyu `commit abc123` üzerinde bildirdi. Önce GitHub'daki güncel branch/commit durumunu kontrol et. Güncel sürüm `abc123` ile aynı değilse bulguyu doğrudan uygulama; değişen dosyaları yeniden incele ve bulgunun hâlâ geçerli olup olmadığını doğrula.**
+Bu durumda ChatGPT'nin görevi Gemini'nin teknik bulgusunu yeniden test etmek değildir. ChatGPT **geçiş kontrolünü** yapar: bulgunun hangi göreve ve sürüme ait olduğunu kontrol eder, GitHub'daki güncel sürümle karşılaştırır, eksik bağlamı korur ve Codex için güvenli görev paketini hazırlar.
+
+Gemini sonucunu ChatGPT'ye verirken örneğin şu prompt kullanılabilir:
+
+> **Aşağıdaki sonuç GitHub'a doğrudan erişimi olmayan tester agenttan geldi. Önce TASK_ID ve INPUT_VERSION bilgilerini kontrol et. GitHub'daki güncel branch/commit bilgisini al ve CURRENT_VERSION olarak kaydet. INPUT_VERSION ile CURRENT_VERSION aynı değilse sonucu doğrudan Codex'e uygulama görevi olarak aktarma; hangi ilgili dosyaların değiştiğini kontrol et ve yeniden doğrulama gerektiğini belirt. Aynıysa bulgu, kanıt, SKIPPED_CHECKS, PRESERVE ve LIMITATIONS bilgilerini kaybetmeden Codex için bir sonraki görev paketini hazırla. Kodda değişiklik yapma.**
 >
-> **Bulguyu güncel kod üzerinde yeniden üretmeye veya mevcut testlerle doğrulamaya çalış. Sorun doğrulanırsa AGENTS.md kurallarına ve görevdeki PRESERVE sınırlarına uyarak gerekli en küçük düzeltmeyi yap. Sorun doğrulanmazsa kodu değiştirme ve kanıtıyla birlikte bildir.**
->
-> **Dış tester sonucu:**
+> **Tester sonucu:**
 >
 > ```text
 > TASK_ID: UI-024
@@ -376,9 +399,66 @@ Codex'e yalnızca “Gemini hata buldu, düzelt” demek yeterli değildir. Bulg
 > FINDING: Geri dönüş akışında seçilen tema bilgisinin kaybolma riski var.
 > EVIDENCE: settings_screen.py geri dönüş işlemi; mevcut testte durum kontrolü yok.
 > SKIPPED_CHECKS: Uygulama çalıştırılmadı; repository'nin diğer dosyaları incelenmedi.
+> RETURN_TO: ChatGPT / Orkestratör
+> NEXT_AGENT: Codex
 > ```
+
+ChatGPT'nin hazırladığı çıktı örneğin şöyle olabilir:
+
+```text
+TASK_ID: UI-024
+TESTER_INPUT_VERSION: commit abc123
+CURRENT_VERSION: commit abc123
+VERSION_STATUS: MATCH
+
+SOURCE_FINDING:
+Geri dönüş akışında seçilen tema bilgisinin kaybolma riski var.
+
+EVIDENCE:
+settings_screen.py geri dönüş işlemi;
+mevcut testte durum kontrolü yok.
+
+SKIPPED_CHECKS:
+- Uygulama tester tarafından çalıştırılmadı.
+- Repository'nin diğer dosyaları tester tarafından incelenmedi.
+
+NEXT_AGENT: Codex
+NEXT_ACTION:
+Bulguyu güncel kod üzerinde doğrula.
+Doğrulanırsa gerekli en küçük düzeltmeyi yap ve testi tamamla.
+```
+
+Bu çıktı **Codex'e verilecek görev paketidir**. Böylece Gemini'den gelen serbest bir bulgu doğrudan “düzelt” komutuna dönüşmez; önce sürüm ve bağlam kontrolünden geçer.
+
+#### ChatGPT'nin hazırladığı görevi Codex'e verme
+
+Manuel veya yarı otomatik düzende kullanıcı, ChatGPT'nin hazırladığı yukarıdaki görev paketini Codex'e verir. Codex'e verilecek talimat şöyle olabilir:
+
+> **Aşağıdaki görev paketi orkestratör tarafından hazırlanmıştır. Önce kendi eriştiğin GitHub branch/commit bilgisini tekrar kontrol et ve paketteki CURRENT_VERSION ile karşılaştır. Eşleşmiyorsa değişiklik yapmadan önce görevi güncel sürüm üzerinde yeniden değerlendir. Eşleşiyorsa dış tester bulgusunu mevcut kod ve testlerle bağımsız olarak doğrula. Sorun doğrulanırsa AGENTS.md ve PRESERVE sınırlarına uyarak gerekli en küçük düzeltmeyi yap. Doğrulanmazsa kodu değiştirme ve kanıtıyla birlikte bildir.**
 >
 > **İşlem sonunda CURRENT_VERSION, CHANGED, PRESERVED, VERIFIED, SKIPPED_CHECKS ve SCOPE_STATUS bilgilerini döndür.**
+
+#### Tam otomatik geçişte tetikleyici ne yapar?
+
+Tam otomatik sistemde kullanıcının yukarıdaki iki taşıma işlemini yapması gerekmez. Bunun için orkestratörün yanında bir **tetikleme mekanizması** bulunur.
+
+```text
+Gemini TASK_COMPLETE sonucu üretir
+        ↓
+Tetikleyici sonucu orkestratöre iletir
+        ↓
+Orkestratör GitHub CURRENT_VERSION kontrolünü yapar
+        ↓
+sürüm ve kapsam uygunsa
+        ↓
+Codex görevi oluşturulur / başlatılır
+        ↓
+Codex sonucu tekrar orkestratöre döner
+```
+
+Tetikleyici bir API olayı, webhook, kuyruk, CI/CD adımı veya kullanılan agent platformunun görev tamamlama olayı olabilir. Hangi teknoloji kullanılırsa kullanılsın tetikleyicinin görevi **“önceki agent tamamlandı” bilgisini yakalayıp sonucu orkestratöre ulaştırmaktır**. Orkestratör ise sürüm, kapsam ve yetki kontrollerini yaptıktan sonra sıradaki görevi oluşturur.
+
+Bu nedenle **orkestratör** ile **tetikleyici** aynı şey değildir: tetikleyici geçişi başlatır; orkestratör neyin, hangi bilgilerle ve hangi agenta aktarılacağını yönetir.
 
 Bilgiyi alan Codex'in görevi dış agentın sonucunu doğru kabul etmek değil, **güncel proje üzerinde yeniden doğrulamaktır**:
 
