@@ -226,6 +226,7 @@ DO NOT:
 EXPECTED_OUTPUT:
 LIMITATIONS:
 
+RETURN_TO:
 NEXT_AGENT:
 NEXT_ACTION:
 ```
@@ -287,6 +288,7 @@ LIMITATIONS:
 - No direct GitHub access.
 - Only the attached files and test output are visible.
 
+RETURN_TO: ChatGPT / Orchestrator
 NEXT_AGENT: Codex
 NEXT_ACTION:
 Validate the finding against the current GitHub version.
@@ -311,6 +313,7 @@ If it is still valid, make the smallest necessary fix.
 > SKIPPED_CHECKS:
 > 
 > RECOMMENDED_ACTION:
+> RETURN_TO:
 > NEXT_AGENT:
 > ```
 
@@ -347,10 +350,13 @@ RECOMMENDED_ACTION:
 Reproduce the behavior on the current GitHub version.
 If confirmed, make the smallest fix and add a regression test.
 
+RETURN_TO: ChatGPT / Orchestrator
 NEXT_AGENT: Codex
 ```
 
-This response is not used directly as an instruction to change code. It first returns to **ChatGPT / the orchestrator**. The orchestrator preserves the `TASK_ID`, `INPUT_VERSION`, finding, evidence, and skipped checks when routing the result to the next agent with project access.
+There are two different routing fields here: **`RETURN_TO`** identifies who receives Gemini's result first, while **`NEXT_AGENT`** identifies the agent to which the orchestrator will route the task for validation or implementation.
+
+In this example, Gemini's response first returns to **ChatGPT / the orchestrator** (`RETURN_TO`). ChatGPT preserves the `TASK_ID`, `INPUT_VERSION`, finding, evidence, and skipped checks, prepares the next task package, and then routes it to Codex (`NEXT_AGENT`). Gemini's output is not used directly as an instruction to change code.
 
 #### Passing the Gemini result to Codex
 
