@@ -1558,9 +1558,9 @@ GitHub izin ekranında ChatGPT'nin takip etmesini istediğiniz repository'ye eri
 
 Bu işlem ChatGPT'nin izin verilen repository'deki bilgileri okuyabilmesini sağlar.
 
-#### 2. ChatGPT'de Work'ü aç
+#### 2. ChatGPT'de kayıtlı projenizi aç ve Work'ü başlat
 
-ChatGPT'de **Work** modunu açın.
+ChatGPT'de GitHub projeniz için kullandığınız **mevcut projeyi** açın. Ardından **Work** modunu başlatın.
 
 Yeni bir görev oluştururken neyi takip etmek istediğinizi normal cümleyle yazın.
 
