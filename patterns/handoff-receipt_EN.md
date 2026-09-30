@@ -2,7 +2,7 @@
 
 # Handoff Receipt Template
 
-This template is used when transferring a task from one agent or person to another so that the current state, completed changes, and remaining checks are not lost.
+This template provides a shared record structure for task handoffs.
 
 > **This template is not an official standard from any particular product or platform. It combines the principles used in this guide to help preserve version, change, verification, coverage, and next-step information during agent handoffs.**
 
