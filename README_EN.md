@@ -8,11 +8,13 @@ Published sections can be opened by clicking their titles.
 2. [**Agent Handoffs**](guide/03-agent-handoffs/README_EN.md) — Transfer work to another agent together with the information it needs.
 3. [**Handoff Receipt Template**](patterns/handoff-receipt_EN.md) — A ready-to-use structure for recording a handoff.
 4. [**Verification**](guide/04-verification/README_EN.md) — Understand the difference between reporting “done” and actually verifying the result.
-5. **Safe Changes and Agent Automation** — Being revised.
-6. **Retries** — Coming soon.
-7. **Memory & Context** — Coming soon.
-8. **Security & Authority** — Coming soon.
-9. **Observability** — Coming soon.
+5. **Safe Changes** — Being revised.
+6. **Handoff Practice** — Being revised.
+7. **Agent Automation** — Being revised.
+8. **Retries** — Coming soon.
+9. **Memory & Context** — Coming soon.
+10. **Security & Authority** — Coming soon.
+11. **Observability** — Coming soon.
 
 > As new sections are published, their titles will become clickable.
 
@@ -42,11 +44,13 @@ The guide is being developed to cover the areas below. Sections that are current
 2. **Agent handoffs** — transferring required information and making completed and skipped checks visible.
 3. **Handoff Receipt Template** — transferring the current state, completed changes, verified results, skipped checks, and next action through a standard record.
 4. **Verification** — separating observations, interpretations, actions, and verification results.
-5. **Safe changes and agent automation** — defining what may change, preserving protected areas, and safely automating agent-to-agent handoffs through GitHub.
-6. **Retries** — retrying with information from the previous failure and stopping when needed.
-7. **Memory & context** — managing temporary information, changed sources, incorrect records, and conflicts.
-8. **Security & authority** — limiting permissions to what is needed and rechecking authority when necessary.
-9. **Observability** — recording actions and verification results so they can be reviewed later.
+5. **Safe changes** — defining what may change, preserving protected areas, and making only the necessary change.
+6. **Handoff practice** — using task packages, version information, and human checkpoints to move work safely between agents.
+7. **Agent automation** — applying safe handoff logic with automated triggers and controlled agent transitions.
+8. **Retries** — retrying with information from the previous failure and stopping when needed.
+9. **Memory & context** — managing temporary information, changed sources, incorrect records, and conflicts.
+10. **Security & authority** — limiting permissions to what is needed and rechecking authority when necessary.
+11. **Observability** — recording actions and verification results so they can be reviewed later.
 
 ## How this guide came together
 
