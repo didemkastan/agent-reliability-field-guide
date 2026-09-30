@@ -1510,163 +1510,126 @@ gh aw compile .github/workflows/review.md
 
 Then send the updated `.md` and `.lock.yml` to GitHub.
 
-### 15. If ChatGPT is the orchestrator, manage agent flow through shared task files
+### 15. How can ChatGPT notify me when an agent changes the project on GitHub?
 
-When ChatGPT is the orchestrator, the results of agents working on our project are kept in a shared, traceable place, and ChatGPT reads those records to decide the next step.
+The goal is simple:
 
-Agents do not need access to each other's chat memory. Instead, reserve a small orchestration area inside the repository.
+```text
+Codex or Claude
+changed our project on GitHub
+        ↓
+a Pull Request was opened or a new commit was added to an existing PR
+        ↓
+ChatGPT ran automatically
+        ↓
+checked the change
+        ↓
+notified me
+```
+
+You do not need to write Python code or a GitHub workflow file for this setup. The automation is created **inside ChatGPT**.
+
+#### 1. Connect GitHub to ChatGPT
+
+In ChatGPT:
+
+```text
+Settings
+→ Apps
+→ GitHub
+→ Connect
+```
+
+On the GitHub authorization screen, grant access to the repository you want ChatGPT to monitor.
+
+This allows ChatGPT to read information from the authorized repository.
+
+#### 2. Open Work in ChatGPT
+
+Open **Work** in ChatGPT.
+
+When creating a new task, describe what you want to monitor in normal language.
+
+For example:
+
+> When a Pull Request is opened in this GitHub repository or a new commit is added to an existing Pull Request, check the change. Briefly tell me which files changed, which agent made the change when that can be determined, and the important result.
+
+This instruction is not written to GitHub. It is entered into the **task in ChatGPT Work**.
+
+#### 3. Review the three task fields
+
+When ChatGPT creates the task, review these parts:
+
+```text
+Trigger
+→ Which GitHub event starts ChatGPT?
+
+Condition
+→ Under what condition should the task actually run?
+
+Prompt
+→ What should ChatGPT do after it starts?
+```
 
 For example:
 
 ```text
-PROJECT/
-├── orchestration/
-│   ├── current-task.md
-│   └── handoffs/
-│       ├── TASK-001-codex.md
-│       ├── TASK-001-claude.md
-│       └── TASK-001-test.md
-│
-├── src/
-└── tests/
+Trigger:
+Pull Request activity occurs in the authorized repository.
+
+Condition:
+A new PR was opened or a new commit was added to an existing PR.
+
+Prompt:
+Review the change.
+Briefly summarize the changed files and important result.
+Notify me.
 ```
 
-This box is not a command. It shows an example folder structure that can be created in the repository.
+No code is being written here. Check that the task is monitoring the correct repository and the intended event.
 
-The files serve different purposes:
+#### 4. Enable notifications
 
-- `orchestration/current-task.md` → the **canonical task state** showing the current stage;
-- `orchestration/handoffs/TASK-001-codex.md` → record of Codex's work and evidence;
-- `orchestration/handoffs/TASK-001-claude.md` → Claude review result;
-- `orchestration/handoffs/TASK-001-test.md` → test/verification result.
-
-For example, after Codex finishes, its handoff record could contain:
+In ChatGPT, open:
 
 ```text
-TASK_ID: TASK-001
-SOURCE_AGENT: Codex
-INPUT_VERSION: abc123
-OUTPUT_VERSION: def456
-STATUS: IMPLEMENTATION_COMPLETE
-
-CHANGED:
-- src/navigation.py
-
-PRESERVE:
-- existing login flow
-
-VERIFIED:
-- existing automated tests passed
-
-SKIPPED_CHECKS:
-- visual check not performed
-
-NEXT_AGENT: Claude
-NEXT_ACTION: review the change against the task boundaries
+Settings
+→ Notifications
 ```
 
-This record is not Codex's memory. It is **shared project state stored in the repository.** ChatGPT, Claude, or another agent can therefore join later without needing the previous agent's conversation history.
+and enable supported **push**, **email**, or other notification options you want.
 
-#### What does ChatGPT do here?
+You then do not need to keep checking GitHub manually to see when the task runs.
 
-The ChatGPT orchestrator should not redo each agent's work. It reads the shared record and checks whether the handoff is safe.
+#### 5. Where can I find the task later?
+
+Open **Scheduled** in ChatGPT to:
+
+- view the task,
+- edit it,
+- pause it,
+- enable it again,
+- or delete it.
+
+#### Important limitation
+
+GitHub event-triggered ChatGPT tasks are not currently a general listener for **every file change** in a repository. Supported GitHub triggers operate through Pull Request activity.
+
+So if agent changes should trigger this automation, the clearest flow is:
 
 ```text
-Codex completed the work
+Agent made a change
         ↓
-Codex updated its handoff file
+the change was sent to a PR
         ↓
-current-task.md was updated
+GitHub PR activity occurred
         ↓
-ChatGPT orchestrator read the record
+ChatGPT ran automatically
         ↓
-check INPUT_VERSION / OUTPUT_VERSION / STATUS / evidence
-        ↓
- ┌───────────────────────────────┐
- │                               │
-handoff is safe              problem found
- │                               │
- ▼                               ▼
-run NEXT_AGENT               stop automation
-for example Claude           notify the human
+notified me
 ```
 
-The primary state ChatGPT reads is **our own task files**. Pull Request comments, Issues, or agent chat memory are not the canonical task state.
-
-#### How can ChatGPT automation follow these files?
-
-There are two approaches.
-
-**Method 1 — Scheduled / monitoring task**
-
-After connecting the GitHub app in ChatGPT, a scheduled task can periodically inspect the orchestration records in our repository.
-
-Example task logic:
-
-```text
-CHECK:
-orchestration/current-task.md
-
-IF:
-STATUS moved to a new stage
-
-VERIFY:
-- is TASK_ID correct?
-- is INPUT_VERSION the expected version?
-- does the required handoff file exist?
-- is there evidence in VERIFIED?
-- are SKIPPED_CHECKS acceptable?
-
-THEN:
-- if safe, perform the NEXT_AGENT / NEXT_ACTION step;
-- if human judgment is required, stop and notify me;
-- if nothing changed, do nothing.
-```
-
-This text is not written into a repository workflow file. It is the instruction for a **scheduled/monitoring task created in ChatGPT**. The task can use the connected GitHub app within the repository access it has been granted.
-
-**Method 2 — Use GitHub activity to wake ChatGPT**
-
-Current ChatGPT GitHub event-triggered tasks can start from supported **Pull Request activity**. If the project already transports agent changes through PRs, that event can be used only as a **wake-up signal** for ChatGPT.
-
-ChatGPT's job is not to comment on the PR:
-
-```text
-PR activity occurs
-        ↓
-ChatGPT task starts
-        ↓
-read orchestration/current-task.md
-        ↓
-read the relevant handoff record
-        ↓
-verify version + status + evidence
-        ↓
-decide next agent / stop / human notification
-```
-
-In other words:
-
-> **The PR event may be the trigger; our task and handoff files remain the source of orchestration state.**
-
-ChatGPT's GitHub event triggers are not a general repository webhook for every file change. If the architecture does not use PRs, a **scheduled monitoring task** is a clearer starting point.
-
-#### When does the human enter the loop?
-
-The ChatGPT orchestrator can continue routine, verified handoffs according to its rules. It should stop and notify the user when, for example:
-
-- `INPUT_VERSION` does not match the current version;
-- a required handoff file is missing;
-- verification failed or is uncertain;
-- `SKIPPED_CHECKS` contains a critical skipped check;
-- an agent needs to leave its allowed scope;
-- higher authority is required;
-- the retry limit is exhausted;
-- `NEXT_AGENT` or `NEXT_ACTION` is ambiguous.
-
-A notification should not merely say **“something failed.”** It should include at least the `TASK_ID`, current version, what happened, evidence, what was tried, and the decision required from the user.
-
-This removes the need for a person to manually carry every agent handoff. The human enters only when the automation cannot make a safe decision.
+The purpose of this first automation is only to **notice the change, perform a short check, and notify the user.** Automatic task handoff between agents can be added later as a separate step.
 
 ### 16. Automate only one agent handoff first
 
