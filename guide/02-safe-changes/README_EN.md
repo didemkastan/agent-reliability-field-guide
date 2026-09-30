@@ -517,7 +517,7 @@ This allows an agent without direct access to the shared workspace to participat
 
 For the workflow to advance automatically between agents, an **orchestrator or triggering mechanism** is still required. Giving multiple agents access to the same GitHub repository does not, by itself, cause one agent to start automatically when another finishes.
 
-## Use in automation
+## Safe Agent Handoffs and Automation Setup
 
 In an automated workflow, expected files can be defined before the task starts. After the task, the system can compare that list with the files that actually changed.
 
