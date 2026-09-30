@@ -232,6 +232,175 @@ NEXT_ACTION:
 
 The package states which version the agent is working from, which files or information it can see, what it should test, what must be preserved, and what it cannot access. The external agent returns its result with the same `TASK_ID` and `INPUT_VERSION`.
 
+### Filled example: tester without GitHub access
+
+Suppose we want to check whether a change to a screen transition has broken existing behavior.
+
+Only the **current-version** files required for the task are attached for Gemini:
+
+```text
+navigation.py
+settings_screen.py
+tests/test_navigation.py
+test_output.txt
+```
+
+Selecting only the files needed for the task, instead of sending the entire repository, limits the scope and helps prevent the agent from making assumptions about areas it cannot see.
+
+Task package for Gemini:
+
+```text
+TASK_ID: UI-024
+INPUT_VERSION: commit abc123
+
+TASK:
+Review the behavior when returning from the Settings screen.
+Check for regression risk in existing screen transitions.
+
+FILES / CONTEXT:
+- navigation.py
+- settings_screen.py
+- tests/test_navigation.py
+- test_output.txt
+
+RULES:
+- Base the assessment only on the supplied files and test output.
+- Keep observations separate from interpretations.
+- State checks that could not be performed.
+
+PRESERVE:
+- Existing working screen transitions
+- Navigation behavior outside Settings
+
+DO NOT:
+- Modify the files.
+- Treat unseen repository content as reviewed.
+- Assume access to the current GitHub state.
+
+EXPECTED_OUTPUT:
+- Findings
+- File/line or test evidence supporting each issue
+- Recommended next action
+- Checks performed and skipped
+
+LIMITATIONS:
+- No direct GitHub access.
+- Only the attached files and test output are visible.
+
+NEXT_AGENT: Codex
+NEXT_ACTION:
+Validate the finding against the current GitHub version.
+If it is still valid, make the smallest necessary fix.
+```
+
+#### Example prompt for Gemini
+
+> **Review the attached task package and files. Preserve TASK_ID and INPUT_VERSION exactly in your response. Base your assessment only on the supplied files and test output. Write OBSERVED first and INTERPRETED separately. If you find an issue, identify the file, section, or test result that supports it. Put tests you could not run and areas you could not access under SKIPPED_CHECKS. Do not modify the files. Return the result using this structure:**
+>
+> ```text
+> TASK_ID:
+> INPUT_VERSION:
+> 
+> OBSERVED:
+> INTERPRETED:
+> 
+> FINDINGS:
+> EVIDENCE:
+> 
+> VERIFIED:
+> SKIPPED_CHECKS:
+> 
+> RECOMMENDED_ACTION:
+> NEXT_AGENT:
+> ```
+
+For example, Gemini might return:
+
+```text
+TASK_ID: UI-024
+INPUT_VERSION: commit abc123
+
+OBSERVED:
+The return action in settings_screen.py recreates selected_theme.
+test_navigation.py does not check this state.
+
+INTERPRETED:
+There is a risk that the selected theme is lost when returning
+from the Settings screen.
+
+FINDINGS:
+- State preservation in the return flow should be checked.
+- The current test does not cover this scenario.
+
+EVIDENCE:
+- settings_screen.py: return action
+- tests/test_navigation.py: no corresponding state assertion
+
+VERIFIED:
+- The three supplied source files and test output were reviewed.
+
+SKIPPED_CHECKS:
+- The application was not executed.
+- Other repository files were not reviewed.
+
+RECOMMENDED_ACTION:
+Reproduce the behavior on the current GitHub version.
+If confirmed, make the smallest fix and add a regression test.
+
+NEXT_AGENT: Codex
+```
+
+This response is not used directly as an instruction to change code. It first returns to **ChatGPT / the orchestrator**. The orchestrator preserves the `TASK_ID`, `INPUT_VERSION`, finding, evidence, and skipped checks when routing the result to the next agent with project access.
+
+#### Passing the Gemini result to Codex
+
+Simply telling Codex “Gemini found a bug, fix it” is not enough. The reviewed version and skipped checks must travel with the finding.
+
+Example prompt:
+
+> **For TASK_ID UI-024, an external tester reported the finding below against `commit abc123`. First check the current branch/commit state in GitHub. If the current version is not the same as `abc123`, do not apply the finding directly; review the changed files again and determine whether the finding is still valid.**
+>
+> **Try to reproduce or verify the finding against the current code and available tests. If confirmed, follow AGENTS.md and the task's PRESERVE boundaries and make the smallest necessary fix. If it cannot be confirmed, do not change the code; report the evidence instead.**
+>
+> **External tester result:**
+>
+> ```text
+> TASK_ID: UI-024
+> INPUT_VERSION: commit abc123
+> FINDING: The selected theme may be lost in the return flow.
+> EVIDENCE: settings_screen.py return action; no state assertion in the current test.
+> SKIPPED_CHECKS: Application not executed; other repository files not reviewed.
+> ```
+>
+> **At the end, return CURRENT_VERSION, CHANGED, PRESERVED, VERIFIED, SKIPPED_CHECKS, and SCOPE_STATUS.**
+
+The receiving Codex agent does not treat the external agent's result as established fact. Its job is to **revalidate it against the current project state**:
+
+```text
+Gemini finding
+TASK_ID + INPUT_VERSION
+        ↓
+ChatGPT / Orchestrator
+preserves context and boundaries
+        ↓
+Codex
+checks CURRENT_VERSION
+        ↓
+revalidates the finding
+        ↓
+not confirmed ──→ no change; report result
+        │
+      confirmed
+        ↓
+minimum fix
+        ↓
+test / diff / scope check
+        ↓
+GitHub
+```
+
+This lets an agent without GitHub access contribute to the project without turning its finding directly into project truth or automatic authority to change the code.
+
 ```text
 GitHub
 shared workspace
