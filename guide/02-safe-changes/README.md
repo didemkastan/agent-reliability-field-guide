@@ -48,7 +48,7 @@ Liste uzun olmak zorunda değildir. Önemli olan, görevin sınırının değiş
 
 Bir yazım hatası tek satırda düzeltilebiliyorsa aynı anda paragrafı yeniden yazmaya veya başka dosyaları düzenlemeye gerek yoktur.
 
-Agent görev sırasında kapsam dışında başka bir sorun fark ederse onu kendiliğinden düzeltmek yerine **bildirmelidir**. Kapsamın genişletilmesine ihtiyaç varsa yeni sınır önce açıkça belirlenir.
+Agent görev sırasında kapsam dışında başka bir sorun fark ederse onu kendiliğinden düzeltmek yerine **bildirmelidir**. Kapsamın genişletilmesine ihtiyaç varsa yeni sınır **insan onayıyla** açıkça belirlenir.
 
 ## Beklenen ve gerçekleşen değişiklik
 
@@ -87,8 +87,6 @@ Agentın kendi raporu tek başına doğrulama değildir. Gerçek değişiklik fa
 
 Değişiklik GitHub'da bir Pull Request (PR) içindeyse PR'ı aç ve **Files changed** sekmesine gir. Burada değişen dosyaları ve satırları görürsün.
 
-Kontrol eden agent burada bağımsız inceleme yapabilir; insan da merge öncesi son kontrolde aynı diff'i gözden geçirir.
-
 ### Bilgisayarda diff kontrolü
 
 Komutları bilgisayarındaki repository klasöründe Terminal veya PowerShell içinde çalıştır.
@@ -105,7 +103,29 @@ git diff
 - `git diff --stat` değişiklikleri dosya bazında özetler.
 - `git diff` değişen satırları gösterir.
 
-> Bu komutlardaki normal `git diff`, henüz commit edilmemiş çalışma alanı değişikliklerini kontrol etmek için kullanılır. Agent değişikliği zaten commit ettiyse GitHub'daki **Files changed** görünümünü kullanabilir veya son commit için `git show HEAD` ile ayrıca kontrol edebilirsin.
+> Bu komutlardaki normal `git diff`, henüz commit edilmemiş çalışma alanı değişikliklerini kontrol etmek için kullanılır.
+
+Agent değişiklikleri commit (kaydedilmiş değişiklik) haline getirdiyse son commit'i görmek için:
+
+**TERMİNALDE ÇALIŞTIR**
+
+```bash
+git show HEAD
+```
+
+Buradaki `HEAD`, üzerinde çalıştığın branch'teki en son commit'i ifade eder.
+
+Agent aynı branch'te birden fazla commit yaptıysa yalnızca son commit'e bakmak yeterli değildir. Çalıştığın branch'in ana daldan ayrıldıktan sonraki bütün farkını görmek için:
+
+**TERMİNALDE ÇALIŞTIR**
+
+```bash
+git diff main...HEAD
+```
+
+> Ana dalın adı `main` değilse komutta kendi ana dal adını kullan. Örneğin ana dal `master` ise `git diff master...HEAD` yaz.
+
+> **Diff satırlarını okumakta zorlanıyorsan:** En azından değişen dosya listesini BEKLENEN listeyle karşılaştır. Beklemediğin bir dosya görürsen aşağıdaki **Seçenek 1** ile agenta kapsam dışı değişikliği açıklat ve kontrol ettir.
 
 ## Beklenmeyen değişiklik bulunursa ne yapılır?
 
@@ -143,7 +163,7 @@ Dosyadaki **tüm commit edilmemiş yerel değişiklikleri silmek istediğinden e
 git restore config.yaml
 ```
 
-> **Dikkat:** `git restore config.yaml` dosyadaki commit edilmemiş değişiklikleri silebilir. Emin değilsen çalıştırma. Değişiklik zaten commit edildiyse bu komutu çözüm olarak kullanma; önce commit farkını incele.
+> **Dikkat:** `git restore config.yaml` dosyadaki commit edilmemiş değişiklikleri silebilir. Emin değilsen çalıştırma. Değişiklik zaten commit edildiyse bu komutu çözüm olarak kullanma. Bu durumda **Seçenek 1**'i kullan ve agenta kapsam dışı değişikliği yeni bir commit ile geri aldır.
 
 ## Kapsam agentlar arasında nasıl korunur?
 
