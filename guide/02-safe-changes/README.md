@@ -1524,163 +1524,126 @@ gh aw compile .github/workflows/review.md
 
 çalıştırılır ve güncellenen `.md` ile `.lock.yml` GitHub'a gönderilir.
 
-### 15. ChatGPT orkestratörse agentlar arasındaki akışı ortak görev dosyalarından yönet
+### 15. Agent GitHub'da değişiklik yaptığında ChatGPT bana nasıl haber verir?
 
-ChatGPT orkestratör olarak kullanıldığında, kendi projemizde çalışan agentların sonuçları ortak ve izlenebilir bir yerde tutulur; ChatGPT bu kayıtları okuyarak sıradaki adımı belirler.
+Amaç basit:
 
-Agentların birbirlerinin sohbet belleğini görmesi gerekmez. Bunun yerine repository içinde orkestrasyona ayrılmış küçük bir alan kullanılabilir.
+```text
+Codex veya Claude
+GitHub'daki projemizde değişiklik yaptı
+        ↓
+Pull Request açıldı veya mevcut PR'a yeni commit geldi
+        ↓
+ChatGPT otomatik çalıştı
+        ↓
+değişikliği kontrol etti
+        ↓
+bana haber verdi
+```
+
+Bunu kurmak için ayrıca Python kodu veya GitHub workflow dosyası yazmak gerekmez. Otomasyon **ChatGPT içinde** oluşturulur.
+
+#### 1. GitHub'ı ChatGPT'ye bağla
+
+ChatGPT'de:
+
+```text
+Ayarlar
+→ Uygulamalar
+→ GitHub
+→ Bağlan
+```
+
+GitHub izin ekranında ChatGPT'nin takip etmesini istediğiniz repository'ye erişim verin.
+
+Bu işlem ChatGPT'nin izin verilen repository'deki bilgileri okuyabilmesini sağlar.
+
+#### 2. ChatGPT'de Work'ü aç
+
+ChatGPT'de **Work** modunu açın.
+
+Yeni bir görev oluştururken neyi takip etmek istediğinizi normal cümleyle yazın.
+
+Örneğin:
+
+> Bu GitHub repository'sinde Pull Request açıldığında veya mevcut Pull Request'e yeni commit geldiğinde değişikliği kontrol et. Hangi dosyaların değiştiğini, değişikliği hangi agentın yaptığını belirleyebiliyorsan bunu ve önemli sonucu kısa şekilde bana bildir.
+
+Bu metin GitHub'a yazılmaz. **ChatGPT Work içindeki göreve yazılır.**
+
+#### 3. ChatGPT'nin oluşturduğu üç alanı kontrol et
+
+ChatGPT görevi oluştururken üç bölüm gösterir:
+
+```text
+Trigger
+→ ChatGPT'yi hangi GitHub olayı başlatacak?
+
+Condition
+→ Hangi durumda görev gerçekten çalışacak?
+
+Prompt
+→ ChatGPT çalıştığında ne yapacak?
+```
 
 Örneğin:
 
 ```text
-PROJECT/
-├── orchestration/
-│   ├── current-task.md
-│   └── handoffs/
-│       ├── TASK-001-codex.md
-│       ├── TASK-001-claude.md
-│       └── TASK-001-test.md
-│
-├── src/
-└── tests/
+Trigger:
+İzin verilen repository'de Pull Request etkinliği oluştu.
+
+Condition:
+Yeni PR açıldı veya mevcut PR'a yeni commit geldi.
+
+Prompt:
+Değişikliği incele.
+Değişen dosyaları ve önemli sonucu kısa şekilde özetle.
+Bana bildirim gönder.
 ```
 
-Bu kutu bir komut değildir. Repository içinde oluşturulabilecek örnek klasör yapısını gösterir.
+Burada kod yazmıyoruz. ChatGPT'nin oluşturduğu görevin doğru repository'yi ve doğru olayı takip ettiğini kontrol ediyoruz.
 
-Buradaki dosyaların görevi:
+#### 4. Bildirimleri aç
 
-- `orchestration/current-task.md` → görevin şu anda hangi aşamada olduğunu gösteren **kanonik görev durumu**;
-- `orchestration/handoffs/TASK-001-codex.md` → Codex'in yaptığı işin ve bıraktığı kanıtların kaydı;
-- `orchestration/handoffs/TASK-001-claude.md` → Claude incelemesinin sonucu;
-- `orchestration/handoffs/TASK-001-test.md` → test/doğrulama sonucu.
-
-Örneğin Codex işi bitirdiğinde kendi handoff kaydına şunları bırakabilir:
+ChatGPT'de:
 
 ```text
-TASK_ID: TASK-001
-SOURCE_AGENT: Codex
-INPUT_VERSION: abc123
-OUTPUT_VERSION: def456
-STATUS: IMPLEMENTATION_COMPLETE
-
-CHANGED:
-- src/navigation.py
-
-PRESERVE:
-- mevcut giriş akışı
-
-VERIFIED:
-- mevcut otomatik testler geçti
-
-SKIPPED_CHECKS:
-- görsel kontrol yapılmadı
-
-NEXT_AGENT: Claude
-NEXT_ACTION: değişikliği görev sınırlarına göre incele
+Ayarlar
+→ Bildirimler
 ```
 
-Bu kayıt Codex'in belleği değildir. **Repository'de saklanan ortak proje kaydıdır.** Bu nedenle ChatGPT, Claude veya başka bir agent aynı göreve daha sonra katıldığında önceki agentın sohbet geçmişine ihtiyaç duymaz.
+bölümünden desteklenen **anlık bildirim**, **e-posta** veya istediğiniz bildirim seçeneğini açın.
 
-#### ChatGPT burada ne yapar?
+Bundan sonra görev çalıştığında sonucu görmek için sürekli GitHub'ı kontrol etmeniz gerekmez.
 
-ChatGPT orkestratörün görevi agentların yaptığı işi tekrar yapmak değil, ortak kaydı okuyup geçişin güvenli olup olmadığını kontrol etmektir.
+#### 5. Görevi daha sonra nereden bulurum?
+
+ChatGPT'deki **Planlananlar** bölümünden görevi:
+
+- görebilir,
+- düzenleyebilir,
+- duraklatabilir,
+- yeniden etkinleştirebilir,
+- silebilirsiniz.
+
+#### Önemli sınır
+
+GitHub olaylı ChatGPT görevleri şu anda genel olarak repository'deki **her dosya değişikliğini** dinleyen bir sistem değildir. Desteklenen GitHub tetikleyicileri Pull Request etkinlikleri üzerinden çalışır.
+
+Bu nedenle agentların yaptığı değişikliklerin bu otomasyonu tetiklemesini istiyorsak en anlaşılır çalışma biçimi şudur:
 
 ```text
-Codex işi tamamladı
+Agent değişiklik yaptı
         ↓
-Codex handoff dosyasını güncelledi
+değişiklik PR'a gönderildi
         ↓
-current-task.md güncellendi
+GitHub PR olayı oluştu
         ↓
-ChatGPT orkestratör kaydı okudu
+ChatGPT otomatik çalıştı
         ↓
-INPUT_VERSION / OUTPUT_VERSION / STATUS / kanıt kontrolü
-        ↓
- ┌───────────────────────────────┐
- │                               │
-geçiş güvenli                sorun var
- │                               │
- ▼                               ▼
-NEXT_AGENT çalıştırılır      otomasyon durur
-ör. Claude                   insana haber verilir
+bana haber verdi
 ```
 
-Burada ChatGPT'nin baktığı temel bilgi **bizim görev dosyalarımızdır**. Pull Request yorumu, Issue veya agent sohbet belleği kanonik görev durumu olarak kullanılmaz.
-
-#### ChatGPT otomasyonu bu dosyaları nasıl takip eder?
-
-İki farklı yöntem kullanılabilir.
-
-**Yöntem 1 — Zamanlanmış / izleme görevi**
-
-ChatGPT'de GitHub uygulaması bağlandıktan sonra bir zamanlanmış görev belirli aralıklarla kendi repository'mizdeki orkestrasyon kayıtlarını kontrol edebilir.
-
-Örnek görev mantığı:
-
-```text
-KONTROL ET:
-orchestration/current-task.md
-
-EĞER:
-STATUS yeni bir aşamaya geçtiyse
-
-DOĞRULA:
-- TASK_ID doğru mu?
-- INPUT_VERSION beklenen sürüm mü?
-- gerekli handoff dosyası var mı?
-- VERIFIED alanında kanıt var mı?
-- SKIPPED_CHECKS kabul edilebilir mi?
-
-SONRA:
-- güvenliyse NEXT_AGENT / NEXT_ACTION adımını uygula;
-- insan kararı gerekiyorsa otomasyonu durdur ve bana bildir;
-- hiçbir şey değişmediyse işlem yapma.
-```
-
-Bu metin repository'deki bir workflow dosyasına yazılmaz. ChatGPT'de oluşturulan **zamanlanmış/izleme görevinin talimatıdır.** Görev, bağlı GitHub uygulamasına verilen erişim kapsamında repository bilgisini okuyabilir.
-
-**Yöntem 2 — GitHub olayı ChatGPT'yi uyandırsın**
-
-Güncel ChatGPT olayla tetiklenen GitHub görevleri desteklenen **Pull Request etkinlikleri** ile başlayabilir. Proje zaten agent değişikliklerini PR üzerinden taşıyorsa bu olay yalnızca ChatGPT'yi hemen çalıştıran bir **uyandırma sinyali** olarak kullanılabilir.
-
-Bu durumda ChatGPT'nin görevi PR'a yorum yazmak değildir:
-
-```text
-PR etkinliği oluştu
-        ↓
-ChatGPT görevi başladı
-        ↓
-orchestration/current-task.md dosyasını oku
-        ↓
-ilgili handoff kaydını oku
-        ↓
-sürüm + durum + kanıtı doğrula
-        ↓
-sıradaki agent / durma / insan bildirimi kararını ver
-```
-
-Yani:
-
-> **PR olayı tetikleyici olabilir; orkestrasyon bilgisinin kaynağı bizim görev ve handoff dosyalarımızdır.**
-
-ChatGPT'nin GitHub olay tetikleyicileri her dosya değişikliğini doğrudan dinleyen genel bir repository webhook'u değildir. Bu nedenle PR kullanılmayan bir yapıda **zamanlanmış izleme görevi** daha anlaşılır başlangıç seçeneğidir.
-
-#### İnsan ne zaman devreye girer?
-
-ChatGPT orkestratör rutin ve doğrulanmış geçişleri kendi kurallarına göre sürdürebilir. Ancak örneğin şu durumlarda akışı durdurup kullanıcıya haber vermelidir:
-
-- `INPUT_VERSION` ile güncel sürüm uyuşmuyor;
-- gerekli handoff dosyası yok;
-- doğrulama başarısız veya belirsiz;
-- `SKIPPED_CHECKS` içinde kritik bir kontrol atlanmış;
-- agent izin verilen kapsamın dışına çıkmak istiyor;
-- daha yüksek yetki gerekiyor;
-- tekrar deneme sınırı dolmuş;
-- `NEXT_AGENT` veya `NEXT_ACTION` belirsiz.
-
-Bildirim yalnızca **“hata oldu”** dememelidir. En azından `TASK_ID`, güncel sürüm, ne olduğu, kanıt, neyin denendiği ve kullanıcıdan hangi kararın beklendiği gösterilmelidir.
-
-Böylece insan her agent geçişini elle taşımak zorunda kalmaz; yalnızca otomasyonun güvenle karar veremediği noktada devreye girer.
+Bu ilk otomasyonun görevi yalnızca **değişikliği fark etmek, kısa şekilde kontrol etmek ve kullanıcıya haber vermektir.** Agentlar arasında görevi otomatik olarak devretme işlemi daha sonra ayrı bir adım olarak eklenebilir.
 
 ### 16. İlk otomasyonda yalnızca tek agent geçişini kur
 
