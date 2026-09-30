@@ -708,14 +708,18 @@ Authentication
 → required API key or supported authentication method is ready
 ```
 
-Check the GitHub CLI:
+Commands beginning with `gh` are **not entered on the GitHub website or inside a project file. They run in a command-line window on your computer.** On Windows, open **PowerShell** or **Windows Terminal**. On macOS/Linux, open **Terminal**.
+
+GitHub CLI is the tool that lets us perform GitHub operations from this command-line window. First, open Terminal/PowerShell and check whether GitHub CLI is installed and connected to your account:
 
 ```bash
 gh --version
 gh auth status
 ```
 
-If needed, authenticate with repository and workflow scopes:
+The first command checks whether GitHub CLI is installed. The second shows its GitHub authentication status.
+
+If needed, authenticate with repository and workflow scopes in the same Terminal/PowerShell window:
 
 ```bash
 gh auth login --scopes repo,workflow
@@ -723,12 +727,14 @@ gh auth login --scopes repo,workflow
 
 ### 2. Prepare the repository for Agentic Workflows
 
-Install the GitHub Agentic Workflows extension:
+Install the GitHub Agentic Workflows extension in the **same Terminal/PowerShell window**:
 
 ```bash
 gh extension install github/gh-aw
 gh aw init
 ```
+
+The first command installs the Agentic Workflows extension. The second prepares the current repository for Agentic Workflows. Before running them, make sure Terminal/PowerShell is currently inside the repository folder you want to work with.
 
 Agent workflow sources are stored under `.github/workflows/`.
 
@@ -748,13 +754,13 @@ Its top section defines **when the task starts, which agent is used, and which p
 
 The `.lock.yml` file is the compiled workflow that GitHub Actions runs.
 
-When workflow settings change, run:
+When workflow settings change, run the following from **Terminal/PowerShell opened in the repository folder**:
 
 ```bash
 gh aw compile
 ```
 
-Then send both the source `.md` and generated `.lock.yml` to GitHub.
+This generates the `.lock.yml` version that GitHub Actions runs. Then send both the source `.md` and generated `.lock.yml` to GitHub.
 
 If the workflow exists only on your computer and has not been sent to GitHub, GitHub cannot run it.
 
@@ -1156,16 +1162,27 @@ YES → next stage
 NO  → stop / record failure
 ```
 
-Failed runs can be inspected from the GitHub **Actions** page.
+A failed run can first be inspected from the **Actions** tab on the GitHub website.
 
-For Agentic Workflows, commands such as:
+For a more detailed check, you can also use **Terminal/PowerShell** on your computer. Open it in the repository folder and run:
 
 ```bash
 gh aw logs
+```
+
+to view Agentic Workflows runs. Find the **RUN_ID (run number)** for the run you want to inspect, then use:
+
+```bash
 gh aw audit <RUN_ID>
 ```
 
-can be used to review recent runs and inspect a specific run in more detail.
+and replace `<RUN_ID>` with the actual run number. For example, if the run number is `123456`:
+
+```bash
+gh aw audit 123456
+```
+
+These commands are not used to create the automation. They are used to **check how an existing automation ran and investigate problems when something goes wrong**.
 
 ### 14. Put a limit on automation cost
 
