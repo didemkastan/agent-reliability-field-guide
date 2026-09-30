@@ -49,13 +49,11 @@ Agent A dosyanın `abc123` hash değerine sahip sürümünü açıyor. Bu sırad
 
 ## Nasıl uygulanır?
 
-Bu yöntem, bir AI agent ile dosya veya kod üzerinde çalışırken görev talimatına eklenebilir. Özellikle aynı dosyanın başka bir agent, kişi veya otomasyon tarafından da değiştirilebildiği çalışmalarda kullanılabilir.
+Bu kontrol, bir AI agent dosya veya kod üzerinde çalışırken görev talimatına eklenebilir.
 
 Başlangıç için agenta şu kontrol kuralı verilebilir:
 
 > **Değişiklik yapmadan önce dosyanın güncel sürümünü ve hash bilgisini kontrol et. Değişiklikten etkilenecek ve geri dönüş için gerekli dosyaların geri yüklenebilir bir sürümünün bulunduğunu doğrula. Dosya sistemi veya Git erişimin varsa gerekli geri dönüş noktasını kendin oluştur ve oluşturulduğunu doğrula. Bu erişimin yoksa yedek alındığını varsayma; kullanıcıdan geri dönüş noktası oluşturmasını iste veya değişiklik işlemini durdur. Değişikliği kaydetmeden hemen önce dosyayı tekrar kontrol et. Sürüm veya hash değişmişse dosyanın üzerine yazma; güncel sürümü yeniden incele ve değişikliği buna göre hazırla.**
-
-Bu talimat ChatGPT, Claude, Codex veya benzeri dosya ve kod üzerinde işlem yapabilen agentlarla çalışırken görev talimatının bir parçası olarak kullanılabilir. Agentın dosya sistemi veya Git üzerinde işlem yapma yetkisi varsa yedek veya geri dönüş noktası oluşturma adımı da agent tarafından gerçekleştirilebilir. Yetkisi yoksa agent bu adımı yapılmış kabul etmemelidir.
 
 Daha otomatik iş akışlarında aynı kontrol yalnızca prompt (talimat) ile bırakılmamalıdır. Dosyanın hash veya sürüm bilgisi işlem başlamadan önce ve değişiklik kaydedilmeden hemen önce sistem tarafından karşılaştırılabilir. Değer değişmişse işlem durdurularak agentın güncel dosyayı yeniden okuması sağlanabilir.
 
