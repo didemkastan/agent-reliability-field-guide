@@ -1524,196 +1524,194 @@ gh aw compile .github/workflows/review.md
 
 çalıştırılır ve güncellenen `.md` ile `.lock.yml` GitHub'a gönderilir.
 
-### 15. İnsana ne zaman haber verileceğini de otomatikleştir
+### 15. ChatGPT orkestratörse agentlar arasındaki akışı ortak görev dosyalarından yönet
 
-Tam otomasyonun amacı insanı sistemden tamamen çıkarmak değildir. Amaç, rutin geçişleri agentlara bırakırken **karar veya müdahale gerektiren durumları doğru kişiye görünür hale getirmektir.**
+Bu rehberde ChatGPT orkestratör olarak kullanıldığında ana amaç **GitHub'daki başka bir Pull Request'e yorum bırakmak değildir.** Amaç, kendi projemizde çalışan agentların sonuçlarını ortak ve izlenebilir bir yerde tutmak; ChatGPT'nin bu kayıtları okuyarak sıradaki adımı belirlemesidir.
 
-Bu nedenle orkestrasyon akışında bir **insan bildirim / müdahale noktası** da tanımlanmalıdır.
-
-Örneğin:
-
-```text
-Agent görevi yürütüyor
-        ↓
-normal ve doğrulanmış sonuç
-        ↓
-otomasyon devam eder
-
-AMA
-
-sürüm uyuşmuyor
-veya
-doğrulama başarısız
-veya
-izin verilen kapsamın dışına çıkmak gerekiyor
-veya
-daha fazla yetki gerekiyor
-veya
-belirlenen tekrar deneme sınırı aşıldı
-        ↓
-OTOMASYONU DURDUR
-        ↓
-insana haber ver
-        ↓
-karar / onay bekle
-```
-
-İnsana haber verilmesi gereken durumlar proje riskine göre belirlenebilir. Özellikle şu durumlar iyi adaylardır:
-
-- görev başarıyla tamamlandı ve nihai sonuç hazır;
-- workflow veya agent art arda başarısız oldu;
-- `INPUT_VERSION` ile `CURRENT_VERSION` uyuşmuyor;
-- agent görev kapsamının dışına çıkmak istiyor;
-- yeni dosya, servis veya daha yüksek yetki gerekiyor;
-- doğrulama sonucu belirsiz veya başarısız;
-- otomatik tekrar deneme sınırı tükendi;
-- güvenlik açısından insan kararı gerektiren bir durum oluştu.
-
-Bildirim yalnızca **“hata oldu”** dememelidir. Karar verecek kişinin ne olduğunu anlayabilmesi için en az şu bilgileri taşımalıdır:
-
-```text
-TASK_ID
-STATUS
-CURRENT_VERSION
-WHAT_HAPPENED
-EVIDENCE
-WHAT_WAS_TRIED
-WHAT_NEEDS_HUMAN_DECISION
-SAFE_NEXT_OPTIONS
-```
+Agentların birbirlerinin sohbet belleğini görmesi gerekmez. Bunun yerine repository içinde orkestrasyona ayrılmış küçük bir alan kullanılabilir.
 
 Örneğin:
 
 ```text
-TASK_ID: UI-024
-STATUS: HUMAN_REVIEW_REQUIRED
-CURRENT_VERSION: def456
+PROJECT/
+├── orchestration/
+│   ├── current-task.md
+│   └── handoffs/
+│       ├── TASK-001-codex.md
+│       ├── TASK-001-claude.md
+│       └── TASK-001-test.md
+│
+├── src/
+└── tests/
+```
 
-WHAT_HAPPENED:
-Claude bulgusundan sonra repository sürümü değişti.
+Bu kutu bir komut değildir. Repository içinde oluşturulabilecek örnek klasör yapısını gösterir.
 
-EVIDENCE:
+Buradaki dosyaların görevi:
+
+- `orchestration/current-task.md` → görevin şu anda hangi aşamada olduğunu gösteren **kanonik görev durumu**;
+- `orchestration/handoffs/TASK-001-codex.md` → Codex'in yaptığı işin ve bıraktığı kanıtların kaydı;
+- `orchestration/handoffs/TASK-001-claude.md` → Claude incelemesinin sonucu;
+- `orchestration/handoffs/TASK-001-test.md` → test/doğrulama sonucu.
+
+Örneğin Codex işi bitirdiğinde kendi handoff kaydına şunları bırakabilir:
+
+```text
+TASK_ID: TASK-001
+SOURCE_AGENT: Codex
 INPUT_VERSION: abc123
-CURRENT_VERSION: def456
+OUTPUT_VERSION: def456
+STATUS: IMPLEMENTATION_COMPLETE
 
-WHAT_NEEDS_HUMAN_DECISION:
-Yeni sürüm üzerinde görevin yeniden başlatılması onaylanmalı mı?
+CHANGED:
+- src/navigation.py
+
+PRESERVE:
+- mevcut giriş akışı
+
+VERIFIED:
+- mevcut otomatik testler geçti
+
+SKIPPED_CHECKS:
+- görsel kontrol yapılmadı
+
+NEXT_AGENT: Claude
+NEXT_ACTION: değişikliği görev sınırlarına göre incele
 ```
 
-#### ChatGPT orkestratörse bildirim ChatGPT üzerinden de kurulabilir
+Bu kayıt Codex'in belleği değildir. **Repository'de saklanan ortak proje kaydıdır.** Bu nedenle ChatGPT, Claude veya başka bir agent aynı göreve daha sonra katıldığında önceki agentın sohbet geçmişine ihtiyaç duymaz.
 
-ChatGPT orkestratör olarak kullanılıyorsa insan bildirimini yalnız GitHub yorumuna bırakmak zorunlu değildir. Uygun hesaplarda ChatGPT'nin **olayla tetiklenen görevleri**, bağlı bir GitHub repository'sindeki desteklenen Pull Request olaylarına yanıt verebilir.
+#### ChatGPT burada ne yapar?
 
-Kurulum ChatGPT içinde yapılır:
+ChatGPT orkestratörün görevi agentların yaptığı işi tekrar yapmak değil, ortak kaydı okuyup geçişin güvenli olup olmadığını kontrol etmektir.
 
 ```text
-ChatGPT
-  ↓
-Ayarlar → Uygulamalar
-  ↓
-GitHub hesabını bağla ve repository erişimini ver
-  ↓
-Work'ü aç
-  ↓
-GitHub olayını + koşulu + ChatGPT'nin yapacağı işi tanımla
-  ↓
-Planlananlar
-  ↓
-oluşturulan görevi kontrol et
-```
-
-Bu kutu kod değildir; ChatGPT arayüzünde izlenecek yolu gösterir.
-
-Örneğin orkestratör görevinin mantığı şöyle tanımlanabilir:
-
-```text
-TETİKLEYİCİ:
-İzin verilen repository'de desteklenen bir Pull Request olayı oluştu.
-
-KONTROL:
-Sonuç insan kararı gerektiriyor mu?
-- doğrulama başarısız mı?
-- sürüm uyuşmazlığı var mı?
-- görev izin verilen kapsamın dışına çıkmak istiyor mu?
-- tekrar deneme sınırı doldu mu?
-
-EYLEM:
-Karar gerekmiyorsa sonucu kaydet.
-İnsan kararı gerekiyorsa durumu özetle ve kullanıcıya bildir.
-```
-
-Bu görev `.github/workflows/` klasörüne yazılmaz. **ChatGPT Work içinde oluşturulan olayla tetiklenen görevin Trigger (Tetikleyici), Condition (Koşul) ve Prompt (Görev talimatı) alanlarında** tanımlanır.
-
-ChatGPT görevlerinin kullanıcıya ulaşması için **Ayarlar → Bildirimler** bölümünden desteklenen push bildirimi, e-posta veya diğer bildirim seçenekleri açılabilir.
-
-Burada iki otomasyon katmanı birbirinden ayrılmalıdır:
-
-```text
-GitHub Agentic Workflows
-→ Codex / Claude / Gemini gibi agent çalışmalarını yürütür
-
-ChatGPT olayla tetiklenen görev
-→ desteklenen GitHub olayında orkestrasyon kontrolü yapabilir
-→ insana haber verebilir
-→ izin verilen bağlı araçlar destekliyorsa sonraki eylemi başlatabilir
-```
-
-ChatGPT'nin GitHub olayını görmesi sınırsız GitHub yetkisi vermez. Yalnızca bağlanan repository'ler ve verilen izinler kullanılabilir; onay gerektiren bir işlem görevi duraklatabilir.
-
-#### GitHub üzerinden bildirim
-
-Bildirimin nereye gönderileceği kullanılan sisteme göre değişebilir. **GitHub içinde kalınacaksa en basit başlangıç noktalarından biri Pull Request yorumu veya Issue oluşturmaktır.** Bunun için ilgili agentic workflow'un `.github/workflows/<ad>.md` dosyasındaki frontmatter'da izin verilen safe output tanımlanır. Örneğin PR'a yorum bırakılacaksa:
-
-```yaml
-safe-outputs:
-  add-comment:
-    max: 1
-```
-
-Bu ayar **“her durumda yorum gönder”** demek değildir; workflow'a kontrollü yorum oluşturabilme yeteneği verir. Workflow'un görev metninde hangi durumda `HUMAN_REVIEW_REQUIRED` sonucu üretileceği ayrıca tanımlanmalıdır.
-
-GitHub yorumu oluşturulduğunda bunun kişiye nasıl bildirim olarak ulaşacağı kullanıcının GitHub bildirim/abonelik ayarlarına bağlıdır. E-posta, Slack veya benzeri harici bir kanala doğrudan bildirim gönderilecekse ayrıca o kanala erişebilen bir entegrasyon gerekir.
-
-Her küçük agent hareketinde insana bildirim göndermek yerine **tamamlanma, durma, hata ve karar gerektiren eşikler** için bildirim oluşturmak daha kullanışlıdır. Aksi halde çok fazla bildirim önemli uyarıların gözden kaçmasına neden olabilir.
-
-Bu nedenle orkestrasyon yalnızca:
-
-```text
-"Sıradaki agent kim?"
-```
-
-sorusunu değil, gerektiğinde:
-
-```text
-"Burada otomasyon durmalı mı?"
-"İnsana haber verilmeli mi?"
-"Devam etmek için insan onayı gerekiyor mu?"
-```
-
-sorularını da cevaplamalıdır.
-
-### 16. İlk otomasyonda bütün sistemi birden kurma
-
-İlk hedef yalnızca tek bir geçiş olmalıdır:
-
-```text
-Codex değişikliği GitHub'a gönderdi
+Codex işi tamamladı
         ↓
-PR oluştu
+Codex handoff dosyasını güncelledi
         ↓
-Claude otomatik incelemeye başladı
+current-task.md güncellendi
+        ↓
+ChatGPT orkestratör kaydı okudu
+        ↓
+INPUT_VERSION / OUTPUT_VERSION / STATUS / kanıt kontrolü
+        ↓
+ ┌───────────────────────────────┐
+ │                               │
+geçiş güvenli                sorun var
+ │                               │
+ ▼                               ▼
+NEXT_AGENT çalıştırılır      otomasyon durur
+ör. Claude                   insana haber verilir
 ```
 
-Bu geçiş güvenilir biçimde çalıştıktan sonra:
+Burada ChatGPT'nin baktığı temel bilgi **bizim görev dosyalarımızdır**. Pull Request yorumu, Issue veya agent sohbet belleği kanonik görev durumu olarak kullanılmaz.
+
+#### ChatGPT otomasyonu bu dosyaları nasıl takip eder?
+
+İki farklı yöntem kullanılabilir.
+
+**Yöntem 1 — Zamanlanmış / izleme görevi**
+
+ChatGPT'de GitHub uygulaması bağlandıktan sonra bir zamanlanmış görev belirli aralıklarla kendi repository'mizdeki orkestrasyon kayıtlarını kontrol edebilir.
+
+Örnek görev mantığı:
+
+```text
+KONTROL ET:
+orchestration/current-task.md
+
+EĞER:
+STATUS yeni bir aşamaya geçtiyse
+
+DOĞRULA:
+- TASK_ID doğru mu?
+- INPUT_VERSION beklenen sürüm mü?
+- gerekli handoff dosyası var mı?
+- VERIFIED alanında kanıt var mı?
+- SKIPPED_CHECKS kabul edilebilir mi?
+
+SONRA:
+- güvenliyse NEXT_AGENT / NEXT_ACTION adımını uygula;
+- insan kararı gerekiyorsa otomasyonu durdur ve bana bildir;
+- hiçbir şey değişmediyse işlem yapma.
+```
+
+Bu metin repository'deki bir workflow dosyasına yazılmaz. ChatGPT'de oluşturulan **zamanlanmış/izleme görevinin talimatıdır.** Görev, bağlı GitHub uygulamasına verilen erişim kapsamında repository bilgisini okuyabilir.
+
+**Yöntem 2 — GitHub olayı ChatGPT'yi uyandırsın**
+
+Güncel ChatGPT olayla tetiklenen GitHub görevleri desteklenen **Pull Request etkinlikleri** ile başlayabilir. Proje zaten agent değişikliklerini PR üzerinden taşıyorsa bu olay yalnızca ChatGPT'yi hemen çalıştıran bir **uyandırma sinyali** olarak kullanılabilir.
+
+Bu durumda ChatGPT'nin görevi PR'a yorum yazmak değildir:
+
+```text
+PR etkinliği oluştu
+        ↓
+ChatGPT görevi başladı
+        ↓
+orchestration/current-task.md dosyasını oku
+        ↓
+ilgili handoff kaydını oku
+        ↓
+sürüm + durum + kanıtı doğrula
+        ↓
+sıradaki agent / durma / insan bildirimi kararını ver
+```
+
+Yani:
+
+> **PR olayı tetikleyici olabilir; orkestrasyon bilgisinin kaynağı bizim görev ve handoff dosyalarımızdır.**
+
+ChatGPT'nin GitHub olay tetikleyicileri her dosya değişikliğini doğrudan dinleyen genel bir repository webhook'u değildir. Bu nedenle PR kullanılmayan bir yapıda **zamanlanmış izleme görevi** daha anlaşılır başlangıç seçeneğidir.
+
+#### İnsan ne zaman devreye girer?
+
+ChatGPT orkestratör rutin ve doğrulanmış geçişleri kendi kurallarına göre sürdürebilir. Ancak örneğin şu durumlarda akışı durdurup kullanıcıya haber vermelidir:
+
+- `INPUT_VERSION` ile güncel sürüm uyuşmuyor;
+- gerekli handoff dosyası yok;
+- doğrulama başarısız veya belirsiz;
+- `SKIPPED_CHECKS` içinde kritik bir kontrol atlanmış;
+- agent izin verilen kapsamın dışına çıkmak istiyor;
+- daha yüksek yetki gerekiyor;
+- tekrar deneme sınırı dolmuş;
+- `NEXT_AGENT` veya `NEXT_ACTION` belirsiz.
+
+Bildirim yalnızca **“hata oldu”** dememelidir. En azından `TASK_ID`, güncel sürüm, ne olduğu, kanıt, neyin denendiği ve kullanıcıdan hangi kararın beklendiği gösterilmelidir.
+
+Böylece insan her agent geçişini elle taşımak zorunda kalmaz; yalnızca otomasyonun güvenle karar veremediği noktada devreye girer.
+
+### 16. İlk otomasyonda yalnızca tek agent geçişini kur
+
+İlk denemede bütün agent zincirini aynı anda otomatikleştirmek yerine yalnızca bir geçişi çalıştırmak daha güvenlidir.
+
+Örneğin ilk hedef:
+
+```text
+Codex görevi tamamladı
+        ↓
+orchestration/handoffs/TASK-001-codex.md oluştu
+        ↓
+orchestration/current-task.md
+NEXT_AGENT: Claude oldu
+        ↓
+ChatGPT orkestratör kaydı kontrol etti
+        ↓
+Claude incelemesi başlatıldı
+```
+
+Bu tek geçiş güvenilir biçimde çalıştıktan sonra sırayla:
 
 ```text
 Claude → Codex düzeltme
 Codex → Claude yeniden inceleme
-İnceleme → test
+İnceleme → normal otomatik testler
 Test → doğrulama
+Doğrulama → tamamlandı / insan kararı
 ```
 
-adımları sırayla eklenebilir.
+adımları eklenebilir.
 
 Her geçişte en az şu bilgiler korunmalıdır:
 
@@ -1722,6 +1720,7 @@ TASK_ID
 INPUT_VERSION
 CURRENT_VERSION
 SOURCE_AGENT
+STATUS
 NEXT_AGENT
 FINDINGS
 EVIDENCE
@@ -1732,9 +1731,9 @@ NEXT_ACTION
 
 Amaç yalnızca agentları sırayla çalıştırmak değildir.
 
-> **Güvenli otomasyon; doğru agentı başlatmanın yanında, doğru görevin doğru sürüm ve doğru sınırlarla bir sonraki aşamaya geçtiğini de kontrol etmelidir.**
+> **Güvenli otomasyon; doğru görevin doğru sürüm, kanıt ve sınırlarla bir sonraki agenta geçtiğini kontrol etmelidir.**
 
-> **Not:** GitHub Agentic Workflows bu rehber hazırlanırken public preview (genel önizleme) durumundadır. Engine (agent motoru), trigger (tetikleyici), permission (izin), safe output (güvenli çıktı) ve kimlik doğrulama seçenekleri kurulum sırasında güncel GitHub dokümantasyonundan tekrar kontrol edilmelidir.
+> **Not:** GitHub Agentic Workflows ve ChatGPT'nin bağlı uygulama/görev özellikleri değişebilen ürün özellikleridir. Engine (agent motoru), trigger (tetikleyici), permission (izin), safe output (güvenli çıktı), bağlı uygulama ve görev seçenekleri gerçek kurulum sırasında güncel ürün dokümantasyonundan tekrar kontrol edilmelidir.
 
 ## Ne zaman kullanılır?
 
