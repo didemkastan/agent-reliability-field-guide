@@ -354,21 +354,44 @@ RETURN_TO: ChatGPT / Orchestrator
 NEXT_AGENT: Codex
 ```
 
-There are two different routing fields here: **`RETURN_TO`** identifies who receives Gemini's result first, while **`NEXT_AGENT`** identifies the agent to which the orchestrator will route the task for validation or implementation.
+There are two different routing fields here: **`RETURN_TO`** identifies who receives Gemini's result first, while **`NEXT_AGENT`** identifies which agent should continue the task after the routing checks are complete.
 
-In this example, Gemini's response first returns to **ChatGPT / the orchestrator** (`RETURN_TO`). ChatGPT preserves the `TASK_ID`, `INPUT_VERSION`, finding, evidence, and skipped checks, prepares the next task package, and then routes it to Codex (`NEXT_AGENT`). Gemini's output is not used directly as an instruction to change code.
+Two operating modes should be kept separate in this example.
 
-#### Passing the Gemini result to Codex
+#### Manual or semi-automated handoff
 
-Simply telling Codex “Gemini found a bug, fix it” is not enough. The reviewed version and skipped checks must travel with the finding.
+If no automatic trigger has been configured between the agents, Gemini does not automatically start ChatGPT or Codex. The user performs the handoff:
 
-Example prompt:
+```text
+Gemini completes the test
+        ↓
+User gives the Gemini result to ChatGPT
+        ↓
+ChatGPT / Orchestrator
+reads TASK_ID and INPUT_VERSION
+        ↓
+checks CURRENT_VERSION in GitHub
+        ↓
+compares INPUT_VERSION ↔ CURRENT_VERSION
+        ↓
+prepares a current task package for Codex
+        ↓
+User gives the task package to Codex
+        ↓
+Codex validates the finding
+        ↓
+if needed, minimum fix + test
+        ↓
+GitHub
+```
 
-> **For TASK_ID UI-024, an external tester reported the finding below against `commit abc123`. First check the current branch/commit state in GitHub. If the current version is not the same as `abc123`, do not apply the finding directly; review the changed files again and determine whether the finding is still valid.**
+In this mode, ChatGPT is not expected to reproduce Gemini's technical finding itself. ChatGPT performs the **handoff checks**: it identifies the task and version associated with the finding, compares them with the current GitHub state, preserves the required context, and prepares a safe task package for Codex.
+
+For example, the Gemini result can be given to ChatGPT with this prompt:
+
+> **The result below came from a tester agent without direct GitHub access. First check TASK_ID and INPUT_VERSION. Retrieve the current GitHub branch/commit and record it as CURRENT_VERSION. If INPUT_VERSION and CURRENT_VERSION do not match, do not route the result to Codex as a direct implementation task; check which relevant files changed and mark the finding for revalidation. If they match, prepare the next task package for Codex without losing the finding, evidence, SKIPPED_CHECKS, PRESERVE, or LIMITATIONS. Do not change code.**
 >
-> **Try to reproduce or verify the finding against the current code and available tests. If confirmed, follow AGENTS.md and the task's PRESERVE boundaries and make the smallest necessary fix. If it cannot be confirmed, do not change the code; report the evidence instead.**
->
-> **External tester result:**
+> **Tester result:**
 >
 > ```text
 > TASK_ID: UI-024
@@ -376,9 +399,66 @@ Example prompt:
 > FINDING: The selected theme may be lost in the return flow.
 > EVIDENCE: settings_screen.py return action; no state assertion in the current test.
 > SKIPPED_CHECKS: Application not executed; other repository files not reviewed.
+> RETURN_TO: ChatGPT / Orchestrator
+> NEXT_AGENT: Codex
 > ```
+
+ChatGPT might prepare an output like this:
+
+```text
+TASK_ID: UI-024
+TESTER_INPUT_VERSION: commit abc123
+CURRENT_VERSION: commit abc123
+VERSION_STATUS: MATCH
+
+SOURCE_FINDING:
+The selected theme may be lost in the return flow.
+
+EVIDENCE:
+settings_screen.py return action;
+no state assertion in the current test.
+
+SKIPPED_CHECKS:
+- Application was not executed by the tester.
+- Other repository files were not reviewed by the tester.
+
+NEXT_AGENT: Codex
+NEXT_ACTION:
+Validate the finding against the current code.
+If confirmed, make the smallest necessary fix and complete the test.
+```
+
+This output is the **task package to give to Codex**. The external finding therefore does not turn directly into a “fix this” command; it first passes through version and context checks.
+
+#### Giving ChatGPT's prepared task to Codex
+
+In a manual or semi-automated workflow, the user gives the task package above to Codex. The instruction can be:
+
+> **The task package below was prepared by the orchestrator. First check the GitHub branch/commit you can access and compare it with CURRENT_VERSION in the package. If they do not match, reassess the task against the current version before making any change. If they match, independently validate the external tester's finding against the current code and tests. If the issue is confirmed, follow AGENTS.md and the PRESERVE boundaries and make the smallest necessary fix. If it is not confirmed, do not change the code; report the evidence instead.**
 >
 > **At the end, return CURRENT_VERSION, CHANGED, PRESERVED, VERIFIED, SKIPPED_CHECKS, and SCOPE_STATUS.**
+
+#### What does the trigger do in a fully automated handoff?
+
+In a fully automated system, the user does not need to perform the two transfers above. A **triggering mechanism** works alongside the orchestrator.
+
+```text
+Gemini produces TASK_COMPLETE
+        ↓
+Trigger delivers the result to the orchestrator
+        ↓
+Orchestrator checks GitHub CURRENT_VERSION
+        ↓
+if version and scope are valid
+        ↓
+Codex task is created / started
+        ↓
+Codex result returns to the orchestrator
+```
+
+The trigger can be an API event, webhook, queue, CI/CD step, or a task-completion event provided by the agent platform. Regardless of technology, its job is to capture **“the previous agent finished”** and deliver the result to the orchestrator. The orchestrator then checks version, scope, and authority before creating the next task.
+
+The **orchestrator** and the **trigger** are therefore not the same thing: the trigger starts the transition; the orchestrator controls what is passed, with which context, and to which agent.
 
 The receiving Codex agent does not treat the external agent's result as established fact. Its job is to **revalidate it against the current project state**:
 
