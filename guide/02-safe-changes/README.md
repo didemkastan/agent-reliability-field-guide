@@ -103,7 +103,7 @@ Dosya sayısı tek başına yeterli değildir. Aynı dosyanın içinde korunmas�
 
 Birden fazla agent aynı projede çalışıyorsa kullanıcı her yeni görevde **“önce kuralları oku”** demek zorunda kalmamalıdır. Ortak kurallar bir kez tanımlanmalı ve her agentın proje başlangıcında bu kurallara ulaşacağı yapı kurulmalıdır.
 
-Bunun için ortak kurallar tek bir **kanonik proje talimatında** tutulabilir. Örneğin:
+Bunun için ortak kurallar tek bir **kanonik proje talimatında** tutulabilir. Basit bir kurulumda `AGENTS.md` dosyası repository'nin ana klasöründe oluşturulabilir:
 
 ```text
 PROJECT/
@@ -113,6 +113,8 @@ PROJECT/
 ├── [Agent C girişi]   ← AGENTS.md kurallarına bağlanır
 └── ...
 ```
+
+Bu kutu bir Terminal komutu değildir; repository içindeki örnek dosya yapısını gösterir. `AGENTS.md` dosyasının içine ortak ve kalıcı agent kuralları normal Markdown/metin olarak yazılır.
 
 Buradaki önemli nokta dosya adından çok **tek bir ortak kural kaynağı** kullanılmasıdır. Farklı agent araçları proje talimatlarını farklı dosya veya ayarlardan yükleyebilir. Bu nedenle her agentın kendi başlangıç mekanizması ortak kurala bağlanmalıdır.
 
@@ -248,6 +250,8 @@ test_output.txt
 
 Tüm repository'yi göndermek yerine görev için gerekli dosyaların seçilmesi, hem kapsamı sınırlar hem de agentın görmediği alanlar hakkında varsayım yapmasını önler.
 
+Bu örnekte Gemini GitHub'a bağlı olmadığı için aşağıdaki paket **bir GitHub ayarı veya dosya formatı değildir**. Kullanıcı/orkestratör bu metni Gemini sohbetine prompt olarak verir ve listelenen dosyaları aynı göreve ekler. Otomatik bir dış-agent entegrasyonu kurulursa aynı alanlar API/görev mesajı içinde taşınabilir.
+
 Gemini'ye verilecek görev paketi:
 
 ```text
@@ -296,6 +300,8 @@ Sorun hâlâ geçerliyse gerekli en küçük düzeltmeyi yap.
 ```
 
 #### Gemini'ye verilecek örnek prompt
+
+Aşağıdaki metin repository'ye yazılmaz. GitHub'a bağlı olmayan Gemini'ye görev verirken **Gemini sohbet/prompt alanına** yazılır; görev paketi ve gerekli dosyalar da aynı konuşmaya eklenir.
 
 > **Ekli görev paketini ve dosyaları incele. TASK_ID ve INPUT_VERSION bilgilerini yanıtında aynen koru. Yalnızca sana verilen dosyalar ve test çıktısı üzerinden değerlendirme yap. Önce OBSERVED (Gözlemlenen), ardından INTERPRETED (Yorumlanan) bilgilerini yaz. Bir sorun bulursan hangi dosya, bölüm veya test sonucunun bunu desteklediğini belirt. Çalıştıramadığın testleri veya erişemediğin alanları SKIPPED_CHECKS altında göster. Dosyalarda değişiklik yapma. Sonucu aşağıdaki yapıyla döndür:**
 >
@@ -533,7 +539,6 @@ Bu bölümde farklı amaçlarla kod ve metin kutuları kullanılır. **Her kutu 
 - GitHub Agentic Workflows kaynak dosyaları genellikle repository içindeki `.github/workflows/<ad>.md` dosyalarıdır. Bu dosyalardaki `---` işaretleri arasındaki bölüm **frontmatter (workflow ayar bölümü)**, altındaki normal Markdown metni ise **agenta verilecek görev talimatıdır**.
 - Frontmatter içindeki trigger (tetikleyici), permission (izin), engine (agent motoru), safe output (güvenli çıktı) veya maliyet ayarı değiştirildiğinde repository klasöründeki Terminal/PowerShell'de `gh aw compile` çalıştırılarak ilgili `.lock.yml` dosyası güncellenir. Kaynak `.md` ve üretilen `.lock.yml` birlikte GitHub'a gönderilir.
 
-Böylece her teknik örnekte önce **nereye**, sonra **neden**, ardından **ne yaptığı** açıklanacaktır.
 
 ### Agentlar birbirlerinin yaptığını nasıl görür?
 
@@ -1048,6 +1053,24 @@ Bu YAML parçası **Terminal'e yazılmaz** ve tek başına ayrı bir dosya deği
 
 Diğer tarafta `.github/workflows/fix.md` dosyasının da `workflow_dispatch` ile başlatılmayı kabul edecek şekilde tanımlanmış olması gerekir. Yani `review.md` **“fix'i başlatabilirim”**, `fix.md` ise **“başka bir workflow beni başlatabilir”** tarafını oluşturur.
 
+Bunun için `.github/workflows/fix.md` dosyasının en üstündeki frontmatter'da en azından tetikleyici tarafı şu mantıkta bulunur:
+
+```markdown
+---
+on:
+  workflow_dispatch:
+
+engine: codex
+---
+
+# Fix
+
+Aktarılan görevi ve bulguyu güncel GitHub sürümünde doğrula.
+Geçerliyse izin verilen kapsam içinde gerekli en küçük düzeltmeyi hazırla.
+```
+
+Bu örnek yalnızca **fix workflow'unun dışarıdan başlatılabilmesini ve Codex engine'ini seçmeyi** gösterir. Gerçek projede ihtiyaç duyulan okuma/yazma izinleri, safe outputs ve görev inputları ayrıca tanımlanmalıdır; bu kısa örnek onları otomatik olarak sağlamaz.
+
 Akış:
 
 ```text
@@ -1085,6 +1108,17 @@ agent:fix-required
 Bu kutu yalnızca örnek etiket adını gösterir. Etiket, GitHub repository'sinin **Issues / Pull Requests label (etiket)** sistemi içinde oluşturulur; kaynak kod dosyasına yazılmaz.
 
 Bir etiketin gerçekten workflow başlatması isteniyorsa yalnız etiketi oluşturmak yetmez. İlgili workflow'un `.github/workflows/<workflow-adı>.md` dosyasındaki frontmatter'da `label_command` gibi bir tetikleyici ayrıca tanımlanmalıdır.
+
+Örneğin `agent:fix-required` etiketi `fix.md` workflow'unu başlatacaksa tetikleyici `.github/workflows/fix.md` dosyasının frontmatter'ına yazılır:
+
+```yaml
+on:
+  label_command:
+    name: agent:fix-required
+    events: [pull_request]
+```
+
+Bu YAML GitHub web sitesindeki etiket açıklamasına veya Terminal'e yazılmaz; **`fix.md` dosyasının ayar bölümüdür.**
 
 Ancak GitHub'ın varsayılan `GITHUB_TOKEN` kimliğiyle yapılan bazı otomatik yazma işlemleri yeni workflow/CI çalışmaları başlatmaz. Bu nedenle **“Claude etiketi ekledi, Codex kesin otomatik başlar”** varsayımı yapılmamalıdır.
 
