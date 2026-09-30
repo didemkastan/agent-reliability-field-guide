@@ -101,11 +101,24 @@ Dosya sayısı tek başına yeterli değildir. Aynı dosyanın içinde korunmas�
 
 ## Birden fazla agent kullanılıyorsa prompt nereye yazılır?
 
-Birden fazla agent aynı projede çalışıyorsa ortak güvenli değişiklik kurallarını her chat'e ayrı ayrı kopyalamak yerine **tek bir kalıcı proje kuralında** tutmak daha uygundur. Böylece farklı agentlara zamanla farklı kurallar verilmesi riski azalır.
+Birden fazla agent aynı projede çalışıyorsa kullanıcı her yeni görevde **“önce kuralları oku”** demek zorunda kalmamalıdır. Ortak kurallar bir kez tanımlanmalı ve her agentın proje başlangıcında bu kurallara ulaşacağı yapı kurulmalıdır.
 
-Örneğin proje içinde `AGENT_RULES.md` gibi ortak bir dosya kullanılabilir. Ancak dosyanın projede bulunması, her agentın onu otomatik olarak okuyacağı anlamına gelmez. Kullanılan her aracın hangi proje talimatını otomatik okuduğu kontrol edilmeli ve ortak kurala bu giriş noktasından ulaşması sağlanmalıdır.
+Bunun için ortak kurallar tek bir **kanonik proje talimatında** tutulabilir. Örneğin:
 
-Göreve özel bilgiler ise ortak kurala eklenmek yerine görev verilirken belirtilir:
+```text
+PROJECT/
+├── AGENTS.md          ← bütün agentlar için ortak kurallar
+├── [Agent A girişi]   ← AGENTS.md kurallarına bağlanır
+├── [Agent B girişi]   ← AGENTS.md kurallarına bağlanır
+├── [Agent C girişi]   ← AGENTS.md kurallarına bağlanır
+└── ...
+```
+
+Buradaki önemli nokta dosya adından çok **tek bir ortak kural kaynağı** kullanılmasıdır. Farklı agent araçları proje talimatlarını farklı dosya veya ayarlardan yükleyebilir. Bu nedenle her agentın kendi başlangıç mekanizması ortak kurala bağlanmalıdır.
+
+> **Bir dosyanın projede bulunması, bütün agentların onu otomatik olarak okuduğu anlamına gelmez. Kurulum sırasında her agentın ortak kuralları gerçekten yüklediği kontrol edilmelidir.**
+
+Bu bağlantı bir kez doğru kurulduktan sonra ortak kuralların her görev promptuna tekrar yazılması gerekmez. Görev sırasında yalnızca o işe ait bilgiler verilir:
 
 ```text
 TASK:
@@ -121,9 +134,31 @@ DO NOT:
 - Başka dosyaları değiştirme.
 ```
 
-Bu yapıda **kalıcı kurallar** bütün agentlar için ortak kalır; **TASK, CHANGE, PRESERVE ve DO NOT** gibi göreve özel bilgiler ise yalnızca ilgili iş için verilir.
+Böylece ayrım nettir:
 
-Otomatik bir çoklu-agent sisteminde aynı yaklaşım orkestratör üzerinden uygulanabilir. Orkestratör ortak kuralları ve göreve özel sınırları işi yapacak agenta aktarır. İş başka bir agenta devredildiğinde de ilgili kapsam ve korunacak alanlar görev devri kaydıyla birlikte taşınmalıdır.
+```text
+ORTAK / KALICI
+AGENTS.md
+- güvenli değişiklik kuralları
+- doğrulama kuralları
+- korunması gereken genel ilkeler
+
+GÖREVE ÖZEL
+TASK / CHANGE / PRESERVE / DO NOT
+- yalnızca mevcut işin sınırları
+```
+
+Çoklu-agent iş akışında başlangıç kontrolü de yapılabilir:
+
+```text
+INSTRUCTION_SOURCE: AGENTS.md
+INSTRUCTION_VERSION: v1.3
+INSTRUCTIONS_LOADED: YES
+```
+
+Bu kayıt, agentın yalnızca kurallara erişebildiğini varsaymak yerine hangi talimat kaynağıyla çalıştığını görünür hale getirir. Kurallar değiştirildiğinde sürüm veya hash (dosyanın belirli bir sürümünü tanımlayan dijital değer) gibi ek bilgiler de kullanılabilir.
+
+Otomatik bir çoklu-agent sisteminde bu işi orkestratör üstlenebilir: ortak kuralları ve göreve özel sınırları işi yapacak agenta aktarır. Görev başka bir agenta devredildiğinde de ilgili kapsam ve korunacak alanlar görev devri kaydıyla birlikte taşınır.
 
 ## Otomasyonda kullanım
 
