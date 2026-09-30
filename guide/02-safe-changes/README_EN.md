@@ -160,40 +160,107 @@ This makes the instruction source visible instead of merely assuming that the ag
 
 In an automated multi-agent system, the orchestrator can handle this step by passing the shared rules and task-specific boundaries to the agent performing the work. If the task is handed to another agent, the relevant scope and protected areas travel with the handoff record.
 
-### Example: task flow with ChatGPT, Codex, Claude, and GitHub
+### Example: task flow with ChatGPT, Codex, Claude, Gemini, and GitHub
 
-Suppose ChatGPT, Codex, and Claude are used together on the same software project. GitHub is not an agent in this example; it is the shared workspace where project files, versions, and change history are maintained.
+Several agents can work together on the same software project with different roles. For example:
 
-A simple division of work could look like this:
+- **ChatGPT — Orchestrator:** Analyzes the request, prepares the task, defines its boundaries, and routes the next step to the appropriate agent.
+- **Codex — Developer:** Makes the required code change on the current project version and records what changed.
+- **Claude — Review / correction:** Independently reviews the change and feeds errors, omissions, or out-of-scope changes back into the correction loop.
+- **Gemini — Tester / QA:** Independently tests the implemented solution and looks for functional, regression, or interface issues.
+- **GitHub — Shared workspace:** It is not an agent. It is the canonical workspace for the current code, change history, shared rules, and task records.
+
+Example flow:
+
+```text
+                 ChatGPT
+               ORCHESTRATOR
+       TASK / CHANGE / PRESERVE / DO NOT
+                     │
+                     ▼
+                   Codex
+                 DEVELOPER
+                 code change
+                     │
+                     ▼
+                   GitHub
+              SHARED WORKSPACE
+        code + version + task records
+                     │
+                     ▼
+                   Claude
+             REVIEW / CORRECTION
+                     │
+          if needed, correction loop
+                 back to Codex
+                     │
+                     ▼
+                   GitHub
+                     │
+                     ▼
+                   Gemini
+                 TESTER / QA
+```
+
+These roles do not have to be fixed; they can change according to the project and task. What matters is that each agent's responsibility, working version, and destination for its result are explicit.
+
+#### An agent without direct access to the shared workspace
+
+Not every agent may be able to connect directly to GitHub. This does not mean that the agent cannot participate in the project.
+
+> **An agent does not need to be connected to GitHub to participate in the project.**
+
+For example, suppose the Gemini tester in the workflow above does not have direct GitHub access. The orchestrator can provide the current information required for the test as a task package:
+
+```text
+TASK_ID:
+INPUT_VERSION:
+
+TASK:
+FILES / CONTEXT:
+
+RULES:
+PRESERVE:
+DO NOT:
+
+EXPECTED_OUTPUT:
+LIMITATIONS:
+
+NEXT_AGENT:
+NEXT_ACTION:
+```
+
+The package states which version the agent is working from, which files or information it can see, what it should test, what must be preserved, and what it cannot access. The external agent returns its result with the same `TASK_ID` and `INPUT_VERSION`.
 
 ```text
 GitHub
-└── Canonical project files + AGENTS.md
-              ↓
-ChatGPT
-└── Analyzes the request and prepares the task boundary.
-    TASK / CHANGE / PRESERVE / DO NOT
-              ↓
-Codex
-└── Receives the rules and task boundary.
-    Makes the required code change.
-    Produces CHANGED / PRESERVED / SCOPE_STATUS.
-              ↓
+shared workspace
+     │
+     ▼
+ChatGPT / Orchestrator
+prepares the current task package
+     │
+     ▼
+Gemini
+tests without direct GitHub access
+     │
+     ▼
+TEST RESULT
+TASK_ID + INPUT_VERSION
+     │
+     ▼
+Orchestrator / connected agent
+compares the result with the current version
+     │
+     ▼
 GitHub
-└── The change and current version are recorded in the shared workspace.
-              ↓
-Claude
-└── Receives the current version and handoff record.
-    Reviews the change and the areas that should have been preserved.
-    Reports missing or unexpected changes.
-              ↓
-GitHub
-└── The verified result and current project state are preserved.
 ```
 
-In this example, ChatGPT handles task preparation and routing, Codex performs the implementation, and Claude provides a second review. These roles do not have to be fixed; they can change according to the task. What matters is that every agent receives the same canonical rules and the current task state.
+The result should not be applied to the project immediately. First compare the `INPUT_VERSION` given to the external agent with the current version in GitHub. If the project changed in the meantime, reassess the result against the current version.
 
-For this flow to run automatically, an **orchestrator or triggering mechanism** is also required. Giving multiple agents access to the same GitHub repository does not, by itself, cause one agent to start automatically when another finishes.
+This allows an agent without direct access to the shared workspace to participate in the project in a controlled way. What matters more than direct GitHub access is **current task context, version information, explicit authority boundaries, and structured handoff.**
+
+For the workflow to advance automatically between agents, an **orchestrator or triggering mechanism** is still required. Giving multiple agents access to the same GitHub repository does not, by itself, cause one agent to start automatically when another finishes.
 
 ## Use in automation
 
