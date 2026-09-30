@@ -99,6 +99,32 @@ Dosya sayısı tek başına yeterli değildir. Aynı dosyanın içinde korunmas�
 > - **UNEXPECTED_CHANGES:** Beklenmeyen değişiklikler; yoksa `none`
 > - **SCOPE_STATUS:** Değişiklik verilen görev sınırları içinde kaldı mı?
 
+## Birden fazla agent kullanılıyorsa prompt nereye yazılır?
+
+Birden fazla agent aynı projede çalışıyorsa ortak güvenli değişiklik kurallarını her chat'e ayrı ayrı kopyalamak yerine **tek bir kalıcı proje kuralında** tutmak daha uygundur. Böylece farklı agentlara zamanla farklı kurallar verilmesi riski azalır.
+
+Örneğin proje içinde `AGENT_RULES.md` gibi ortak bir dosya kullanılabilir. Ancak dosyanın projede bulunması, her agentın onu otomatik olarak okuyacağı anlamına gelmez. Kullanılan her aracın hangi proje talimatını otomatik okuduğu kontrol edilmeli ve ortak kurala bu giriş noktasından ulaşması sağlanmalıdır.
+
+Göreve özel bilgiler ise ortak kurala eklenmek yerine görev verilirken belirtilir:
+
+```text
+TASK:
+- README.md içindeki eski bağlantıyı düzelt.
+
+CHANGE:
+- İlgili bağlantı
+
+PRESERVE:
+- Diğer metinler ve başlıklar
+
+DO NOT:
+- Başka dosyaları değiştirme.
+```
+
+Bu yapıda **kalıcı kurallar** bütün agentlar için ortak kalır; **TASK, CHANGE, PRESERVE ve DO NOT** gibi göreve özel bilgiler ise yalnızca ilgili iş için verilir.
+
+Otomatik bir çoklu-agent sisteminde aynı yaklaşım orkestratör üzerinden uygulanabilir. Orkestratör ortak kuralları ve göreve özel sınırları işi yapacak agenta aktarır. İş başka bir agenta devredildiğinde de ilgili kapsam ve korunacak alanlar görev devri kaydıyla birlikte taşınmalıdır.
+
 ## Otomasyonda kullanım
 
 Otomatik bir iş akışında beklenen dosyalar görev başlamadan önce tanımlanabilir. İşlem sonunda sistem gerçekten değişen dosyaları bu listeyle karşılaştırabilir.
