@@ -93,14 +93,10 @@ For example, an automated system could produce an output like this:
 
 Because each piece of information is stored separately, the system can distinguish the action from the verification result. If the `VERIFIED` field is empty or states that verification was not performed, the task should not be treated as verified only because the agent reported “done.”
 
-### When should the user apply this rule?
-
-Use it especially when asking an agent to **change something or demonstrate that something works correctly**. Examples include file or code changes, tests, builds, configuration changes, tool use, and work that will later be handed to another agent.
-
-For important tasks, also record the file or version that was checked and the environment in which verification was performed.
-
 ## When to use it
 
-This distinction is especially useful when an agent changes files, runs tests, creates outputs, uses another tool, or hands work to another agent.
+This rule is especially useful when asking an agent to **change something or demonstrate that something works correctly**. Examples include file or code changes, tests, builds, configuration changes, tool use, and work that will later be handed to another agent.
+
+For important tasks, also record the file or version that was checked and the environment in which verification was performed.
 
 For low-risk and easily reversible changes, a shorter check may be enough. For example, after correcting a typo in a README file, checking that the updated text appears correctly may be sufficient; running a comprehensive test suite may not be necessary.
