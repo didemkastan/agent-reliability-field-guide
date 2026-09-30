@@ -523,6 +523,318 @@ Otomatik bir iş akışında beklenen dosyalar görev başlamadan önce tanımla
 
 Beklenmeyen bir dosya değişmişse işlem doğrudan kabul edilmek yerine incelemeye alınabilir. Daha sıkı kontrollerde dosya içindeki değişen satırlar da izin verilen alanlarla karşılaştırılabilir.
 
+### İnsan olmadan agentlar arası geçiş nasıl kurulur?
+
+Bir agentın GitHub repository'sine erişebilmesi ile başka bir agentı otomatik olarak başlatabilmesi aynı şey değildir. İnsan olmadan geçiş için üç ayrı katman gerekir:
+
+```text
+GitHub olayı
+PR / push / label / workflow sonucu
+        ↓
+TETİKLEYİCİ
+GitHub Actions
+        ↓
+YÖNLENDİRME KURALI
+hangi durum → hangi görev?
+        ↓
+AGENT ÇALIŞTIRMA
+Codex / Claude / Gemini
+        ↓
+YAPILANDIRILMIŞ SONUÇ
+        ↓
+GitHub'da yeni olay
+        ↓
+sıradaki aşama
+```
+
+Agentın gerçekten otomatik çalışabilmesi için ayrıca programatik bir çalışma yolu bulunmalıdır. Bu bir API, CLI, GitHub entegrasyonu veya agent platformunun desteklediği başka bir çalışma mekanizması olabilir. Yalnızca repository'ye erişim verilmiş olması bu mekanizmanın var olduğu anlamına gelmez.
+
+GitHub'ın **Agentic Workflows** özelliği bu yapıyı GitHub Actions üzerinde kurmak için kullanılabilen güncel seçeneklerden biridir. Bu özellik halen **public preview** durumundadır; bu nedenle kurulum ve sözdizimi zaman içinde değişebilir. Güncel sürümde GitHub Copilot, Claude Code, OpenAI Codex ve Google Gemini gibi agent motorları workflow içinde seçilebilmektedir.
+
+### Örnek: Codex → Claude → Codex otomatik döngüsü
+
+Örneğin ilk görev Codex'e verilsin, Claude değişikliği incelesin ve sorun bulursa Codex düzeltmeyi otomatik olarak devralsın:
+
+```text
+Görev
+  ↓
+Codex / Yazılımcı
+  ↓
+Pull Request oluşturur
+  ↓
+PR opened / synchronize
+  ↓
+GitHub Actions tetiklenir
+  ↓
+Claude / Review
+  ↓
+ ┌──────────────────────┐
+ │                      │
+sorun var             uygun
+ │                      │
+ ▼                      ▼
+agent:fix-required   agent:review-passed
+ │
+ ▼
+GitHub Actions
+ │
+ ▼
+Codex / Düzeltme
+ │
+ ▼
+PR branch güncellenir
+ │
+ ▼
+synchronize olayı
+ │
+ └──────────────→ Claude tekrar inceler
+```
+
+Burada kullanıcı **“Codex bitti, şimdi Claude'a geç”** veya **“Claude hata buldu, Codex'e geri dön”** mesajlarını taşımaz. Geçişi GitHub olayları ve workflow kuralları yapar.
+
+### 1. Repository'yi agentic workflow için hazırlama
+
+GitHub CLI kurulu ve repository için yetkilendirilmiş olmalıdır. GitHub Agentic Workflows uzantısı daha sonra kurulabilir:
+
+```bash
+gh extension install github/gh-aw
+gh aw init
+```
+
+Workflow kaynakları `.github/workflows/` altında Markdown olarak tutulur. Frontmatter bölümünde tetikleyici, agent motoru, izinler ve güvenli çıktılar; Markdown gövdesinde ise agentın görevi tanımlanır.
+
+Örneğin:
+
+```text
+.github/workflows/
+├── implement.md
+├── implement.lock.yml
+├── review.md
+├── review.lock.yml
+├── fix.md
+└── fix.lock.yml
+```
+
+`.lock.yml` dosyaları `gh aw compile` tarafından üretilir. Workflow frontmatter'ı değiştirildiğinde yeniden derlenmeli ve kaynak Markdown dosyasıyla birlikte commit edilmelidir:
+
+```bash
+gh aw compile
+```
+
+### 2. Agent kimlik bilgilerini güvenli biçimde tanımlama
+
+Agent motorunun gerektirdiği kimlik bilgisi repository dosyalarına yazılmaz. GitHub **Settings → Secrets and variables → Actions** altında secret olarak tutulur.
+
+Güncel GitHub Agentic Workflows kurulumunda örneğin:
+
+```text
+Codex   → CODEX_API_KEY veya OPENAI_API_KEY
+Claude  → ANTHROPIC_API_KEY
+Gemini  → GEMINI_API_KEY
+```
+
+Secret'ın gerçek değeri `AGENTS.md`, workflow dosyası, görev paketi veya kaynak kod içine yazılmamalıdır.
+
+### 3. Claude review workflow'unu PR olayıyla tetikleme
+
+Örneğin Codex'in oluşturduğu veya güncellediği PR, Claude review workflow'unu otomatik başlatabilir:
+
+```markdown
+---
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+engine: claude
+
+permissions:
+  contents: read
+  pull-requests: read
+
+safe-outputs:
+  add-comment:
+  add-labels:
+    allowed: ["agent:fix-required", "agent:review-passed"]
+---
+
+# Review
+
+PR değişikliğini AGENTS.md ve görev sınırlarına göre incele.
+
+Kontrol et:
+- İstenen değişiklik yapılmış mı?
+- PRESERVE alanları korunmuş mu?
+- Kapsam dışı dosya değişmiş mi?
+- Test veya doğrulama eksiği var mı?
+
+Sorun varsa bulguyu kanıtıyla birlikte yaz ve
+`agent:fix-required` etiketini iste.
+
+Sorun yoksa yapılan kontrolleri belirt ve
+`agent:review-passed` etiketini iste.
+```
+
+Buradaki `opened` ilk PR oluşturulduğunda, `synchronize` ise PR branch'ine yeni commit geldiğinde review'u yeniden tetikler.
+
+### 4. Claude'un bulgusu Codex'i nasıl otomatik başlatır?
+
+Review sonucunda kullanılan etiket bir **durum bilgisi** olmanın yanında sıradaki workflow için tetikleyici olabilir.
+
+Örneğin Codex düzeltme workflow'u yalnız `agent:fix-required` etiketi geldiğinde çalıştırılabilir:
+
+```markdown
+---
+on:
+  label_command:
+    name: agent:fix-required
+    events: [pull_request]
+
+engine: codex
+
+permissions:
+  contents: read
+  pull-requests: read
+
+safe-outputs:
+  push-to-pull-request-branch:
+---
+
+# Fix
+
+Tetiklenen PR üzerindeki review bulgularını incele.
+
+Önce:
+1. PR'nin güncel HEAD commit'ini INPUT_VERSION olarak kaydet.
+2. Review bulgusunun bu sürümde hâlâ geçerli olduğunu doğrula.
+3. AGENTS.md içindeki ortak kuralları ve PRESERVE sınırlarını uygula.
+
+Bulgu doğrulanırsa yalnızca gerekli en küçük düzeltmeyi yap.
+İlgili testleri çalıştır.
+Doğrulanmayan bir bulgu için kod değiştirme.
+
+Sonuçta CHANGED, PRESERVED, VERIFIED,
+SKIPPED_CHECKS ve SCOPE_STATUS bilgilerini üret.
+```
+
+Codex PR branch'ini güncellediğinde yeni commit bir `synchronize` olayı oluşturur. Bu olay yukarıdaki Claude review workflow'unu tekrar çalıştırır. Böylece düzeltme döngüsü kullanıcı mesaj taşımadan devam edebilir.
+
+### 5. Review geçtiğinde test aşamasına geçme
+
+Claude `agent:review-passed` durumunu ürettiğinde bu da ayrı bir test workflow'unu tetikleyebilir:
+
+```text
+agent:review-passed
+        ↓
+GitHub Actions
+        ↓
+test / build / lint
+        ↓
+PASS → VERIFIED
+FAIL → agent:fix-required veya ayrı hata görevi
+```
+
+Deterministik testler için ayrıca bir AI agent kullanmak zorunlu değildir. Birim testleri, lint, build ve benzeri kesin kontroller normal GitHub Actions adımlarıyla çalıştırılabilir. Agent yalnızca yorumlama veya bağlamsal değerlendirme gereken yerde kullanılabilir.
+
+### 6. Tetikleyici ile orkestratörü ayır
+
+Bu yapıda:
+
+```text
+GitHub olayı
+= "bir şey oldu"
+
+Tetikleyici
+= "ilgili workflow'u başlat"
+
+Orkestrasyon kuralı
+= "bu sonuçtan sonra hangi aşama çalışmalı?"
+
+Agent
+= "kendisine verilen işi yap"
+```
+
+Örneğin `agent:fix-required` etiketi **“Codex'i çalıştır”** anlamına gelen bir komut olarak kullanılabilir. `agent:review-passed` ise test aşamasını başlatabilir.
+
+Ayrı bir ChatGPT orkestratörü kullanılacaksa onun da programatik olarak çağrılabileceği bir entegrasyon gerekir. Böyle bir entegrasyon yoksa GitHub içindeki otomatik yönlendirmeyi GitHub Actions ve workflow durumları üstlenebilir. Bu ayrım, “ChatGPT orkestratör” rolü ile “GitHub üzerinde gerçekten çalışan otomasyon” mekanizmasını birbirine karıştırmayı önler.
+
+### 7. Agentlara doğrudan sınırsız yazma yetkisi verme
+
+Otomasyon kurulurken mümkün olan en düşük yetki kullanılmalıdır. Agentın doğrudan `main` branch'ini değiştirmesi yerine değişikliği PR üzerinden üretmesi daha kontrollü bir akış sağlar.
+
+GitHub Agentic Workflows içindeki **safe outputs (güvenli çıktılar)** agentın önerdiği yazma işlemini ayrı ve izin kontrollü bir adımda uygulayabilir. Örneğin `create-pull-request`, `push-to-pull-request-branch` ve sınırlı etiket işlemleri kullanılabilir.
+
+Dosya kapsamı da sınırlandırılabilir:
+
+```text
+ALLOWED_FILES:
+- src/navigation/**
+- tests/navigation/**
+
+PROTECTED:
+- AGENTS.md
+- .github/**
+- dependency / package dosyaları
+```
+
+Agentın görev için gerek duymadığı güvenlik, workflow veya talimat dosyalarını değiştirebilmesi otomatik olarak açılmamalıdır.
+
+### 8. Aynı görevin iki kez çalışmasını engelle
+
+Aynı PR veya TASK_ID için iki agent çalışmasının çakışması veri kaybına veya birbirinin değişikliğini ezmesine yol açabilir. GitHub Actions tarafında `concurrency` veya agentic workflow'un uygun kilitleme mekanizması kullanılarak aynı görev için eşzamanlı çalışmalar sınırlandırılabilir.
+
+Mantık:
+
+```text
+CONCURRENCY_KEY:
+TASK_ID veya PR_NUMBER
+
+UI-024 çalışıyor
+        ↓
+ikinci UI-024 geldi
+        ↓
+beklet / iptal et / yeniden değerlendir
+```
+
+### 9. İlk otomasyonda tüm sistemi birden kurma
+
+İlk denemede dört agentı birbirine bağlamak yerine tek bir geçiş otomatikleştirilmelidir:
+
+```text
+Codex PR oluşturdu
+        ↓
+Claude otomatik review yaptı
+```
+
+Bu geçiş güvenilir biçimde çalıştıktan sonra:
+
+```text
+Claude → Codex düzeltme
+Codex → Claude yeniden review
+Review → test
+Test → doğrulama
+```
+
+adımları sırayla eklenebilir.
+
+Her yeni geçişte en az şu bilgiler korunmalıdır:
+
+```text
+TASK_ID
+INPUT_VERSION
+CURRENT_VERSION
+SOURCE_AGENT
+NEXT_AGENT
+FINDINGS
+EVIDENCE
+PRESERVE
+SKIPPED_CHECKS
+NEXT_ACTION
+```
+
+Böylece otomasyon yalnızca agentları sırayla çalıştırmaz; **hangi görevin, hangi sürümden, hangi kanıt ve sınırlarla bir sonraki aşamaya geçtiğini de korur.**
+
+> **Not:** GitHub Agentic Workflows bu rehber hazırlanırken public preview durumundadır. Kurulumdan önce güncel GitHub dokümantasyonundaki engine, trigger, permission ve safe-output seçenekleri tekrar kontrol edilmelidir.
+
 ## Ne zaman kullanılır?
 
 Bu yöntem özellikle mevcut bir dosya veya kod üzerinde sınırlı bir düzeltme yapılırken, çalışan bölümlerin korunması gerektiğinde veya agentın yalnızca belirli dosyalara dokunması istendiğinde kullanışlıdır.
