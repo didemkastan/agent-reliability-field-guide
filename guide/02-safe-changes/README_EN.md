@@ -103,7 +103,7 @@ File count alone is not enough. A protected section may have changed inside an e
 
 When several agents work on the same project, the user should not have to say **“read the rules first”** at the start of every task. Shared rules should be defined once, and each agent should be connected to them through its project startup mechanism.
 
-The shared rules can be kept in one **canonical project instruction**. For example:
+The shared rules can be kept in one **canonical project instruction**. In a simple setup, create `AGENTS.md` in the repository root:
 
 ```text
 PROJECT/
@@ -113,6 +113,8 @@ PROJECT/
 ├── [Agent C entry]    ← connected to the AGENTS.md rules
 └── ...
 ```
+
+This box is not a Terminal command; it illustrates the repository file structure. Write shared, persistent agent rules as normal Markdown/text inside `AGENTS.md`.
 
 The important point is not the file name itself but having **one shared source of rules**. Different agent tools may load project instructions from different files or settings, so each agent's startup mechanism should be connected to the shared rules.
 
@@ -248,6 +250,8 @@ test_output.txt
 
 Selecting only the files needed for the task, instead of sending the entire repository, limits the scope and helps prevent the agent from making assumptions about areas it cannot see.
 
+Because Gemini is not connected to GitHub in this example, the package below is **not a GitHub setting or required file format**. The user/orchestrator pastes this text into the Gemini task/chat and attaches the listed files to the same task. If an automated external-agent integration is later built, the same fields can travel in the API/task message.
+
 Task package for Gemini:
 
 ```text
@@ -296,6 +300,8 @@ If it is still valid, make the smallest necessary fix.
 ```
 
 #### Example prompt for Gemini
+
+The text below is not written into the repository. When assigning the task to a Gemini instance without GitHub access, paste it into the **Gemini chat/prompt field** and attach the task package and required files to the same conversation.
 
 > **Review the attached task package and files. Preserve TASK_ID and INPUT_VERSION exactly in your response. Base your assessment only on the supplied files and test output. Write OBSERVED first and INTERPRETED separately. If you find an issue, identify the file, section, or test result that supports it. Put tests you could not run and areas you could not access under SKIPPED_CHECKS. Do not modify the files. Return the result using this structure:**
 >
@@ -1036,6 +1042,24 @@ This YAML is **not entered in Terminal** and is not a separate file. It belongs 
 
 The `.github/workflows/fix.md` file must also be configured to accept `workflow_dispatch`. In other words, `review.md` says **“I may start fix”**, while `fix.md` says **“another workflow may start me.”**
 
+At minimum, the trigger side of the frontmatter at the top of `.github/workflows/fix.md` follows this pattern:
+
+```markdown
+---
+on:
+  workflow_dispatch:
+
+engine: codex
+---
+
+# Fix
+
+Validate the transferred task and finding against the current GitHub version.
+If still valid, prepare the smallest correction within the allowed scope.
+```
+
+This example only shows **how the fix workflow can be started externally and how the Codex engine is selected**. Real projects must separately define the required read/write permissions, safe outputs, and task inputs; this short example does not grant them automatically.
+
 Flow:
 
 ```text
@@ -1073,6 +1097,17 @@ agent:fix-required
 This box only shows an example label name. Create the label in the repository's **Issues / Pull Requests label** system; do not write it into source code.
 
 If applying the label should actually start a workflow, creating the label alone is not enough. A trigger such as `label_command` must also be defined in the frontmatter of the relevant `.github/workflows/<workflow-name>.md` file.
+
+For example, if the `agent:fix-required` label should start the `fix.md` workflow, put the trigger in the frontmatter of `.github/workflows/fix.md`:
+
+```yaml
+on:
+  label_command:
+    name: agent:fix-required
+    events: [pull_request]
+```
+
+Do not enter this YAML in the GitHub label description or Terminal; it is **configuration inside `fix.md`**.
 
 There is an important limitation: some writes performed with GitHub's default `GITHUB_TOKEN` do not start new workflow or CI runs. Do not assume **“Claude added a label, therefore Codex will definitely start.”**
 
