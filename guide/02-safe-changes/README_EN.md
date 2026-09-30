@@ -1209,7 +1209,101 @@ max-ai-credits: 500
 
 Choose a real limit based on the model and expected workload rather than copying the example value blindly.
 
-### 15. Start with one small automated handoff
+### 15. Automate when the human should be notified
+
+The goal of full automation is not to remove the human from the system completely. The goal is to let agents handle routine transitions while **making situations that require a decision or intervention visible to the right person.**
+
+The orchestration flow should therefore include a **human notification / intervention point**.
+
+For example:
+
+```text
+Agent is working
+        ↓
+normal, verified result
+        ↓
+automation continues
+
+BUT
+
+version mismatch
+or
+verification failed
+or
+the task needs to leave its allowed scope
+or
+more authority is required
+or
+the retry limit was reached
+        ↓
+STOP AUTOMATION
+        ↓
+notify the human
+        ↓
+wait for decision / approval
+```
+
+The exact notification conditions depend on project risk. Good candidates include:
+
+- the task completed successfully and the final result is ready;
+- a workflow or agent failed repeatedly;
+- `INPUT_VERSION` does not match `CURRENT_VERSION`;
+- an agent needs to leave the assigned scope;
+- a new file, service, or higher permission is required;
+- verification is uncertain or failed;
+- the automatic retry limit is exhausted;
+- a security-sensitive situation requires a human decision.
+
+A notification should not merely say **“something failed.”** It should contain enough information for the person to make a decision:
+
+```text
+TASK_ID
+STATUS
+CURRENT_VERSION
+WHAT_HAPPENED
+EVIDENCE
+WHAT_WAS_TRIED
+WHAT_NEEDS_HUMAN_DECISION
+SAFE_NEXT_OPTIONS
+```
+
+For example:
+
+```text
+TASK_ID: UI-024
+STATUS: HUMAN_REVIEW_REQUIRED
+CURRENT_VERSION: def456
+
+WHAT_HAPPENED:
+The repository version changed after Claude's finding.
+
+EVIDENCE:
+INPUT_VERSION: abc123
+CURRENT_VERSION: def456
+
+WHAT_NEEDS_HUMAN_DECISION:
+Should the task be restarted against the new version?
+```
+
+Where the notification is sent depends on the system. A GitHub Issue, Pull Request comment, or another configured notification channel can be used. Email, Slack, or another external channel requires a separate integration that can access that channel.
+
+Rather than notifying a human about every small agent action, notifications are more useful at **completion, stop, failure, and decision-required thresholds**. Too many notifications can hide the important ones.
+
+Orchestration should therefore answer not only:
+
+```text
+"Which agent is next?"
+```
+
+but, when needed:
+
+```text
+"Should automation stop here?"
+"Should the human be notified?"
+"Is human approval required before continuing?"
+```
+
+### 16. Start with one small automated handoff
 
 Do not connect every agent at once.
 
