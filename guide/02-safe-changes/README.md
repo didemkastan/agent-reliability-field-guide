@@ -232,6 +232,175 @@ NEXT_ACTION:
 
 Bu pakette agentın hangi sürüm üzerinde çalıştığı, hangi dosya veya bilgileri gördüğü, neyi test edeceği, neleri koruması gerektiği ve hangi alanlara erişemediği açıkça belirtilir. Dışarıdaki agent da sonucunu aynı `TASK_ID` ve `INPUT_VERSION` ile geri verir.
 
+### Doldurulmuş örnek: GitHub'a bağlı olmayan tester
+
+Örneğin bir ekran geçişinde yapılan değişikliğin mevcut davranışı bozup bozmadığını kontrol etmek istiyoruz.
+
+Gemini'ye yalnızca görev için gerekli olan **güncel sürümdeki** dosyalar eklenir:
+
+```text
+navigation.py
+settings_screen.py
+tests/test_navigation.py
+test_output.txt
+```
+
+Tüm repository'yi göndermek yerine görev için gerekli dosyaların seçilmesi, hem kapsamı sınırlar hem de agentın görmediği alanlar hakkında varsayım yapmasını önler.
+
+Gemini'ye verilecek görev paketi:
+
+```text
+TASK_ID: UI-024
+INPUT_VERSION: commit abc123
+
+TASK:
+Ayarlar ekranından geri dönüş davranışını incele.
+Mevcut ekran geçişlerinde regresyon riski olup olmadığını kontrol et.
+
+FILES / CONTEXT:
+- navigation.py
+- settings_screen.py
+- tests/test_navigation.py
+- test_output.txt
+
+RULES:
+- Yalnızca verilen dosya ve test çıktısına dayan.
+- Gözlem ile yorumu birbirinden ayır.
+- Yapamadığın kontrolleri açıkça belirt.
+
+PRESERVE:
+- Mevcut çalışan ekran geçişleri
+- Ayarlar dışındaki navigasyon davranışları
+
+DO NOT:
+- Dosyalarda değişiklik yapma.
+- Görmediğin repository içeriğini kontrol edilmiş kabul etme.
+- GitHub'daki güncel sürümü gördüğünü varsayma.
+
+EXPECTED_OUTPUT:
+- Bulunan sorunlar
+- Sorunu destekleyen dosya/satır veya test kanıtı
+- Önerilen sonraki işlem
+- Yapılan ve yapılamayan kontroller
+
+LIMITATIONS:
+- GitHub'a doğrudan erişim yok.
+- Yalnızca eklenen dosyalar ve test çıktısı görülebilir.
+
+NEXT_AGENT: Codex
+NEXT_ACTION:
+Bulguyu GitHub'daki güncel sürüm üzerinde doğrula.
+Sorun hâlâ geçerliyse gerekli en küçük düzeltmeyi yap.
+```
+
+#### Gemini'ye verilecek örnek prompt
+
+> **Ekli görev paketini ve dosyaları incele. TASK_ID ve INPUT_VERSION bilgilerini yanıtında aynen koru. Yalnızca sana verilen dosyalar ve test çıktısı üzerinden değerlendirme yap. Önce OBSERVED (Gözlemlenen), ardından INTERPRETED (Yorumlanan) bilgilerini yaz. Bir sorun bulursan hangi dosya, bölüm veya test sonucunun bunu desteklediğini belirt. Çalıştıramadığın testleri veya erişemediğin alanları SKIPPED_CHECKS altında göster. Dosyalarda değişiklik yapma. Sonucu aşağıdaki yapıyla döndür:**
+>
+> ```text
+> TASK_ID:
+> INPUT_VERSION:
+> 
+> OBSERVED:
+> INTERPRETED:
+> 
+> FINDINGS:
+> EVIDENCE:
+> 
+> VERIFIED:
+> SKIPPED_CHECKS:
+> 
+> RECOMMENDED_ACTION:
+> NEXT_AGENT:
+> ```
+
+Gemini örneğin şöyle bir bulgu döndürebilir:
+
+```text
+TASK_ID: UI-024
+INPUT_VERSION: commit abc123
+
+OBSERVED:
+settings_screen.py içindeki geri dönüş işlemi selected_theme değerini
+yeniden oluşturuyor. test_navigation.py bu durumu kontrol etmiyor.
+
+INTERPRETED:
+Ayarlar ekranından geri dönüldüğünde seçilen tema bilgisinin
+kaybolma riski var.
+
+FINDINGS:
+- Geri dönüş akışında durum bilgisinin korunması kontrol edilmeli.
+- Mevcut test bu senaryoyu kapsamıyor.
+
+EVIDENCE:
+- settings_screen.py: geri dönüş işlemi
+- tests/test_navigation.py: ilgili durum kontrolü bulunmuyor
+
+VERIFIED:
+- Verilen üç kaynak dosya ve test çıktısı incelendi.
+
+SKIPPED_CHECKS:
+- Uygulama çalıştırılmadı.
+- Repository'nin diğer dosyaları incelenmedi.
+
+RECOMMENDED_ACTION:
+Güncel GitHub sürümünde davranışı yeniden üret.
+Sorun doğrulanırsa en küçük düzeltmeyi yap ve regresyon testi ekle.
+
+NEXT_AGENT: Codex
+```
+
+Bu yanıt doğrudan kod değişikliği talimatı olarak kullanılmaz. Önce **ChatGPT / orkestratöre** geri verilir. Orkestratör `TASK_ID`, `INPUT_VERSION`, bulgu, kanıt ve yapılmayan kontrolleri koruyarak sonucu projeye erişimi olan sıradaki agenta aktarır.
+
+#### Gemini sonucunu Codex'e aktarma
+
+Codex'e yalnızca “Gemini hata buldu, düzelt” demek yeterli değildir. Bulguyla birlikte hangi sürümün incelendiği ve hangi kontrollerin yapılmadığı da aktarılmalıdır.
+
+Örnek prompt:
+
+> **TASK_ID UI-024 için dış tester aşağıdaki bulguyu `commit abc123` üzerinde bildirdi. Önce GitHub'daki güncel branch/commit durumunu kontrol et. Güncel sürüm `abc123` ile aynı değilse bulguyu doğrudan uygulama; değişen dosyaları yeniden incele ve bulgunun hâlâ geçerli olup olmadığını doğrula.**
+>
+> **Bulguyu güncel kod üzerinde yeniden üretmeye veya mevcut testlerle doğrulamaya çalış. Sorun doğrulanırsa AGENTS.md kurallarına ve görevdeki PRESERVE sınırlarına uyarak gerekli en küçük düzeltmeyi yap. Sorun doğrulanmazsa kodu değiştirme ve kanıtıyla birlikte bildir.**
+>
+> **Dış tester sonucu:**
+>
+> ```text
+> TASK_ID: UI-024
+> INPUT_VERSION: commit abc123
+> FINDING: Geri dönüş akışında seçilen tema bilgisinin kaybolma riski var.
+> EVIDENCE: settings_screen.py geri dönüş işlemi; mevcut testte durum kontrolü yok.
+> SKIPPED_CHECKS: Uygulama çalıştırılmadı; repository'nin diğer dosyaları incelenmedi.
+> ```
+>
+> **İşlem sonunda CURRENT_VERSION, CHANGED, PRESERVED, VERIFIED, SKIPPED_CHECKS ve SCOPE_STATUS bilgilerini döndür.**
+
+Bilgiyi alan Codex'in görevi dış agentın sonucunu doğru kabul etmek değil, **güncel proje üzerinde yeniden doğrulamaktır**:
+
+```text
+Gemini bulgusu
+TASK_ID + INPUT_VERSION
+        ↓
+ChatGPT / Orkestratör
+bilgiyi ve sınırları korur
+        ↓
+Codex
+CURRENT_VERSION kontrolü
+        ↓
+bulguyu yeniden doğrular
+        ↓
+doğrulanmadı ──→ değişiklik yapma, sonucu bildir
+        │
+     doğrulandı
+        ↓
+minimum düzeltme
+        ↓
+test / diff / kapsam kontrolü
+        ↓
+GitHub
+```
+
+Bu yöntem, GitHub'a bağlı olmayan agentın projeye değer katmasını sağlar; ancak dış agentın bulgusunu doğrudan proje gerçeği veya otomatik değişiklik yetkisi haline getirmez.
+
 ```text
 GitHub
 ortak çalışma alanı
