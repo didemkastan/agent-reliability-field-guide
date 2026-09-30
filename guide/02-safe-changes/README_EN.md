@@ -766,15 +766,79 @@ If the workflow exists only on your computer and has not been sent to GitHub, Gi
 
 ### 3. Do not put agent keys in the code
 
-Secrets required by Codex, Claude, or Gemini should not be written into normal repository files.
+If an AI engine such as Codex, Claude, or Gemini uses an API key, the real key should **not be written into repository files, source code, or normal workflow text.** Store it in GitHub's **Actions secrets** area.
 
-Store them in GitHub under:
+#### Where does the key come from?
 
-**Settings → Secrets and variables → Actions**
+Create an API key in the account for the AI service you use:
 
-as repository secrets.
+```text
+Codex   → API key from your OpenAI account
+Claude  → API key from your Anthropic account
+Gemini  → API key from Google AI Studio
+```
 
-Current Agentic Workflows authentication commonly uses:
+Then store that value in GitHub as a secret.
+
+#### Where do you enter it in GitHub?
+
+Open the repository where the automation will run on the GitHub website, then follow:
+
+```text
+Repository
+   ↓
+Settings
+   ↓
+Secrets and variables
+   ↓
+Actions
+   ↓
+New repository secret
+```
+
+The page has two important fields:
+
+```text
+Name
+→ the name the workflow uses to find the key
+
+Secret
+→ the real API key obtained from the AI provider
+```
+
+For Claude:
+
+```text
+Name:
+ANTHROPIC_API_KEY
+
+Secret:
+[your real key from the Anthropic account]
+```
+
+For Codex:
+
+```text
+Name:
+OPENAI_API_KEY
+
+Secret:
+[your real key from the OpenAI account]
+```
+
+For Gemini:
+
+```text
+Name:
+GEMINI_API_KEY
+
+Secret:
+[your real key from Google AI Studio]
+```
+
+Finally, select **Add secret**.
+
+The current basic secret names for GitHub Agentic Workflows are:
 
 ```text
 Codex   → OPENAI_API_KEY or CODEX_API_KEY
@@ -782,9 +846,43 @@ Claude  → ANTHROPIC_API_KEY
 Gemini  → GEMINI_API_KEY
 ```
 
-Never put the real key value in `AGENTS.md`, a workflow, a task package, or source code.
+Codex accepts both `CODEX_API_KEY` and `OPENAI_API_KEY`; if both are present, `CODEX_API_KEY` takes precedence.
 
-These credentials authenticate the AI engine. Permissions to read files, update a PR, or start another workflow are controlled separately through GitHub permissions.
+#### How does the workflow use the key?
+
+The basic flow is:
+
+```text
+Create a key with the AI provider
+        ↓
+store it in GitHub Actions Secrets
+        ↓
+workflow runs
+        ↓
+GitHub securely supplies the secret during the run
+        ↓
+the AI engine authenticates
+```
+
+The real key therefore does not appear in normal repository files.
+
+Do **not** put the real key in:
+
+```text
+AGENTS.md
+normal workflow text
+task packages
+README files
+source code
+commit messages
+Issue / Pull Request comments
+```
+
+Keys can also be stored from Terminal/PowerShell, but this guide uses the GitHub web interface as the primary path for beginners.
+
+> **GitHub Copilot can work differently:** With organization-backed GitHub Copilot usage, the `copilot-requests: write` permission can remove the need for a separate AI-provider API key. Recheck the current authentication method for the selected engine and account setup.
+
+The API key here is used to **authenticate to the AI service**. Permissions to read repository files, update a PR, add comments, or start another workflow are controlled separately through GitHub permissions and workflow configuration.
 
 ### 4. How does Claude see the change after Codex finishes?
 
