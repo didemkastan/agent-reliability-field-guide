@@ -517,7 +517,7 @@ Bu sayede ortak çalışma alanına doğrudan erişemeyen bir agent da kontroll�
 
 Bu akışın agentlar arasında kendiliğinden ilerlemesi için ayrıca bir **orkestratör veya tetikleme mekanizması** gerekir. Agentların aynı GitHub repository'sine erişebilmesi, tek başına bir agentın işi bitirdiğinde diğerinin otomatik olarak başlayacağı anlamına gelmez.
 
-## Otomasyonda kullanım
+## Güvenli Agent Geçişi ve Otomasyon Kurulumu
 
 Otomatik bir iş akışında beklenen dosyalar görev başlamadan önce tanımlanabilir. İşlem sonunda sistem gerçekten değişen dosyaları bu listeyle karşılaştırabilir.
 
