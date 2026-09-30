@@ -1544,9 +1544,9 @@ On the GitHub authorization screen, grant access to the repository you want Chat
 
 This allows ChatGPT to read information from the authorized repository.
 
-#### 2. Open Work in ChatGPT
+#### 2. Open your saved project in ChatGPT and start Work
 
-Open **Work** in ChatGPT.
+Open the **existing project** you use for your GitHub project in ChatGPT. Then start **Work**.
 
 When creating a new task, describe what you want to monitor in normal language.
 
