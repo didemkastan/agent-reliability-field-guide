@@ -8,7 +8,7 @@ Published sections can be opened by clicking their titles.
 2. [**Agent Handoffs**](guide/03-agent-handoffs/README_EN.md) — Transfer work to another agent together with the information it needs.
 3. [**Handoff Receipt Template**](patterns/handoff-receipt_EN.md) — A ready-to-use structure for recording a handoff.
 4. [**Verification**](guide/04-verification/README_EN.md) — Understand the difference between reporting “done” and actually verifying the result.
-5. [**Safe Changes and Agent Automation**](guide/02-safe-changes/README_EN.md) — Keep changes within the assigned scope and safely automate agent-to-agent handoffs through GitHub.
+5. **Safe Changes and Agent Automation** — Being revised.
 6. **Retries** — Coming soon.
 7. **Memory & Context** — Coming soon.
 8. **Security & Authority** — Coming soon.
