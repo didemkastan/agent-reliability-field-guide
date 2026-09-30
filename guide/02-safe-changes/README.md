@@ -523,6 +523,18 @@ Buraya kadar görevlerin agentlar arasında hangi bilgilerle aktarılması gerek
 
 Bu bölümdeki amaç, yalnızca birkaç workflow dosyası oluşturmak değildir. Önce **agentların birbirlerinin yaptığı işi nasıl gördüğünü**, sonra **GitHub'ın sıradaki agentı nasıl başlattığını** anlamak gerekir.
 
+### Bu bölümdeki kutular nasıl okunmalı?
+
+Bu bölümde farklı amaçlarla kod ve metin kutuları kullanılır. **Her kutu bir yere yazılacak ayar değildir.**
+
+- ```text``` kutuları çoğunlukla akışı veya örnek görev kaydını anlatır. Altında açıkça “şu dosyaya yazın” denmiyorsa bunları kopyalamanız gerekmez.
+- ```bash``` kutuları bilgisayarınızdaki **Terminal / PowerShell** içinde çalıştırılan komutlardır.
+- ```markdown``` ve ```yaml``` kutuları gerçek bir workflow ayarı gösteriyorsa, örneğin hemen üstünde **hangi dosyaya yazılacağı** belirtilir.
+- GitHub Agentic Workflows kaynak dosyaları genellikle repository içindeki `.github/workflows/<ad>.md` dosyalarıdır. Bu dosyalardaki `---` işaretleri arasındaki bölüm **frontmatter (workflow ayar bölümü)**, altındaki normal Markdown metni ise **agenta verilecek görev talimatıdır**.
+- Frontmatter içindeki trigger (tetikleyici), permission (izin), engine (agent motoru), safe output (güvenli çıktı) veya maliyet ayarı değiştirildiğinde repository klasöründeki Terminal/PowerShell'de `gh aw compile` çalıştırılarak ilgili `.lock.yml` dosyası güncellenir. Kaynak `.md` ve üretilen `.lock.yml` birlikte GitHub'a gönderilir.
+
+Böylece her teknik örnekte önce **nereye**, sonra **neden**, ardından **ne yaptığı** açıklanacaktır.
+
 ### Agentlar birbirlerinin yaptığını nasıl görür?
 
 En önemli nokta şudur:
@@ -886,9 +898,7 @@ Buradaki API anahtarı **AI hizmetine kimlik doğrulamak** içindir. Agentın Gi
 
 ### 4. Codex işi bitirdiğinde Claude değişikliği nasıl görür?
 
-Codex'in yalnızca **“işim bitti”** demesi yeterli değildir.
-
-Değişikliğin GitHub'a ulaşması gerekir:
+Codex'in yalnızca **“işim bitti”** demesi yeterli değildir. Değişiklik commit/branch/Pull Request yoluyla GitHub'a ulaşmalıdır.
 
 ```text
 Codex değişikliği yaptı
@@ -902,11 +912,17 @@ Claude workflow'u başladı
 Claude PR'ın güncel kodunu ve değişikliklerini okudu
 ```
 
-Pull Request ile çalışan bir workflow'da GitHub Agentic Workflows varsayılan olarak ilgili repository'yi çalışma ortamına alır; PR olayıyla çalışıyorsa PR'ın güncel branch'ini de çalışma bağlamına getirir.
+Yukarıdaki kutu yalnızca akışı gösterir; herhangi bir dosyaya yazılmaz.
 
-Bu nedenle Claude, Codex'in belleğine bakmaz. **GitHub'daki kaydedilmiş değişikliğe bakar.**
+Claude'un bir Pull Request açıldığında otomatik başlaması isteniyorsa bunun için **gerçek bir workflow dosyası oluşturulur**. Bu örnekte dosya:
 
-Örnek tetikleyici:
+```text
+.github/workflows/review.md
+```
+
+olacaktır. Dosyayı repository içinde siz oluşturabilirsiniz veya repository'ye erişebilen bir coding agenttan oluşturmasını isteyebilirsiniz.
+
+Aşağıdaki örnek **`.github/workflows/review.md` dosyasının içeriğidir**:
 
 ```markdown
 ---
@@ -939,15 +955,36 @@ Kontrol et:
 Bulguları kanıtlarıyla birlikte yaz.
 ```
 
-Burada:
+Bu dosyanın iki bölümü vardır:
 
 ```text
-opened
-= PR ilk açıldığında çalış
+--- ile --- arasındaki bölüm
+→ GitHub'a workflow'un ne zaman ve nasıl çalışacağını söyler.
 
-synchronize
-= PR'a yeni commit geldiğinde tekrar çalış
+# Review ile başlayan bölüm
+→ Claude'a çalıştığında ne yapacağını söyler.
 ```
+
+Örnekteki ayarların anlamı:
+
+- `on: pull_request` → bu workflow Pull Request olaylarını takip eder.
+- `opened` → PR ilk açıldığında workflow'u başlatır.
+- `synchronize` → aynı PR'a yeni commit gönderildiğinde workflow'u yeniden başlatır.
+- `engine: claude` → bu görevi Claude engine'inin çalıştıracağını belirtir.
+- `contents: read` ve `pull-requests: read` → Claude'un kodu ve PR bilgisini okuyabilmesi için okuma izinlerini tanımlar.
+- `safe-outputs: add-comment` → agentın sonucunun kontrollü biçimde PR yorumu olarak yazılabilmesine izin verir.
+
+**Neden bu dosyayı oluşturuyoruz?** Çünkü Claude'un GitHub'da sürekli bekleyip yeni PR'ları kendiliğinden fark ettiği varsayılmaz. Bu workflow, GitHub'a açıkça **“PR açılırsa veya bu PR'a yeni commit gelirse Claude incelemesini başlat”** kuralını verir.
+
+Frontmatter oluşturulduğu veya değiştirildiği için repository klasöründe Terminal/PowerShell açıp:
+
+```bash
+gh aw compile .github/workflows/review.md
+```
+
+çalıştırılır. Bunun sonucunda oluşan `review.lock.yml` ile kaynak `review.md` birlikte commit edilip GitHub'a gönderilir. GitHub Actions'ın çalıştırdığı dosya derlenmiş `.lock.yml` sürümüdür.
+
+Pull Request olayı geldiğinde workflow ilgili GitHub bağlamını kullanır. Bu nedenle Claude, Codex'in belleğine bakmaz; **GitHub'da kaydedilmiş PR ve kod değişikliğini okur.**
 
 ### 5. Her geçişte sürümü yeniden kontrol et
 
@@ -985,25 +1022,18 @@ Bu kontrol otomasyon içinde de korunmalıdır.
 
 ### 6. Claude'un sonucu Codex'i nasıl başlatır?
 
-Burada iki farklı yöntem birbirine karıştırılmamalıdır.
+Claude'un bir sorun bulması, Codex'in kendiliğinden çalışacağı anlamına gelmez. GitHub'a **hangi workflow'un sırada başlayacağını** ayrıca söylemek gerekir.
 
-#### Yöntem A — Workflow'u doğrudan başlatmak
+#### Yöntem A — Sonraki workflow'u doğrudan başlatmak
 
-Agentlar arası açık bir otomasyon zinciri kurmak için bir workflow diğer izin verilen workflow'u **dispatch-workflow (workflow başlatma)** ile çağırabilir.
-
-Mantık:
+Bu örnekte iki ayrı dosya vardır:
 
 ```text
-Claude incelemeyi bitirdi
-        ↓
-sorun buldu
-        ↓
-fix workflow'unu başlat
-        ↓
-Codex çalıştı
+.github/workflows/review.md  → Claude incelemesi
+.github/workflows/fix.md     → Codex düzeltmesi
 ```
 
-Örneğin review workflow'unda yalnızca izin verilen `fix` workflow'unun başlatılmasına izin verilebilir:
+`review.md` içindeki frontmatter'a, Claude'un gerektiğinde yalnızca `fix` workflow'unu başlatabilmesine izin veren şu ayar eklenir:
 
 ```yaml
 safe-outputs:
@@ -1012,42 +1042,63 @@ safe-outputs:
     max: 1
 ```
 
-`fix` workflow'u da `workflow_dispatch` ile çalışmayı kabul eder.
+Bu YAML parçası **Terminal'e yazılmaz** ve tek başına ayrı bir dosya değildir. `.github/workflows/review.md` dosyasının en üstündeki `---` işaretleri arasındaki ayar bölümüne eklenir.
 
-Bu yöntem agentlar arası yönlendirmeyi açık hale getirir: **Claude sonucu → fix workflow → Codex.**
+`workflows: [fix]` yalnızca `fix` adlı workflow'un çağrılmasına izin verir. `max: 1` ise bu çalışmada en fazla bir kez böyle bir geçiş yapılmasına izin verir.
 
-Görevle birlikte `TASK_ID`, PR numarası, incelenen commit ve bulgu gibi bilgiler de sonraki workflow'a aktarılmalıdır.
+Diğer tarafta `.github/workflows/fix.md` dosyasının da `workflow_dispatch` ile başlatılmayı kabul edecek şekilde tanımlanmış olması gerekir. Yani `review.md` **“fix'i başlatabilirim”**, `fix.md` ise **“başka bir workflow beni başlatabilir”** tarafını oluşturur.
+
+Akış:
+
+```text
+review.md → Claude sorun buldu
+        ↓
+dispatch-workflow
+        ↓
+fix.md başlatıldı
+        ↓
+Codex görevi aldı
+```
+
+Bu akış kutusu açıklama amaçlıdır; dosyaya kopyalanmaz.
+
+Geçişte yalnızca “sorun var” bilgisi taşınmamalıdır. `TASK_ID`, PR numarası, Claude'un incelediği commit, bulgu ve kanıt gibi bilgiler `fix` workflow'una aktarılmalıdır. Böylece Codex hangi görevin hangi sürümüne ait bulguyu aldığını bilir.
+
+`review.md` veya `fix.md` frontmatter'ı değiştirildikten sonra Terminal/PowerShell'de ilgili workflow yeniden derlenir:
+
+```bash
+gh aw compile .github/workflows/review.md
+gh aw compile .github/workflows/fix.md
+```
+
+Oluşan `.lock.yml` dosyaları da kaynak `.md` dosyalarıyla birlikte GitHub'a gönderilir.
 
 #### Yöntem B — Etiketi durum veya komut olarak kullanmak
 
-GitHub etiketi de kullanılabilir:
+GitHub etiketi bir durumu göstermek için kullanılabilir:
 
 ```text
 agent:fix-required
 = düzeltme gerekiyor
 ```
 
-`label_command` kullanıldığında belirli bir etiket workflow'u başlatan tek kullanımlık komut gibi davranabilir.
+Bu kutu yalnızca örnek etiket adını gösterir. Etiket, GitHub repository'sinin **Issues / Pull Requests label (etiket)** sistemi içinde oluşturulur; kaynak kod dosyasına yazılmaz.
 
-Ancak burada önemli bir ayrıntı vardır: GitHub'ın varsayılan `GITHUB_TOKEN` kimliğiyle yapılan bazı otomatik yazma işlemleri yeni workflow/CI çalışmaları başlatmaz. Bu davranış otomasyonların kendi kendini sonsuza kadar tetiklemesini önlemek içindir.
+Bir etiketin gerçekten workflow başlatması isteniyorsa yalnız etiketi oluşturmak yetmez. İlgili workflow'un `.github/workflows/<workflow-adı>.md` dosyasındaki frontmatter'da `label_command` gibi bir tetikleyici ayrıca tanımlanmalıdır.
 
-Bu nedenle **“Claude etiketi ekledi, Codex kesin otomatik başlar”** varsayımı yapılmamalıdır.
+Ancak GitHub'ın varsayılan `GITHUB_TOKEN` kimliğiyle yapılan bazı otomatik yazma işlemleri yeni workflow/CI çalışmaları başlatmaz. Bu nedenle **“Claude etiketi ekledi, Codex kesin otomatik başlar”** varsayımı yapılmamalıdır.
 
-Etiket veya agent tarafından oluşturulan PR/commit üzerinden yeni bir CI zinciri başlatılacaksa kullanılan token ve tetikleme yöntemi ayrıca kontrol edilmelidir.
-
-Agentic Workflows içinde PR oluşturma veya PR branch'ine yapılan güvenli yazmaların yeni CI çalıştırması isteniyorsa bunun için uygun bir CI tetikleme kimliği yapılandırılabilir. Alternatif olarak agentlar arası geçiş için doğrudan `dispatch-workflow` kullanılabilir.
-
-Başlangıç için daha anlaşılır model:
+Başlangıçta daha kolay izlenen yöntem şudur:
 
 ```text
 DURUMU GÖSTER
 → yorum / etiket
 
-SIRADAKİ AGENTI BAŞLAT
-→ dispatch-workflow
+SIRADAKİ AGENTI GERÇEKTEN BAŞLAT
+→ review.md içindeki dispatch-workflow ayarı
 ```
 
-Böylece “durumu göstermek” ile “başka bir agentı gerçekten çalıştırmak” birbirine karışmaz.
+İlk satır insana durumu görünür kılar; ikinci satır ise teknik olarak sonraki workflow'u başlatır.
 
 ### 7. Codex bulguyu körü körüne uygulamamalı
 
@@ -1069,7 +1120,9 @@ Codex önce güncel GitHub sürümünü kontrol etmelidir:
 
 Ancak bundan sonra gerekiyorsa en küçük düzeltme yapılır.
 
-Örnek görev:
+Bu bilgilerin aşağıdaki gibi yazılması **GitHub'ın kendi ayarı değildir**. Bunlar Codex'e verilecek görev kaydıdır. Manuel kullanımda Codex promptuna eklenebilir; otomatik kullanımda ise `fix.md` workflow'una input/görev bağlamı olarak taşınabilir.
+
+Örnek görev kaydı:
 
 ```text
 TASK_ID: UI-024
@@ -1154,13 +1207,19 @@ Type check geçti mi?
 
 Bunlar için bir AI agentın kodu okuyup karar vermesine gerek yoktur. Mevcut test komutları, scriptler veya **GitHub Actions** bu kontrolleri otomatik olarak çalıştırabilir.
 
-Örneğin proje zaten şu komutu kullanıyorsa:
+Örneğin Python projesi testleri zaten `pytest` ile çalıştırıyorsa, geliştirici bunu kendi bilgisayarında repository klasöründeki Terminal/PowerShell'de manuel olarak çalıştırabilir:
 
 ```bash
 pytest
 ```
 
-GitHub Actions aynı komutu otomatik çalıştırabilir ve komutun başarılı olup olmadığına göre akışı devam ettirebilir.
+Otomasyonda ise `pytest` komutunu her seferinde insanın Terminal'e yazması beklenmez. Komut, repository içindeki normal bir **GitHub Actions test workflow'una** eklenir; örneğin:
+
+```text
+.github/workflows/tests.yml
+```
+
+Bu `tests.yml`, AI agent talimatı olan `review.md` veya `fix.md` ile aynı şey değildir. `tests.yml` GitHub Actions'a **“kod geldiğinde şu kesin test komutunu çalıştır”** der. Böylece GitHub testi otomatik çalıştırır ve başarılı/başarısız sonucunu üretir.
 
 Mantık:
 
@@ -1288,7 +1347,7 @@ Codex
 → PR branch'ine kontrollü biçimde gönder
 ```
 
-Dosya sınırı da doğrudan tanımlanabilir:
+Görev sınırı ayrıca açıkça yazılabilir:
 
 ```text
 ALLOWED_FILES:
@@ -1300,6 +1359,10 @@ PROTECTED:
 - .github/**
 - dependency / package dosyaları
 ```
+
+Bu kutu **GitHub'ın yerleşik bir izin ayarı değildir**. `ALLOWED_FILES` ve `PROTECTED` burada agenta verilen görev talimatının alanlarıdır. Manuel akışta agent promptuna, otomatik akışta ise ilgili `review.md` / `fix.md` dosyasının görev metnine veya taşınan görev kaydına yazılır.
+
+Bu talimat agentın ne yapması gerektiğini sınırlar; tek başına teknik erişim kontrolü sağlamaz. Kritik alanların gerçekten değiştirilememesi gerekiyorsa GitHub permissions, branch protection, safe outputs ve kullanılan araçların gerçek izinleriyle ayrıca teknik sınır uygulanmalıdır.
 
 Agentın görev için gerek duymadığı workflow, güvenlik, talimat veya bağımlılık dosyalarını değiştirebilmesi otomatik olarak açılmamalıdır.
 
@@ -1321,7 +1384,17 @@ eski çalışma / yeni çalışma politikası kontrol edilir
 çakışan iki değişiklik aynı anda uygulanmaz
 ```
 
-PR tabanlı agentic workflow'larda yeni commit geldiğinde eski ve artık güncel olmayan çalışmanın iptal edilmesi gibi kontroller de kullanılabilir.
+PR tabanlı Agentic Workflows güncel olmayan çalışmaların çakışmasını azaltan concurrency (eşzamanlı çalışma) kontrolleri uygular. Özel bir kural tanımlamak gerekiyorsa `concurrency` ayarı ilgili agentic workflow'un, örneğin `.github/workflows/review.md` dosyasının **frontmatter** bölümüne yazılır; Terminal'e yazılmaz.
+
+Örneğin yalnız en güncel çalışmanın devam etmesi istenen özel bir durumda:
+
+```yaml
+concurrency:
+  group: review-${{ github.ref }}
+  cancel-in-progress: true
+```
+
+Bu örnek ancak projenin istenen çalışma sırasına uygunsa kullanılmalıdır. `cancel-in-progress: true`, aynı gruptaki yeni çalışma başladığında eski çalışmanın iptal edilmesini ister. Frontmatter değiştiği için sonrasında `gh aw compile .github/workflows/review.md` çalıştırılarak derlenmiş workflow güncellenir.
 
 ### 13. Bir adım başarısız olursa zinciri devam ettirme
 
@@ -1379,15 +1452,30 @@ EVET → normal test / script / GitHub Actions
 HAYIR → yorumlama gerekiyorsa AI agent
 ```
 
-Agentic Workflows çalışma başına AI kullanım sınırı tanımlamayı ve kullanım kayıtlarını incelemeyi de destekler.
+Agentic Workflows çalışma başına AI kullanım sınırı tanımlamayı da destekler.
 
-Örneğin:
+Bu ayar **Terminal'e veya GitHub Settings ekranına yazılmaz**. Sınır hangi agentic workflow için geçerliyse o dosyanın, örneğin `.github/workflows/review.md` dosyasının en üstündeki **frontmatter** bölümüne eklenir:
 
 ```yaml
+---
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+engine: claude
 max-ai-credits: 500
+---
 ```
 
-Bu değer gerçek projede kullanılmadan önce seçilen modelin maliyeti ve istenen görev büyüklüğüne göre ayarlanmalıdır.
+`max-ai-credits: 500`, bu workflow'un tek bir çalışması için AI kullanım bütçesine üst sınır koyan bir güvenlik ayarıdır. Buradaki `500` yalnızca örnektir; gerçek değer seçilen model ve görev büyüklüğüne göre belirlenmelidir.
+
+Frontmatter değiştiği için sonrasında Terminal/PowerShell'de:
+
+```bash
+gh aw compile .github/workflows/review.md
+```
+
+çalıştırılır ve güncellenen `.md` ile `.lock.yml` GitHub'a gönderilir.
 
 ### 15. İnsana ne zaman haber verileceğini de otomatikleştir
 
@@ -1465,7 +1553,17 @@ WHAT_NEEDS_HUMAN_DECISION:
 Yeni sürüm üzerinde görevin yeniden başlatılması onaylanmalı mı?
 ```
 
-Bildirimin nereye gönderileceği kullanılan sisteme göre değişebilir. GitHub üzerinde Issue, Pull Request yorumu veya belirlenmiş başka bir bildirim kanalı kullanılabilir. E-posta, Slack veya benzeri harici bir kanal kullanılacaksa ayrıca o kanala erişebilen bir entegrasyon gerekir.
+Bildirimin nereye gönderileceği kullanılan sisteme göre değişebilir. **GitHub içinde kalınacaksa en basit başlangıç noktalarından biri Pull Request yorumu veya Issue oluşturmaktır.** Bunun için ilgili agentic workflow'un `.github/workflows/<ad>.md` dosyasındaki frontmatter'da izin verilen safe output tanımlanır. Örneğin PR'a yorum bırakılacaksa:
+
+```yaml
+safe-outputs:
+  add-comment:
+    max: 1
+```
+
+Bu ayar **“her durumda yorum gönder”** demek değildir; workflow'a kontrollü yorum oluşturabilme yeteneği verir. Workflow'un görev metninde hangi durumda `HUMAN_REVIEW_REQUIRED` sonucu üretileceği ayrıca tanımlanmalıdır.
+
+GitHub yorumu oluşturulduğunda bunun kişiye nasıl bildirim olarak ulaşacağı kullanıcının GitHub bildirim/abonelik ayarlarına bağlıdır. E-posta, Slack veya benzeri harici bir kanala doğrudan bildirim gönderilecekse ayrıca o kanala erişebilen bir entegrasyon gerekir.
 
 Her küçük agent hareketinde insana bildirim göndermek yerine **tamamlanma, durma, hata ve karar gerektiren eşikler** için bildirim oluşturmak daha kullanışlıdır. Aksi halde çok fazla bildirim önemli uyarıların gözden kaçmasına neden olabilir.
 
