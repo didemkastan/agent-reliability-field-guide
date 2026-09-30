@@ -87,7 +87,17 @@ File count alone is not enough. A protected section may have changed inside an e
 
 ## Usable prompt
 
-> **Make only the changes required to complete the assigned task. Do not modify unrelated files, text, configuration, or dependencies. Do not alter areas marked for preservation. If you notice an additional issue, report it instead of fixing it automatically. At the end, check which files and sections changed. If anything changed outside the task scope, identify it and do not leave it unreviewed.**
+> **Before starting, define the scope of the requested change: identify which files or sections may change and what must be preserved. Make only the smallest change needed to complete the assigned task. Do not modify unrelated files, text, configuration, dependencies, or existing working behavior.**
+>
+> **If you notice another issue outside the scope while working, do not fix it automatically; report it separately. If completing the task requires going beyond the scope defined at the start, state this before continuing and explain why the additional change is necessary.**
+>
+> **When the task is complete, compare the actual changes with the original scope. Check which files and sections changed and, when possible, review the diff for unexpected modifications. Confirm that protected areas remained unchanged. If anything changed outside the scope, do not treat it as part of the task; report it clearly and revert it if it is not required.**
+>
+> **Finish with a short record:**
+> - **CHANGED:** What was actually changed
+> - **PRESERVED:** What was checked and confirmed unchanged
+> - **UNEXPECTED_CHANGES:** Unexpected changes; use `none` if there are none
+> - **SCOPE_STATUS:** Whether the change stayed within the assigned scope
 
 ## Use in automation
 
