@@ -886,9 +886,7 @@ The API key here is used to **authenticate to the AI service**. Permissions to r
 
 ### 4. How does Claude see the change after Codex finishes?
 
-Codex saying **“done”** is not enough.
-
-The change must reach GitHub:
+Codex saying **“done”** is not enough. The change must reach GitHub through a commit, branch, or Pull Request.
 
 ```text
 Codex made the change
@@ -902,11 +900,17 @@ Claude workflow started
 Claude read the current PR code and changes
 ```
 
-For a Pull Request workflow, GitHub Agentic Workflows checks out the relevant repository for the run and, for a PR event, can work from the PR head context.
+The box above only illustrates the flow; it is not pasted into a file.
 
-Claude is not reading Codex's memory. **It is reading the recorded change in GitHub.**
+If Claude should start automatically when a Pull Request is opened, create a **real workflow source file**. In this example the file is:
 
-Example trigger:
+```text
+.github/workflows/review.md
+```
+
+You can create this file in the repository yourself or ask a coding agent with repository access to create it.
+
+The following is the **content of `.github/workflows/review.md`**:
 
 ```markdown
 ---
@@ -939,15 +943,36 @@ Check:
 Report findings with evidence.
 ```
 
-Here:
+The file has two parts:
 
 ```text
-opened
-= run when the PR is first opened
+between --- and ---
+→ tells GitHub when and how the workflow runs.
 
-synchronize
-= run again when a new commit is added to the PR
+the Markdown beginning with # Review
+→ tells Claude what to do after it starts.
 ```
+
+The important settings mean:
+
+- `on: pull_request` → watch Pull Request events.
+- `opened` → start when the PR is first opened.
+- `synchronize` → start again when a new commit is pushed to the same PR.
+- `engine: claude` → run the task with the Claude engine.
+- `contents: read` and `pull-requests: read` → allow read access to repository content and PR information.
+- `safe-outputs: add-comment` → allow the result to be written back as a controlled PR comment.
+
+**Why create this file?** Claude is not assumed to sit inside GitHub continuously watching every PR. This workflow explicitly tells GitHub: **“when a PR opens or receives a new commit, start the Claude review.”**
+
+Because the frontmatter was created or changed, open Terminal/PowerShell in the repository folder and run:
+
+```bash
+gh aw compile .github/workflows/review.md
+```
+
+Commit and send both the generated `review.lock.yml` and source `review.md` to GitHub. GitHub Actions runs the compiled `.lock.yml`.
+
+When the PR event occurs, the workflow uses the GitHub context. Claude therefore does not read Codex's memory; **it reads the PR and code change recorded in GitHub.**
 
 ### 5. Recheck the version at every handoff
 
@@ -985,25 +1010,18 @@ This check should remain part of the automation.
 
 ### 6. How does Claude's result start Codex?
 
-Two different methods should not be confused.
+Claude finding a problem does not automatically start Codex. GitHub must also be told **which workflow should start next**.
 
 #### Method A — Start the next workflow directly
 
-For an explicit agent-to-agent automation chain, one workflow can use **dispatch-workflow** to start an allowed worker workflow.
-
-The idea is:
+This example uses two files:
 
 ```text
-Claude finishes review
-        ↓
-problem found
-        ↓
-start fix workflow
-        ↓
-Codex runs
+.github/workflows/review.md  → Claude review
+.github/workflows/fix.md     → Codex correction
 ```
 
-For example, the review workflow can be allowed to dispatch only the `fix` workflow:
+Add the following setting to the frontmatter of `review.md` so Claude may dispatch only the `fix` workflow when needed:
 
 ```yaml
 safe-outputs:
@@ -1012,42 +1030,63 @@ safe-outputs:
     max: 1
 ```
 
-The `fix` workflow accepts `workflow_dispatch`.
+This YAML is **not entered in Terminal** and is not a separate file. It belongs in the configuration section between the `---` markers at the top of `.github/workflows/review.md`.
 
-Pass task information such as `TASK_ID`, PR number, reviewed commit, and finding into the next workflow.
+`workflows: [fix]` allows only the workflow named `fix` to be dispatched. `max: 1` limits this run to at most one such dispatch.
+
+The `.github/workflows/fix.md` file must also be configured to accept `workflow_dispatch`. In other words, `review.md` says **“I may start fix”**, while `fix.md` says **“another workflow may start me.”**
+
+Flow:
+
+```text
+review.md → Claude found a problem
+        ↓
+dispatch-workflow
+        ↓
+fix.md started
+        ↓
+Codex received the task
+```
+
+This flow box is explanatory and is not copied into a file.
+
+Do not pass only “a problem exists.” Pass information such as `TASK_ID`, PR number, the commit Claude reviewed, the finding, and its evidence into the `fix` workflow. Codex can then identify which task and version the finding belongs to.
+
+After changing frontmatter in `review.md` or `fix.md`, recompile the relevant workflows from Terminal/PowerShell:
+
+```bash
+gh aw compile .github/workflows/review.md
+gh aw compile .github/workflows/fix.md
+```
+
+Send the generated `.lock.yml` files to GitHub together with their source `.md` files.
 
 #### Method B — Use a label as state or a command
 
-A GitHub label can also represent a state:
+A GitHub label can represent a state:
 
 ```text
 agent:fix-required
 = correction required
 ```
 
-With `label_command`, a specific label can act like a one-shot command that starts a workflow.
+This box only shows an example label name. Create the label in the repository's **Issues / Pull Requests label** system; do not write it into source code.
 
-There is an important detail, however: some writes performed with GitHub's default `GITHUB_TOKEN` do not start new workflow or CI runs. GitHub uses this behavior to prevent accidental automation loops.
+If applying the label should actually start a workflow, creating the label alone is not enough. A trigger such as `label_command` must also be defined in the frontmatter of the relevant `.github/workflows/<workflow-name>.md` file.
 
-So do not assume:
+There is an important limitation: some writes performed with GitHub's default `GITHUB_TOKEN` do not start new workflow or CI runs. Do not assume **“Claude added a label, therefore Codex will definitely start.”**
 
-> **“Claude added a label, therefore Codex will definitely start.”**
-
-If labels, agent-created PRs, or agent-generated commits are expected to trigger another workflow, the token and trigger path must be configured accordingly.
-
-Agentic Workflows can also use a suitable CI-trigger credential when safe-output PR creation or PR-branch pushes need to trigger CI. Another option is to use `dispatch-workflow` explicitly for agent-to-agent routing.
-
-A clear beginner model is:
+For a first setup, the easier model to follow is:
 
 ```text
 SHOW THE STATE
 → comment / label
 
-START THE NEXT AGENT
-→ dispatch-workflow
+ACTUALLY START THE NEXT AGENT
+→ dispatch-workflow setting in review.md
 ```
 
-This keeps **showing state** separate from **actually starting another agent**.
+The first makes state visible to people; the second technically starts the next workflow.
 
 ### 7. Codex should not blindly apply Claude's finding
 
@@ -1067,7 +1106,9 @@ Codex should first check the current GitHub state:
 
 Only then should it make the smallest necessary correction.
 
-Example task:
+The fields below are **not a native GitHub setting**. They are the task record passed to Codex. In a manual flow they can be included in the Codex prompt; in an automated flow they can travel as input/task context for the `fix.md` workflow.
+
+Example task record:
 
 ```text
 TASK_ID: UI-024
@@ -1151,13 +1192,19 @@ Did the type check pass?
 
 An AI agent does not need to read the code and decide these results. Existing test commands, scripts, or **GitHub Actions** can run these checks automatically.
 
-For example, if the project already uses:
+For example, if a Python project already uses `pytest`, a developer can run it manually from Terminal/PowerShell opened in the repository folder:
 
 ```bash
 pytest
 ```
 
-GitHub Actions can run the same command automatically and route the workflow according to whether it succeeds.
+In an automated flow, a person should not have to type `pytest` every time. Put the command in a normal **GitHub Actions test workflow**, for example:
+
+```text
+.github/workflows/tests.yml
+```
+
+This `tests.yml` is different from an AI-agent instruction file such as `review.md` or `fix.md`. The normal Actions workflow tells GitHub **“when code arrives, run this exact test command.”** GitHub then produces the pass/fail result automatically.
 
 The flow becomes:
 
@@ -1285,7 +1332,7 @@ Codex
 → send it to the PR branch through a controlled output
 ```
 
-File boundaries can also be defined:
+The task boundary can also be written explicitly:
 
 ```text
 ALLOWED_FILES:
@@ -1297,6 +1344,10 @@ PROTECTED:
 - .github/**
 - dependency / package files
 ```
+
+This box is **not a built-in GitHub permission setting**. `ALLOWED_FILES` and `PROTECTED` are task-instruction fields for the agent. In a manual flow they go into the agent prompt; in an automated flow they can be placed in the task text of the relevant `review.md` / `fix.md` or in the task record passed to it.
+
+These instructions define what the agent should do; by themselves they do not create a technical access boundary. If critical areas must truly be unmodifiable, also enforce that boundary through GitHub permissions, branch protection, safe outputs, and the actual permissions of the tools being used.
 
 Do not automatically allow an agent to modify workflow, security, instruction, or dependency files that are not needed for its task.
 
@@ -1318,7 +1369,17 @@ old/new run policy is checked
 conflicting changes are not applied at the same time
 ```
 
-For PR-based agentic workflows, controls can also cancel an older run after a newer commit makes it stale.
+PR-based Agentic Workflows apply concurrency controls that help prevent stale runs from colliding. If you need a custom rule, put the `concurrency` setting in the **frontmatter** of the relevant agentic workflow, for example `.github/workflows/review.md`; do not enter it in Terminal.
+
+For a custom case where only the latest run should continue:
+
+```yaml
+concurrency:
+  group: review-${{ github.ref }}
+  cancel-in-progress: true
+```
+
+Use this only when it matches the desired project behavior. `cancel-in-progress: true` asks GitHub to cancel an older run in the same group when a new one starts. Because this changes frontmatter, run `gh aw compile .github/workflows/review.md` afterward to refresh the compiled workflow.
 
 ### 13. Do not continue the chain after a failed step
 
@@ -1376,15 +1437,30 @@ YES → normal test / script / GitHub Actions
 NO  → use an AI agent if interpretation is needed
 ```
 
-Agentic Workflows also supports per-run AI usage limits and usage inspection.
+Agentic Workflows also supports a per-run AI usage limit.
 
-For example:
+Do **not** enter this setting in Terminal or the GitHub Settings page. Add it to the **frontmatter** of the agentic workflow that should be limited, for example `.github/workflows/review.md`:
 
 ```yaml
+---
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+engine: claude
 max-ai-credits: 500
+---
 ```
 
-Choose a real limit based on the model and expected workload rather than copying the example value blindly.
+`max-ai-credits: 500` places a guardrail on the AI usage budget for one run of this workflow. The value `500` is only an example; choose the real value according to the selected model and task size.
+
+Because frontmatter changed, run the following from Terminal/PowerShell:
+
+```bash
+gh aw compile .github/workflows/review.md
+```
+
+Then send the updated `.md` and `.lock.yml` to GitHub.
 
 ### 15. Automate when the human should be notified
 
@@ -1462,7 +1538,17 @@ WHAT_NEEDS_HUMAN_DECISION:
 Should the task be restarted against the new version?
 ```
 
-Where the notification is sent depends on the system. A GitHub Issue, Pull Request comment, or another configured notification channel can be used. Email, Slack, or another external channel requires a separate integration that can access that channel.
+Where the notification is sent depends on the system. **If you want to stay inside GitHub, a Pull Request comment or Issue is one of the simplest starting points.** Define the allowed safe output in the frontmatter of the relevant `.github/workflows/<name>.md`. For example, to allow a PR comment:
+
+```yaml
+safe-outputs:
+  add-comment:
+    max: 1
+```
+
+This does **not** mean “always send a comment.” It gives the workflow the controlled ability to create a comment. The workflow task text must separately define the conditions that produce a `HUMAN_REVIEW_REQUIRED` result.
+
+Whether a GitHub comment reaches a person as a notification depends on that user's GitHub notification/subscription settings. Direct email, Slack, or another external channel requires a separate integration that can access that channel.
 
 Rather than notifying a human about every small agent action, notifications are more useful at **completion, stop, failure, and decision-required thresholds**. Too many notifications can hide the important ones.
 
