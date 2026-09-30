@@ -8,7 +8,7 @@ Bir agent kendi görevini doğru tamamlamış olsa bile işi devralan agent gere
 
 Örneğin Agent A bir dosyayı değiştirirken korunması gereken önemli bir kuralı biliyor olabilir. Bu bilgi görev devri sırasında Agent B'ye aktarılmazsa Agent B önceki çalışmayı farkında olmadan bozabilir.
 
-Buradaki “görev devri”, agentların mutlaka doğrudan birbirleriyle konuştuğu anlamına gelmez. Birçok kullanımda agentlar arasında doğrudan iletişim kanalı yoktur. Devir bilgisi kullanıcı tarafından taşınabilir, ortak bir dosyaya yazılabilir veya bir otomasyon tarafından sonraki agenta aktarılabilir.
+Görev devri, agentların doğrudan birbirleriyle iletişim kurmasını gerektirmez.
 
 ## Temel kural
 
@@ -116,8 +116,6 @@ Kullanıcının agentların yaptığı teknik işi tekrar anlatması gerekmez. A
 
 ## Ne zaman kullanılır?
 
-Bu yöntem, bir iş bir agenttan başka bir agenta veya kişiye geçecekse; çalışma farklı bir oturumda devam edecekse; aynı proje üzerinde farklı araçlar sırayla çalışacaksa; ya da yapılan iş daha sonra başka biri tarafından devam ettirilecekse kullanışlıdır.
-
-Özellikle dosya veya kod değişikliklerinde, testin başka bir agent tarafından tamamlanacağı durumlarda ve uzun süren işlerin farklı oturumlarda devam etmesinde görev devri kaydı bilgi kaybını azaltır.
+Bu yöntem, iş başka bir agenta, kişiye veya oturuma devredilecekse ya da farklı araçlar aynı işi sırayla sürdürecekse kullanışlıdır. Görev devri kaydı, sonraki tarafın tamamlanan ve eksik kalan adımları yeniden tahmin etmek zorunda kalmasını önler.
 
 Tek bir agentın tek oturumda tamamladığı, başka bir kişiye veya agenta aktarılmayacak ve kolayca geri alınabilecek küçük görevlerde ayrıntılı görev devri kaydı gerekli olmayabilir.
