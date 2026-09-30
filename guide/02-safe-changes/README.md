@@ -1526,7 +1526,7 @@ gh aw compile .github/workflows/review.md
 
 ### 15. ChatGPT orkestratörse agentlar arasındaki akışı ortak görev dosyalarından yönet
 
-Bu rehberde ChatGPT orkestratör olarak kullanıldığında ana amaç **GitHub'daki başka bir Pull Request'e yorum bırakmak değildir.** Amaç, kendi projemizde çalışan agentların sonuçlarını ortak ve izlenebilir bir yerde tutmak; ChatGPT'nin bu kayıtları okuyarak sıradaki adımı belirlemesidir.
+ChatGPT orkestratör olarak kullanıldığında, kendi projemizde çalışan agentların sonuçları ortak ve izlenebilir bir yerde tutulur; ChatGPT bu kayıtları okuyarak sıradaki adımı belirler.
 
 Agentların birbirlerinin sohbet belleğini görmesi gerekmez. Bunun yerine repository içinde orkestrasyona ayrılmış küçük bir alan kullanılabilir.
 
