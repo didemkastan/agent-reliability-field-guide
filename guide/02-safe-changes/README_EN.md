@@ -587,11 +587,13 @@ AUTOMATIC EXECUTION
   when a defined event occurs
 ```
 
-For example, giving ChatGPT access to GitHub in a chat does not mean ChatGPT automatically runs after every commit.
+For example, giving a normal ChatGPT conversation access to GitHub does not mean that conversation automatically runs after every GitHub change.
+
+ChatGPT does, however, have a separate path for this: eligible users can create **GitHub event-triggered tasks in Work**. After GitHub is connected, supported Pull Request activity can start a ChatGPT task automatically. This is different from ordinary repository access because the task has an explicit **Trigger + Condition + Prompt**.
 
 Likewise, simply having a Codex or Claude connection does not create an automated agent handoff.
 
-GitHub Agentic Workflows can directly select GitHub Copilot, Claude Code, OpenAI Codex, and Google Gemini as the **engine** that runs a workflow. If the ChatGPT product is used as a separate orchestrator, it needs its own programmatic integration so the automation can invoke it.
+GitHub Agentic Workflows can directly select GitHub Copilot, Claude Code, OpenAI Codex, and Google Gemini as the **engine** that runs a workflow. If ChatGPT is the orchestrator, the two layers can be combined: Agentic Workflows run agent work, while a ChatGPT event-triggered task can react to supported GitHub events for orchestration checks or human notification. If ChatGPT must actually start a downstream agent, the connected tools and permissions must also support that action.
 
 ### What does a GitHub “event” mean?
 
@@ -1298,7 +1300,7 @@ is there a contextual problem?
 verification
 ```
 
-The order can vary by project. For example, running cheap and fast automated tests before an AI review can avoid spending AI usage on a change that does not even build.
+The order can vary by project. Running fast automated checks before an AI review is often useful. If the code does not pass basic technical checks — for example, the project cannot compile or existing tests fail — that problem can be caught first instead of spending AI usage reviewing a change that has not yet passed the basics.
 
 In short:
 
@@ -1346,7 +1348,7 @@ routing rule selected fix workflow
 Codex received the correction task
 ```
 
-If ChatGPT is also used as an orchestrator, there must be a real integration that allows the automation to invoke ChatGPT. GitHub access alone does not provide that behavior.
+If ChatGPT is the orchestrator, do not rely on ordinary GitHub access alone. Eligible users can create a **GitHub event-triggered task in ChatGPT Work** so supported Pull Request activity starts ChatGPT automatically. ChatGPT can then read the GitHub state and perform an orchestration check or notify the human. If it must directly start the next agent, the connected tools and permissions must support that downstream action as well.
 
 ### 11. Give agents only the permissions they need
 
@@ -1386,35 +1388,46 @@ These instructions define what the agent should do; by themselves they do not cr
 
 Do not automatically allow an agent to modify workflow, security, instruction, or dependency files that are not needed for its task.
 
-### 12. Prevent the same task from running twice
+### 12. Do not let old and new versions of the same work be reviewed at the same time
 
-If two runs start for the same PR or task at the same time, they may invalidate each other's results.
+This is easiest to understand with an example.
 
-GitHub Actions and Agentic Workflows can use concurrency controls to limit overlapping runs.
-
-The idea is:
+Suppose Claude is reviewing **version A** of a Pull Request. Before Claude finishes, Codex pushes another commit and the Pull Request becomes **version B**:
 
 ```text
-UI-024 is running
+Claude
+is reviewing version A
         ↓
-same task arrives again
+review is still running
+
+meanwhile
+
+Codex pushes a new commit
         ↓
-old/new run policy is checked
-        ↓
-conflicting changes are not applied at the same time
+the Pull Request is now version B
 ```
 
-PR-based Agentic Workflows apply concurrency controls that help prevent stale runs from colliding. If you need a custom rule, put the `concurrency` setting in the **frontmatter** of the relevant agentic workflow, for example `.github/workflows/review.md`; do not enter it in Terminal.
+If Claude continues and reports on version A, its result may already be stale because version B is now the current GitHub state.
 
-For a custom case where only the latest run should continue:
+That is the purpose of **concurrency control** here: prevent old and new runs for the same Pull Request from colliding.
 
-```yaml
-concurrency:
-  group: review-${{ github.ref }}
-  cancel-in-progress: true
+GitHub Agentic Workflows already manages this for Pull Request-triggered runs. When a new commit arrives on the same PR, an outdated run can be cancelled so the current version is reviewed.
+
+```text
+Claude reviews version A
+        ↓
+Codex sends version B to GitHub
+        ↓
+the version A review is now stale
+        ↓
+old run stops
+        ↓
+Claude reviews version B
 ```
 
-Use this only when it matches the desired project behavior. `cancel-in-progress: true` asks GitHub to cancel an older run in the same group when a new one starts. Because this changes frontmatter, run `gh aw compile .github/workflows/review.md` afterward to refresh the compiled workflow.
+For this basic case, the user does not need to add a custom `concurrency:` block. The earlier `group ... cancel-in-progress` example has therefore been removed from the beginner path.
+
+Advanced projects can override concurrency behavior when they need a special execution order, but a standard Pull Request review should begin with the Agentic Workflows default behavior.
 
 ### 13. Do not continue the chain after a failed step
 
@@ -1572,6 +1585,68 @@ CURRENT_VERSION: def456
 WHAT_NEEDS_HUMAN_DECISION:
 Should the task be restarted against the new version?
 ```
+
+#### If ChatGPT is the orchestrator, notification can also be handled in ChatGPT
+
+When ChatGPT is the orchestrator, human notification does not have to rely only on a GitHub comment. For eligible users, ChatGPT **event-triggered tasks** can respond to supported Pull Request activity in a connected GitHub repository.
+
+Set this up inside ChatGPT:
+
+```text
+ChatGPT
+  ↓
+Settings → Apps
+  ↓
+connect GitHub and authorize repository access
+  ↓
+open Work
+  ↓
+define the GitHub event + condition + task for ChatGPT
+  ↓
+Scheduled
+  ↓
+review the created task
+```
+
+This box is not code; it shows the path through the ChatGPT interface.
+
+An orchestrator task could use this logic:
+
+```text
+TRIGGER:
+Supported Pull Request activity occurs in an authorized repository.
+
+CHECK:
+Does the result require a human decision?
+- did verification fail?
+- is there a version mismatch?
+- does the task need to leave its allowed scope?
+- has the retry limit been reached?
+
+ACTION:
+If no decision is required, record the result.
+If a human decision is required, summarize the situation and notify the user.
+```
+
+This task is not written into `.github/workflows/`. Define it in the **Trigger, Condition, and Prompt fields of the event-triggered task created in ChatGPT Work**.
+
+For ChatGPT task notifications, open **Settings → Notifications** and enable supported push, email, or other notification options.
+
+Keep the two automation layers separate:
+
+```text
+GitHub Agentic Workflows
+→ runs agent work such as Codex / Claude / Gemini
+
+ChatGPT event-triggered task
+→ can perform orchestration checks on supported GitHub events
+→ can notify the human
+→ can start an allowed next action when connected tools and permissions support it
+```
+
+Seeing a GitHub event does not give ChatGPT unlimited GitHub authority. The task can use only authorized repositories and granted permissions, and an action that requires approval can pause the task.
+
+#### Notification through GitHub
 
 Where the notification is sent depends on the system. **If you want to stay inside GitHub, a Pull Request comment or Issue is one of the simplest starting points.** Define the allowed safe output in the frontmatter of the relevant `.github/workflows/<name>.md`. For example, to allow a PR comment:
 
