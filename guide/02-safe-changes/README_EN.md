@@ -99,6 +99,32 @@ File count alone is not enough. A protected section may have changed inside an e
 > - **UNEXPECTED_CHANGES:** Unexpected changes; use `none` if there are none
 > - **SCOPE_STATUS:** Whether the change stayed within the assigned scope
 
+## Where should the prompt go when using multiple agents?
+
+When several agents work on the same project, it is better to keep shared safe-change rules in **one persistent project rule** instead of copying them separately into every chat. This reduces the risk of different agents gradually receiving different versions of the rules.
+
+For example, a project can use a shared file such as `AGENT_RULES.md`. However, the presence of that file in the project does not mean every agent will read it automatically. Check which project instruction each tool loads automatically and make the shared rule available through that entry point.
+
+Task-specific information should be provided when assigning the task rather than added permanently to the shared rule:
+
+```text
+TASK:
+- Fix the old link in README.md.
+
+CHANGE:
+- The relevant link
+
+PRESERVE:
+- Other text and headings
+
+DO NOT:
+- Do not change other files.
+```
+
+With this structure, **persistent rules** remain shared across agents, while task-specific information such as **TASK, CHANGE, PRESERVE, and DO NOT** is supplied only for the relevant task.
+
+In an automated multi-agent system, the same approach can be applied through the orchestrator. The orchestrator passes the shared rules and task-specific boundaries to the agent performing the work. If the task is handed to another agent, the relevant scope and protected areas should travel with the handoff record.
+
 ## Use in automation
 
 In an automated workflow, expected files can be defined before the task starts. After the task, the system can compare that list with the files that actually changed.
