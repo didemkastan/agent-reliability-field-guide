@@ -778,7 +778,7 @@ Gemini  → GEMINI_API_KEY
 
 Gerçek anahtar değeri `AGENTS.md`, workflow, görev paketi veya kaynak kod içine eklenmez.
 
-Bu anahtar agentın AI hizmetini çalıştırmak içindir. GitHub'da dosya okuma, PR güncelleme veya başka workflow başlatma yetkileri ise ayrıca GitHub izinlarıyla kontrol edilir.
+Bu anahtar agentın AI hizmetini çalıştırmak içindir. GitHub'da dosya okuma, PR güncelleme veya başka workflow başlatma yetkileri ise ayrıca GitHub izinleriyle kontrol edilir.
 
 ### 4. Codex işi bitirdiğinde Claude değişikliği nasıl görür?
 
@@ -1060,7 +1060,7 @@ Bu kavramları en basit haliyle ayıralım:
 TETİKLEYİCİ
 = "şimdi başla"
 
-ORKETRASYON KURALI
+ORKESTRASYON KURALI
 = "şimdi kim, hangi görevle başlayacak?"
 
 AGENT
