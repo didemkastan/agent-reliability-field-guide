@@ -8,7 +8,7 @@ One agent may complete its task correctly, but the next agent can still make a m
 
 For example, Agent A may know that an important part of a file must remain unchanged. If that requirement is not passed to Agent B, Agent B may accidentally undo or damage the previous work.
 
-A “handoff” does not necessarily mean that agents communicate directly with each other. In many setups there is no direct agent-to-agent communication channel. The handoff information may be carried by the user, written to a shared file, or transferred to the next agent by an automation.
+A handoff does not require agents to communicate directly with each other.
 
 ## Core rule
 
@@ -116,8 +116,6 @@ The user does not need to repeat the technical work performed by the agents. But
 
 ## When to use it
 
-Use this method when work will move from one agent to another agent or person, when work will continue in another session, when different tools will work on the same project in sequence, or when someone else will need to continue the task later.
-
-It is especially useful for file or code changes, when testing will be completed by another agent, and when long-running work continues across different sessions.
+Use this method when work will move to another agent, person, or session, or when different tools will continue the same work in sequence. A handoff record prevents the next party from having to guess which steps were completed and which remain.
 
 A detailed handoff record may not be necessary for a small, reversible task completed by one agent in a single session with no later transfer.
