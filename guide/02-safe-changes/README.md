@@ -160,40 +160,107 @@ Bu kayıt, agentın yalnızca kurallara erişebildiğini varsaymak yerine hangi 
 
 Otomatik bir çoklu-agent sisteminde bu işi orkestratör üstlenebilir: ortak kuralları ve göreve özel sınırları işi yapacak agenta aktarır. Görev başka bir agenta devredildiğinde de ilgili kapsam ve korunacak alanlar görev devri kaydıyla birlikte taşınır.
 
-### Örnek: ChatGPT, Codex, Claude ve GitHub ile görev akışı
+### Örnek: ChatGPT, Codex, Claude, Gemini ve GitHub ile görev akışı
 
-Örneğin aynı yazılım projesinde ChatGPT, Codex ve Claude birlikte kullanılıyor olsun. GitHub burada bir agent değil; dosyaların, sürümlerin ve değişiklik geçmişinin tutulduğu ortak çalışma alanıdır.
+Bir yazılım projesinde birden fazla agent farklı rollerle birlikte kullanılabilir. Örneğin:
 
-Basit bir görev dağılımı şöyle kurulabilir:
+- **ChatGPT — Orkestratör:** İsteği analiz eder, görevi hazırlar, sınırlarını belirler ve sıradaki işi hangi agentın yapacağını yönlendirir.
+- **Codex — Yazılımcı:** Güncel proje üzerinde gerekli kod değişikliğini yapar ve yaptığı değişiklikleri kaydeder.
+- **Claude — İnceleme / düzeltme:** Yapılan değişikliği bağımsız olarak inceler; hata, eksik veya kapsam dışı değişiklik bulursa düzeltme döngüsüne girdi sağlar.
+- **Gemini — Tester / QA:** Uygulanan çözümü bağımsız olarak test eder ve işlevsel, regresyon veya arayüz sorunlarını arar.
+- **GitHub — Ortak çalışma alanı:** Bir agent değildir. Kodun güncel sürümünün, değişiklik geçmişinin, ortak kuralların ve görev kayıtlarının tutulduğu kanonik çalışma alanıdır.
+
+Örnek akış:
+
+```text
+                 ChatGPT
+                ORKESTRATÖR
+       TASK / CHANGE / PRESERVE / DO NOT
+                     │
+                     ▼
+                   Codex
+                 YAZILIMCI
+              kod değişikliği
+                     │
+                     ▼
+                   GitHub
+             ORTAK ÇALIŞMA ALANI
+        kod + sürüm + görev kayıtları
+                     │
+                     ▼
+                   Claude
+           İNCELEME / DÜZELTME
+                     │
+             sorun varsa Codex
+             düzeltme döngüsü
+                     │
+                     ▼
+                   GitHub
+                     │
+                     ▼
+                   Gemini
+                 TESTER / QA
+```
+
+Bu roller sabit olmak zorunda değildir; projeye ve göreve göre değiştirilebilir. Önemli olan her agentın hangi işi yaptığının, hangi sürüm üzerinde çalıştığının ve sonucunu nereye bırakacağının açık olmasıdır.
+
+#### Ortak çalışma alanına doğrudan erişemeyen bir agent
+
+Her agent GitHub'a doğrudan bağlanamayabilir. Bu durum o agentın projede görev alamayacağı anlamına gelmez.
+
+> **Bir agentın projeye dahil olması, GitHub'a bağlı olması demek değildir.**
+
+Örneğin yukarıdaki yapıda tester rolündeki Gemini'nin GitHub'a doğrudan erişimi olmadığını düşünelim. Orkestratör, test görevi için gerekli ve güncel bilgileri bir görev paketi olarak aktarabilir:
+
+```text
+TASK_ID:
+INPUT_VERSION:
+
+TASK:
+FILES / CONTEXT:
+
+RULES:
+PRESERVE:
+DO NOT:
+
+EXPECTED_OUTPUT:
+LIMITATIONS:
+
+NEXT_AGENT:
+NEXT_ACTION:
+```
+
+Bu pakette agentın hangi sürüm üzerinde çalıştığı, hangi dosya veya bilgileri gördüğü, neyi test edeceği, neleri koruması gerektiği ve hangi alanlara erişemediği açıkça belirtilir. Dışarıdaki agent da sonucunu aynı `TASK_ID` ve `INPUT_VERSION` ile geri verir.
 
 ```text
 GitHub
-└── Kanonik proje dosyaları + AGENTS.md
-              ↓
-ChatGPT
-└── İsteği analiz eder ve görev sınırını hazırlar.
-    TASK / CHANGE / PRESERVE / DO NOT
-              ↓
-Codex
-└── Kuralları ve görev sınırını alır.
-    Gerekli kod değişikliğini yapar.
-    CHANGED / PRESERVED / SCOPE_STATUS kaydını üretir.
-              ↓
+ortak çalışma alanı
+     │
+     ▼
+ChatGPT / Orkestratör
+güncel görev paketini hazırlar
+     │
+     ▼
+Gemini
+GitHub erişimi olmadan testi yapar
+     │
+     ▼
+TEST RESULT
+TASK_ID + INPUT_VERSION
+     │
+     ▼
+Orkestratör / bağlı agent
+güncel sürümle sonucu karşılaştırır
+     │
+     ▼
 GitHub
-└── Değişiklik ve güncel sürüm ortak çalışma alanına kaydedilir.
-              ↓
-Claude
-└── Güncel sürümü ve görev devri kaydını alır.
-    Yapılan değişikliği ve korunması gereken alanları inceler.
-    Eksik veya beklenmeyen bir değişiklik varsa bildirir.
-              ↓
-GitHub
-└── Doğrulanmış sonuç ve güncel proje durumu korunur.
 ```
 
-Bu örnekte ChatGPT görev hazırlama ve yönlendirme, Codex uygulama, Claude ikinci inceleme rolündedir. Bu roller sabit olmak zorunda değildir; göreve göre değiştirilebilir. Önemli olan her agentın aynı kanonik kuralları ve güncel görev durumunu almasıdır.
+Sonuç doğrudan projeye uygulanmamalıdır. Önce dışarıdaki agenta verilen `INPUT_VERSION` ile GitHub'daki güncel sürüm karşılaştırılır. Proje bu sırada değişmişse sonuç güncel sürüm üzerinde yeniden değerlendirilir.
 
-Bu akışın otomatik olabilmesi için ayrıca bir **orkestratör veya tetikleme mekanizması** gerekir. Agentların aynı GitHub repository'sine erişebilmesi, tek başına bir agentın işi bitirdiğinde diğerinin otomatik olarak başlayacağı anlamına gelmez.
+Bu sayede ortak çalışma alanına doğrudan erişemeyen bir agent da kontrollü biçimde projeye dahil edilebilir. Gerekli olan doğrudan GitHub bağlantısından çok **güncel görev bağlamı, sürüm bilgisi, açık yetki sınırı ve yapılandırılmış görev devridir.**
+
+Bu akışın agentlar arasında kendiliğinden ilerlemesi için ayrıca bir **orkestratör veya tetikleme mekanizması** gerekir. Agentların aynı GitHub repository'sine erişebilmesi, tek başına bir agentın işi bitirdiğinde diğerinin otomatik olarak başlayacağı anlamına gelmez.
 
 ## Otomasyonda kullanım
 
