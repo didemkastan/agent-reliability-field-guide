@@ -226,6 +226,7 @@ DO NOT:
 EXPECTED_OUTPUT:
 LIMITATIONS:
 
+RETURN_TO:
 NEXT_AGENT:
 NEXT_ACTION:
 ```
@@ -287,6 +288,7 @@ LIMITATIONS:
 - GitHub'a doğrudan erişim yok.
 - Yalnızca eklenen dosyalar ve test çıktısı görülebilir.
 
+RETURN_TO: ChatGPT / Orkestratör
 NEXT_AGENT: Codex
 NEXT_ACTION:
 Bulguyu GitHub'daki güncel sürüm üzerinde doğrula.
@@ -311,6 +313,7 @@ Sorun hâlâ geçerliyse gerekli en küçük düzeltmeyi yap.
 > SKIPPED_CHECKS:
 > 
 > RECOMMENDED_ACTION:
+> RETURN_TO:
 > NEXT_AGENT:
 > ```
 
@@ -347,10 +350,13 @@ RECOMMENDED_ACTION:
 Güncel GitHub sürümünde davranışı yeniden üret.
 Sorun doğrulanırsa en küçük düzeltmeyi yap ve regresyon testi ekle.
 
+RETURN_TO: ChatGPT / Orkestratör
 NEXT_AGENT: Codex
 ```
 
-Bu yanıt doğrudan kod değişikliği talimatı olarak kullanılmaz. Önce **ChatGPT / orkestratöre** geri verilir. Orkestratör `TASK_ID`, `INPUT_VERSION`, bulgu, kanıt ve yapılmayan kontrolleri koruyarak sonucu projeye erişimi olan sıradaki agenta aktarır.
+Burada iki farklı yön bilgisi vardır: **`RETURN_TO`**, Gemini'nin sonucunu ilk olarak kime teslim edeceğini; **`NEXT_AGENT`** ise orkestratörün doğrulama veya uygulama için görevi daha sonra hangi agenta yönlendireceğini gösterir.
+
+Bu örnekte Gemini'nin yanıtı önce **ChatGPT / orkestratöre** geri verilir (`RETURN_TO`). ChatGPT `TASK_ID`, `INPUT_VERSION`, bulgu, kanıt ve yapılmayan kontrolleri koruyarak yeni görev paketini hazırlar ve ardından Codex'e (`NEXT_AGENT`) aktarır. Gemini'nin çıktısı doğrudan kod değişikliği talimatı olarak kullanılmaz.
 
 #### Gemini sonucunu Codex'e aktarma
 
