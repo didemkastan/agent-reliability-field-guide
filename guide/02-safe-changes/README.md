@@ -87,7 +87,17 @@ Dosya sayısı tek başına yeterli değildir. Aynı dosyanın içinde korunmas�
 
 ## Kullanılabilir prompt
 
-> **Yalnızca verilen görevi tamamlamak için gerekli değişiklikleri yap. Görevle ilgisi olmayan dosyaları, metinleri, yapılandırmaları veya bağımlılıkları değiştirme. Korunması belirtilen alanlara dokunma. Ek bir sorun fark edersen kendiliğinden düzeltmek yerine bildir. İşlem sonunda hangi dosyaların ve bölümlerin değiştiğini kontrol et; görev kapsamı dışında bir değişiklik varsa belirt ve doğrulanmadan bırakma.**
+> **Göreve başlamadan önce istenen değişikliğin kapsamını belirle: hangi dosya veya bölümlerin değiştirileceğini ve nelerin korunması gerektiğini tespit et. Yalnızca verilen görevi tamamlamak için gerekli olan en küçük değişikliği yap. Görevle ilgisi olmayan dosyaları, metinleri, yapılandırmaları, bağımlılıkları veya çalışan mevcut davranışları değiştirme.**
+>
+> **Değişiklik sırasında kapsam dışında başka bir sorun fark edersen bunu kendiliğinden düzeltme; ayrı olarak bildir. Görevi tamamlamak için başlangıçta belirlenen kapsamın dışına çıkmak zorunlu hale gelirse değişikliğe devam etmeden önce bunu açıkça belirt ve neden gerekli olduğunu açıkla.**
+>
+> **İşlem tamamlandığında yapılan değişiklikleri başlangıçta belirlenen kapsamla karşılaştır. Hangi dosya ve bölümlerin değiştiğini kontrol et; mümkünse diff (değişiklik farkı) üzerinden beklenmeyen değişiklik olup olmadığını incele. Korunması gereken alanların değişmediğini doğrula. Kapsam dışında bir değişiklik oluşmuşsa bunu görevin parçası kabul etme; açıkça belirt ve gerekli değilse geri al.**
+>
+> **Sonuçta kısa bir kayıt ver:**
+> - **CHANGED:** Gerçekte değiştirilenler
+> - **PRESERVED:** Korunduğu kontrol edilenler
+> - **UNEXPECTED_CHANGES:** Beklenmeyen değişiklikler; yoksa `none`
+> - **SCOPE_STATUS:** Değişiklik verilen görev sınırları içinde kaldı mı?
 
 ## Otomasyonda kullanım
 
