@@ -358,9 +358,9 @@ There are two different routing fields here: **`RETURN_TO`** identifies who rece
 
 Two operating modes should be kept separate in this example.
 
-#### Manual or semi-automated handoff
+#### Returning the result from an agent without GitHub access
 
-If no automatic trigger has been configured between the agents, Gemini does not automatically start ChatGPT or Codex. The user performs the handoff:
+In this example, Gemini is not directly connected to the shared workspace in GitHub. The user therefore provides Gemini with the task package and the files required for the task. When Gemini completes the test, the user passes its result back to ChatGPT / the orchestrator:
 
 ```text
 Gemini completes the test
