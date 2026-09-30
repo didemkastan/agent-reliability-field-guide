@@ -8,7 +8,7 @@ Yayımlanmış bölümlere başlıklarına tıklayarak ulaşabilirsiniz.
 2. [**Agentlar Arası Görev Devri**](guide/03-agent-handoffs/README.md) — Bir agentın yaptığı işi diğerine gerekli bilgilerle birlikte aktarma.
 3. [**Handoff Receipt (Görev Devri Kayıt Şablonu)**](patterns/handoff-receipt.md) — Görev devrinde kullanılabilecek hazır kayıt yapısı.
 4. [**Verification (Doğrulama)**](guide/04-verification/README.md) — “Tamamlandı” demek ile sonucu gerçekten doğrulamak arasındaki fark.
-5. **Güvenli Değişiklik** — Yakında.
+5. [**Güvenli Değişiklik**](guide/02-safe-changes/README.md) — Değişikliği verilen görev sınırları içinde tutma ve gereksiz değişiklikleri önleme.
 6. **Retry (Yeniden deneme)** — Yakında.
 7. **Memory & Context (Hafıza ve bağlam)** — Yakında.
 8. **Security & Authority (Güvenlik ve yetki)** — Yakında.
@@ -42,7 +42,7 @@ Rehber aşağıdaki alanları kapsayacak şekilde geliştirilmektedir. Şu anda 
 2. **Agentlar arası görev devri** — gerekli bilgilerin aktarılması, yapılan kontrollerin belirtilmesi ve eksik kalan kontrollerin görünür olması.
 3. **Handoff Receipt (Görev Devri Kayıt Şablonu)** — görev devrinde mevcut durumu, yapılan değişiklikleri, doğrulananları, eksik kontrolleri ve sonraki adımı standart bir kayıtla aktarma.
 4. **Verification (Doğrulama)** — gözlem, yorum, yapılan işlem ve doğrulama sonucunu birbirinden ayırma.
-5. **Güvenli değişiklik** — güncel olmayan bilgilerle işlem yapılmasını ve yanlış sürüm üzerinde değişiklik yapılmasını önleme.
+5. **Güvenli değişiklik** — değiştirilebilecek alanları sınırlandırma, korunacak noktaları belirleme ve gereksiz değişiklikleri önleme.
 6. **Retry (Yeniden deneme)** — aynı hatayı tekrarlamak yerine hata nedenini dikkate alarak yeniden deneme ve gerektiğinde işlemi durdurma.
 7. **Memory & Context (Hafıza ve bağlam)** — geçici bilgilerin, değişen kaynakların, hatalı kayıtların ve bilgi çakışmalarının yönetimi.
 8. **Security & Authority (Güvenlik ve yetki)** — yalnızca gerekli yetkilerin verilmesi ve yetkinin gerektiğinde yeniden kontrol edilmesi.
