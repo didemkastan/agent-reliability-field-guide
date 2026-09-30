@@ -72,7 +72,7 @@ Ask both questions:
 
 ## How is scope checked?
 
-The first scope check can be performed by an agent other than the one that made the change. For example, if Codex made the change, Claude or Gemini can inspect the diff. However, before a change is merged into the main branch, the final scope review and acceptance decision belongs to the human.
+The first scope check can be performed by an agent other than the one that made the change. For example, if Codex made the change, Claude or Gemini can inspect the difference between what was expected and what actually changed (**diff**). However, before the change is added to the main project (**merge**), the final scope review and acceptance decision belongs to the human.
 
 Compare CHANGE with the actual change and answer:
 
@@ -81,15 +81,15 @@ Compare CHANGE with the actual change and answer:
 - Was an action prohibited under DO NOT performed?
 - Was any additional change made that was not required for the task?
 
-The agent's own report is not verification by itself. Inspect the actual **diff**.
+The agent's own report is not verification by itself. Separately inspect which files and lines actually changed (**diff**).
 
-### Check the diff on GitHub
+### Check the changes on GitHub
 
-If the change is in a Pull Request (PR) on GitHub, open the PR and select **Files changed**. This shows the changed files and lines.
+If the change is stored on GitHub as a separate change proposal (**Pull Request / PR**), open the PR and select **Files changed**. This shows which files and lines changed.
 
-### Check the diff on your computer
+### Check the changes on your computer
 
-Run these commands in Terminal or PowerShell from the repository folder.
+Run these commands in Terminal or PowerShell from the project folder (**repository**).
 
 **RUN IN TERMINAL**
 
@@ -100,12 +100,12 @@ git diff
 ```
 
 - `git status` shows which files changed.
-- `git diff --stat` summarizes changes by file.
-- `git diff` shows the changed lines.
+- `git diff --stat` gives a short file-by-file summary.
+- `git diff` shows the changed lines in detail.
 
-> A normal `git diff` here is used to inspect working-tree changes that have not yet been committed.
+These three commands are useful before the changes are recorded in Git history. In Git, that recording step is called a **commit (recording a change)**.
 
-If the agent has already created a commit (a recorded change), inspect the latest commit with:
+If the agent has already recorded the changes in Git history (**made a commit**), inspect the latest record with:
 
 **RUN IN TERMINAL**
 
@@ -113,9 +113,9 @@ If the agent has already created a commit (a recorded change), inspect the lates
 git show HEAD
 ```
 
-Here, `HEAD` means the latest commit on the branch you are currently working on.
+Here, **HEAD (latest record)** means the most recently recorded change on the working branch.
 
-If the agent made multiple commits on the same branch, inspecting only the latest commit is not enough. To see the full difference between the working branch and the point where it diverged from the main branch:
+If the agent created several records (**commits**) on the same working branch (**branch**), looking only at the latest one is not enough. To see the full difference between the working branch and the main branch (**main**):
 
 **RUN IN TERMINAL**
 
@@ -123,9 +123,9 @@ If the agent made multiple commits on the same branch, inspecting only the lates
 git diff main...HEAD
 ```
 
-> If your main branch is not named `main`, use its actual name. For example, use `git diff master...HEAD` when the main branch is named `master`.
+> If the project's main branch is not named `main`, use its actual name. For example, use `git diff master...HEAD` when the main branch is named `master`.
 
-> **If line-by-line diffs feel difficult to read:** At minimum, compare the list of changed files with the EXPECTED list. If you see a file you did not expect, use **Option 1** below and ask the agent to explain and review the out-of-scope change.
+> **If the changed lines (diff) feel difficult to read:** At minimum, compare the list of changed files with the EXPECTED list. If you see a file you did not expect, use **Option 1** below and ask the agent to explain and review the out-of-scope change.
 
 ## What happens when an unexpected change is found?
 
@@ -136,16 +136,16 @@ Do not accept an unexpected change automatically. First determine why it exists.
 **PASTE TO THE AGENT**
 
 ```text
-Compare the current diff with the original CHANGE / PRESERVE / DO NOT boundaries.
+Compare the actual changes (diff) with the original CHANGE / PRESERVE / DO NOT boundaries.
 List every out-of-scope change.
 Explain why each unexpected change occurred.
 If it is not required to complete the task, revert only the out-of-scope change.
 Do not expand the scope automatically.
 ```
 
-Check the diff again after the correction.
+Check the change difference (diff) again after the correction.
 
-### Option 2 — Revert an uncommitted local file
+### Option 2 — Revert a local change that has not yet been recorded
 
 First inspect the file:
 
@@ -155,7 +155,7 @@ First inspect the file:
 git diff config.yaml
 ```
 
-If you are **certain you want to discard all uncommitted local changes in that file**:
+If you are **certain you want to discard all local changes in that file that have not yet been recorded in Git history**:
 
 **RUN IN TERMINAL**
 
@@ -163,7 +163,7 @@ If you are **certain you want to discard all uncommitted local changes in that f
 git restore config.yaml
 ```
 
-> **Warning:** `git restore config.yaml` can discard uncommitted changes in that file. Do not run it if you are unsure. If the change was already committed, do not use this command as the solution. In that case, use **Option 1** and have the agent revert the out-of-scope change in a new commit.
+> **Warning:** `git restore config.yaml` can discard changes in that file that have not yet been recorded. Do not run it if you are unsure. If the change has already been recorded in Git history (**committed**), do not use this command as the solution. In that case, use **Option 1** and have the agent revert the out-of-scope change with a new record (**commit**).
 
 ## How is scope preserved between agents?
 
@@ -200,7 +200,7 @@ UNEXPECTED_CHANGES
 SCOPE_STATUS
 ```
 
-How persistent shared rules are stored in project instructions such as `AGENTS.md` and carried to the next agent is covered in [Agent Handoffs](../03-agent-handoffs/README_EN.md).
+How persistent shared rules are stored in project instructions such as `AGENTS.md` and carried to the next agent will be covered in [Agent Handoffs](../03-agent-handoffs/README_EN.md).
 
 ## Ready-to-use task instruction
 
@@ -252,10 +252,10 @@ A detailed CHANGE / PRESERVE / DO NOT record may be unnecessary for small experi
 
 1. Define **CHANGE / PRESERVE / DO NOT** before the change begins.
 2. The agent makes only the **smallest necessary change**.
-3. Inspect the actual change through the **diff**.
+3. Inspect the files and lines that actually changed (**diff**).
 4. Investigate unexpected changes and revert them when they are not required.
 5. Carry scope information to the next agent together with the task.
-6. Independent agent review can help; **the human makes the final acceptance decision before merge.**
+6. Independent agent review can help; the human makes the final acceptance decision before the change is added to the main project (**merge**).
 
 ## Next steps
 
