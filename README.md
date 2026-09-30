@@ -8,11 +8,13 @@ Yayımlanmış bölümlerin başlıklarına tıklayarak ulaşabilirsiniz.
 2. [**Agentlar Arası Görev Devri**](guide/03-agent-handoffs/README.md) — Bir agentın yaptığı işi diğerine gerekli bilgilerle birlikte aktarma.
 3. [**Handoff Receipt (Görev Devri Kayıt Şablonu)**](patterns/handoff-receipt.md) — Görev devrinde kullanılabilecek hazır kayıt yapısı.
 4. [**Verification (Doğrulama)**](guide/04-verification/README.md) — “Tamamlandı” demek ile sonucu gerçekten doğrulamak arasındaki fark.
-5. **Güvenli Değişiklik ve Agent Otomasyonu** — Düzenleniyor.
-6. **Retry (Yeniden deneme)** — Yakında.
-7. **Memory & Context (Hafıza ve bağlam)** — Yakında.
-8. **Security & Authority (Güvenlik ve yetki)** — Yakında.
-9. **Observability (İzlenebilirlik)** — Yakında.
+5. **Güvenli Değişiklik** — Düzenleniyor.
+6. **Görev Devri Uygulaması** — Düzenleniyor.
+7. **Agent Otomasyonu** — Düzenleniyor.
+8. **Retry (Yeniden deneme)** — Yakında.
+9. **Memory & Context (Hafıza ve bağlam)** — Yakında.
+10. **Security & Authority (Güvenlik ve yetki)** — Yakında.
+11. **Observability (İzlenebilirlik)** — Yakında.
 
 > Yeni bölümler yayımlandıkça ilgili başlıklar tıklanabilir hale getirilecektir.
 
@@ -42,11 +44,13 @@ Rehber aşağıdaki alanları kapsayacak şekilde geliştirilmektedir. Şu anda 
 2. **Agentlar arası görev devri** — gerekli bilgilerin aktarılması, yapılan kontrollerin belirtilmesi ve eksik kalan kontrollerin görünür olması.
 3. **Handoff Receipt (Görev Devri Kayıt Şablonu)** — görev devrinde mevcut durumu, yapılan değişiklikleri, doğrulananları, eksik kontrolleri ve sonraki adımı standart bir kayıtla aktarma.
 4. **Verification (Doğrulama)** — gözlem, yorum, yapılan işlem ve doğrulama sonucunu birbirinden ayırma.
-5. **Güvenli değişiklik ve agent otomasyonu** — değiştirilebilecek alanları sınırlandırma, korunacak noktaları belirleme ve agentlar arası geçişleri GitHub üzerinden güvenli biçimde otomatikleştirme.
-6. **Retry (Yeniden deneme)** — aynı hatayı tekrarlamak yerine hata nedenini dikkate alarak yeniden deneme ve gerektiğinde işlemi durdurma.
-7. **Memory & Context (Hafıza ve bağlam)** — geçici bilgilerin, değişen kaynakların, hatalı kayıtların ve bilgi çakışmalarının yönetimi.
-8. **Security & Authority (Güvenlik ve yetki)** — yalnızca gerekli yetkilerin verilmesi ve yetkinin gerektiğinde yeniden kontrol edilmesi.
-9. **Observability (İzlenebilirlik)** — yapılan işlemlerin ve doğrulama sonuçlarının sonradan kontrol edilebilecek şekilde kaydedilmesi.
+5. **Güvenli değişiklik** — değiştirilebilecek alanları sınırlandırma, korunacak noktaları belirleme ve yalnızca gerekli değişikliği yapma.
+6. **Görev devri uygulaması** — görev paketlerini, sürüm bilgisini ve insan kontrolünü kullanarak agentlar arasında işi güvenli biçimde taşıma.
+7. **Agent otomasyonu** — güvenli görev devri mantığını otomatik tetikleyiciler ve kontrollü agent geçişleriyle uygulama.
+8. **Retry (Yeniden deneme)** — aynı hatayı tekrarlamak yerine hata nedenini dikkate alarak yeniden deneme ve gerektiğinde işlemi durdurma.
+9. **Memory & Context (Hafıza ve bağlam)** — geçici bilgilerin, değişen kaynakların, hatalı kayıtların ve bilgi çakışmalarının yönetimi.
+10. **Security & Authority (Güvenlik ve yetki)** — yalnızca gerekli yetkilerin verilmesi ve yetkinin gerektiğinde yeniden kontrol edilmesi.
+11. **Observability (İzlenebilirlik)** — yapılan işlemlerin ve doğrulama sonuçlarının sonradan kontrol edilebilecek şekilde kaydedilmesi.
 
 ## Bu rehber nasıl oluştu?
 
