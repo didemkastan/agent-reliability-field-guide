@@ -48,7 +48,7 @@ The list does not need to be long. What matters is that the task boundary is vis
 
 If a typo can be fixed on one line, there is no need to rewrite the paragraph or modify other files at the same time.
 
-If an agent notices another problem outside the scope, it should **report it** rather than fix it automatically. If the scope needs to expand, define the new boundary explicitly first.
+If an agent notices another problem outside the scope, it should **report it** rather than fix it automatically. If the scope needs to expand, define the new boundary explicitly with **human approval** first.
 
 ## Expected and actual changes
 
@@ -87,8 +87,6 @@ The agent's own report is not verification by itself. Inspect the actual **diff*
 
 If the change is in a Pull Request (PR) on GitHub, open the PR and select **Files changed**. This shows the changed files and lines.
 
-An independent agent can review the change here, and the human reviews the same diff before the final merge decision.
-
 ### Check the diff on your computer
 
 Run these commands in Terminal or PowerShell from the repository folder.
@@ -105,7 +103,29 @@ git diff
 - `git diff --stat` summarizes changes by file.
 - `git diff` shows the changed lines.
 
-> A normal `git diff` here is used to inspect working-tree changes that have not yet been committed. If the agent already committed the change, use GitHub's **Files changed** view or inspect the latest commit separately with `git show HEAD`.
+> A normal `git diff` here is used to inspect working-tree changes that have not yet been committed.
+
+If the agent has already created a commit (a recorded change), inspect the latest commit with:
+
+**RUN IN TERMINAL**
+
+```bash
+git show HEAD
+```
+
+Here, `HEAD` means the latest commit on the branch you are currently working on.
+
+If the agent made multiple commits on the same branch, inspecting only the latest commit is not enough. To see the full difference between the working branch and the point where it diverged from the main branch:
+
+**RUN IN TERMINAL**
+
+```bash
+git diff main...HEAD
+```
+
+> If your main branch is not named `main`, use its actual name. For example, use `git diff master...HEAD` when the main branch is named `master`.
+
+> **If line-by-line diffs feel difficult to read:** At minimum, compare the list of changed files with the EXPECTED list. If you see a file you did not expect, use **Option 1** below and ask the agent to explain and review the out-of-scope change.
 
 ## What happens when an unexpected change is found?
 
@@ -143,7 +163,7 @@ If you are **certain you want to discard all uncommitted local changes in that f
 git restore config.yaml
 ```
 
-> **Warning:** `git restore config.yaml` can discard uncommitted changes in that file. Do not run it if you are unsure. If the change was already committed, do not use this command as the solution; inspect the commit diff first.
+> **Warning:** `git restore config.yaml` can discard uncommitted changes in that file. Do not run it if you are unsure. If the change was already committed, do not use this command as the solution. In that case, use **Option 1** and have the agent revert the out-of-scope change in a new commit.
 
 ## How is scope preserved between agents?
 
