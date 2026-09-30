@@ -2,7 +2,7 @@
 
 # Handoff Receipt (Görev Devri Kayıt Şablonu)
 
-Bu şablon, bir görevin bir agenttan başka bir agenta veya kişiye devredilirken mevcut durumun, yapılan değişikliklerin ve kalan kontrollerin kaybolmadan aktarılması için kullanılır.
+Bu şablon, görev devrinde kullanılabilecek ortak bir kayıt yapısı sunar.
 
 > **Bu şablon belirli bir ürün veya platforma ait resmî bir standart değildir. Agentlar arası görev devrinde sürüm, değişiklik, doğrulama, kapsam ve sonraki adım bilgilerinin kaybolmasını önlemek amacıyla bu rehberde kullanılan ilkelerin bir araya getirilmesiyle hazırlanmıştır.**
 
