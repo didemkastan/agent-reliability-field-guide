@@ -598,11 +598,13 @@ OTOMATİK ÇALIŞTIRMA
   agentı kendiliğinden başlatabilir
 ```
 
-Örneğin ChatGPT'nin bu sohbet içinde GitHub'a erişebilmesi, GitHub'daki her commit sonrasında ChatGPT'nin otomatik olarak çalışacağı anlamına gelmez.
+Örneğin ChatGPT'nin normal bir sohbet içinde GitHub'a erişebilmesi, GitHub'daki her değişiklikten sonra bu sohbetin kendiliğinden çalışacağı anlamına gelmez.
+
+Ancak ChatGPT'de bunun için ayrı bir yol vardır: uygun hesaplarda **Work içinde GitHub olaylarıyla tetiklenen görevler** oluşturulabilir. GitHub hesabı ChatGPT'ye bağlandıktan sonra desteklenen Pull Request olayları bir ChatGPT görevini otomatik başlatabilir. Bu, yalnızca “GitHub'a erişim” vermekten farklıdır; ayrıca bir **tetikleyici + koşul + görev talimatı** tanımlanır.
 
 Aynı şekilde bir Codex veya Claude bağlantısının bulunması da tek başına otomatik agent geçişi oluşturmaz.
 
-GitHub Agentic Workflows içinde GitHub Copilot, Claude Code, OpenAI Codex ve Google Gemini doğrudan **engine (çalıştırılacak agent motoru)** olarak seçilebilir. ChatGPT ürününü ayrı bir orkestratör olarak kullanmak istenirse, ChatGPT'nin de otomasyon tarafından programatik olarak çağrılabileceği ayrı bir entegrasyon gerekir.
+GitHub Agentic Workflows içinde GitHub Copilot, Claude Code, OpenAI Codex ve Google Gemini doğrudan **engine (çalıştırılacak agent motoru)** olarak seçilebilir. ChatGPT orkestratör olarak kullanılacaksa iki katman birlikte düşünülebilir: GitHub Agentic Workflows agent çalışmalarını yürütür; ChatGPT'nin olayla tetiklenen görevi ise desteklenen GitHub olaylarında durumu okuyup kontrol veya insan bildirimi görevi üstlenebilir. ChatGPT'nin sonraki agentı gerçekten başlatması isteniyorsa, bağlı araçların bu işlemi yapmaya izin vermesi ve gerekli yetkilerin ayrıca verilmiş olması gerekir.
 
 ### GitHub'da “olay” ne demektir?
 
@@ -1312,7 +1314,7 @@ bağlamsal bir sorun var mı?
 doğrulama
 ```
 
-Sıra projeye göre değişebilir. Örneğin ucuz ve hızlı otomatik testleri AI incelemesinden önce çalıştırmak, zaten build edilemeyen bir değişiklik için gereksiz AI kullanmayı önleyebilir.
+Sıra projeye göre değişebilir. Örneğin hızlı otomatik kontrolleri AI incelemesinden önce çalıştırmak yararlıdır. Kod daha temel kontrollerden geçmiyorsa — örneğin proje derlenemiyor veya mevcut testler başarısız oluyorsa — önce bu teknik sorun görülür. Böylece henüz temel kontrolleri geçemeyen bir değişiklik için gereksiz yere AI incelemesi başlatılmaz.
 
 Kısaca:
 
@@ -1360,7 +1362,7 @@ orkestrasyon kuralı soruna göre fix workflow'unu seçti
 Codex düzeltme görevini aldı
 ```
 
-ChatGPT ayrıca orkestratör olarak kullanılacaksa ChatGPT'nin de otomasyon tarafından çağrılabileceği gerçek bir entegrasyon gerekir. Yalnızca GitHub bağlantısının bulunması bunu sağlamaz.
+ChatGPT orkestratör olarak kullanılacaksa yalnızca normal GitHub bağlantısına güvenilmez. Uygun hesaplarda **ChatGPT Work içinde GitHub olaylarıyla tetiklenen görev** oluşturularak desteklenen Pull Request olaylarında ChatGPT'nin otomatik çalışması sağlanabilir. Böylece ChatGPT, olay gerçekleştiğinde GitHub'daki durumu okuyup orkestrasyon kontrolünü veya insan bildirimini çalıştırabilir. Sonraki agentı doğrudan başlatması gerekiyorsa kullanılan bağlantıların ve izinlerin bu eylemi de desteklemesi gerekir.
 
 ### 11. Agentlara yalnızca ihtiyaç duydukları yetkiyi ver
 
@@ -1400,35 +1402,46 @@ Bu talimat agentın ne yapması gerektiğini sınırlar; tek başına teknik eri
 
 Agentın görev için gerek duymadığı workflow, güvenlik, talimat veya bağımlılık dosyalarını değiştirebilmesi otomatik olarak açılmamalıdır.
 
-### 12. Aynı görevin iki kez çalışmasını engelle
+### 12. Aynı işin eski ve yeni sürümü aynı anda incelenmesin
 
-Aynı PR veya görev için iki çalışma aynı anda başlarsa birbirlerinin sonucunu geçersiz hale getirebilir.
+Bu sorun en kolay bir örnekle anlaşılır.
 
-GitHub Agentic Workflows ve GitHub Actions eşzamanlı çalışmaları sınırlandırmak için concurrency (eşzamanlı çalışma kontrolü) kullanabilir.
-
-Mantık:
+Claude bir Pull Request içindeki **A sürümünü** inceliyor olsun. Claude incelemeyi bitirmeden Codex aynı Pull Request'e yeni bir commit gönderdi ve artık **B sürümü** oluştu:
 
 ```text
-UI-024 çalışıyor
+Claude
+A sürümünü inceliyor
         ↓
-aynı görev tekrar geldi
+inceleme henüz bitmedi
+
+bu sırada
+
+Codex yeni commit gönderdi
         ↓
-eski çalışma / yeni çalışma politikası kontrol edilir
-        ↓
-çakışan iki değişiklik aynı anda uygulanmaz
+Pull Request artık B sürümünde
 ```
 
-PR tabanlı Agentic Workflows güncel olmayan çalışmaların çakışmasını azaltan concurrency (eşzamanlı çalışma) kontrolleri uygular. Özel bir kural tanımlamak gerekiyorsa `concurrency` ayarı ilgili agentic workflow'un, örneğin `.github/workflows/review.md` dosyasının **frontmatter** bölümüne yazılır; Terminal'e yazılmaz.
+Claude A sürümü için incelemeyi tamamlamaya devam ederse sonucu daha oluştuğu anda eski kalabilir. Çünkü GitHub'daki güncel kod artık B sürümüdür.
 
-Örneğin yalnız en güncel çalışmanın devam etmesi istenen özel bir durumda:
+İşte **concurrency (aynı işin eşzamanlı çalışmalarını yönetme)** kontrolünün amacı budur: aynı Pull Request için eski ve yeni incelemelerin birbirine karışmasını önlemek.
 
-```yaml
-concurrency:
-  group: review-${{ github.ref }}
-  cancel-in-progress: true
+GitHub Agentic Workflows, Pull Request ile tetiklenen çalışmalar için bu durumu zaten yönetir. Aynı PR'a yeni commit geldiğinde eski sürüme ait çalışma iptal edilerek güncel sürüm için yeni çalışma devam edebilir.
+
+```text
+Claude A sürümünü inceliyor
+        ↓
+Codex B sürümünü GitHub'a gönderdi
+        ↓
+A sürümüne ait inceleme artık güncel değil
+        ↓
+eski çalışma durdurulur
+        ↓
+Claude B sürümünü inceler
 ```
 
-Bu örnek ancak projenin istenen çalışma sırasına uygunsa kullanılmalıdır. `cancel-in-progress: true`, aynı gruptaki yeni çalışma başladığında eski çalışmanın iptal edilmesini ister. Frontmatter değiştiği için sonrasında `gh aw compile .github/workflows/review.md` çalıştırılarak derlenmiş workflow güncellenir.
+Bu temel kullanımda kullanıcının ayrıca bir `concurrency:` kodu yazması gerekmez. Bu nedenle önceki `group ... cancel-in-progress` örneği başlangıç anlatımından çıkarılmıştır.
+
+Özel çalışma sıraları gereken ileri seviye projelerde concurrency ayarları değiştirilebilir. Ancak standart Pull Request inceleme akışında önce GitHub Agentic Workflows'un varsayılan davranışı kullanılmalıdır.
 
 ### 13. Bir adım başarısız olursa zinciri devam ettirme
 
@@ -1586,6 +1599,68 @@ CURRENT_VERSION: def456
 WHAT_NEEDS_HUMAN_DECISION:
 Yeni sürüm üzerinde görevin yeniden başlatılması onaylanmalı mı?
 ```
+
+#### ChatGPT orkestratörse bildirim ChatGPT üzerinden de kurulabilir
+
+ChatGPT orkestratör olarak kullanılıyorsa insan bildirimini yalnız GitHub yorumuna bırakmak zorunlu değildir. Uygun hesaplarda ChatGPT'nin **olayla tetiklenen görevleri**, bağlı bir GitHub repository'sindeki desteklenen Pull Request olaylarına yanıt verebilir.
+
+Kurulum ChatGPT içinde yapılır:
+
+```text
+ChatGPT
+  ↓
+Ayarlar → Uygulamalar
+  ↓
+GitHub hesabını bağla ve repository erişimini ver
+  ↓
+Work'ü aç
+  ↓
+GitHub olayını + koşulu + ChatGPT'nin yapacağı işi tanımla
+  ↓
+Planlananlar
+  ↓
+oluşturulan görevi kontrol et
+```
+
+Bu kutu kod değildir; ChatGPT arayüzünde izlenecek yolu gösterir.
+
+Örneğin orkestratör görevinin mantığı şöyle tanımlanabilir:
+
+```text
+TETİKLEYİCİ:
+İzin verilen repository'de desteklenen bir Pull Request olayı oluştu.
+
+KONTROL:
+Sonuç insan kararı gerektiriyor mu?
+- doğrulama başarısız mı?
+- sürüm uyuşmazlığı var mı?
+- görev izin verilen kapsamın dışına çıkmak istiyor mu?
+- tekrar deneme sınırı doldu mu?
+
+EYLEM:
+Karar gerekmiyorsa sonucu kaydet.
+İnsan kararı gerekiyorsa durumu özetle ve kullanıcıya bildir.
+```
+
+Bu görev `.github/workflows/` klasörüne yazılmaz. **ChatGPT Work içinde oluşturulan olayla tetiklenen görevin Trigger (Tetikleyici), Condition (Koşul) ve Prompt (Görev talimatı) alanlarında** tanımlanır.
+
+ChatGPT görevlerinin kullanıcıya ulaşması için **Ayarlar → Bildirimler** bölümünden desteklenen push bildirimi, e-posta veya diğer bildirim seçenekleri açılabilir.
+
+Burada iki otomasyon katmanı birbirinden ayrılmalıdır:
+
+```text
+GitHub Agentic Workflows
+→ Codex / Claude / Gemini gibi agent çalışmalarını yürütür
+
+ChatGPT olayla tetiklenen görev
+→ desteklenen GitHub olayında orkestrasyon kontrolü yapabilir
+→ insana haber verebilir
+→ izin verilen bağlı araçlar destekliyorsa sonraki eylemi başlatabilir
+```
+
+ChatGPT'nin GitHub olayını görmesi sınırsız GitHub yetkisi vermez. Yalnızca bağlanan repository'ler ve verilen izinler kullanılabilir; onay gerektiren bir işlem görevi duraklatabilir.
+
+#### GitHub üzerinden bildirim
 
 Bildirimin nereye gönderileceği kullanılan sisteme göre değişebilir. **GitHub içinde kalınacaksa en basit başlangıç noktalarından biri Pull Request yorumu veya Issue oluşturmaktır.** Bunun için ilgili agentic workflow'un `.github/workflows/<ad>.md` dosyasındaki frontmatter'da izin verilen safe output tanımlanır. Örneğin PR'a yorum bırakılacaksa:
 
