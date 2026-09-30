@@ -1510,193 +1510,191 @@ gh aw compile .github/workflows/review.md
 
 Then send the updated `.md` and `.lock.yml` to GitHub.
 
-### 15. Automate when the human should be notified
+### 15. If ChatGPT is the orchestrator, manage agent flow through shared task files
 
-The goal of full automation is not to remove the human from the system completely. The goal is to let agents handle routine transitions while **making situations that require a decision or intervention visible to the right person.**
+When ChatGPT is the orchestrator in this guide, the main goal is **not to post comments on another Pull Request.** The goal is to keep the results of agents working on our own project in a shared, traceable place and let ChatGPT decide the next step from those records.
 
-The orchestration flow should therefore include a **human notification / intervention point**.
-
-For example:
-
-```text
-Agent is working
-        ↓
-normal, verified result
-        ↓
-automation continues
-
-BUT
-
-version mismatch
-or
-verification failed
-or
-the task needs to leave its allowed scope
-or
-more authority is required
-or
-the retry limit was reached
-        ↓
-STOP AUTOMATION
-        ↓
-notify the human
-        ↓
-wait for decision / approval
-```
-
-The exact notification conditions depend on project risk. Good candidates include:
-
-- the task completed successfully and the final result is ready;
-- a workflow or agent failed repeatedly;
-- `INPUT_VERSION` does not match `CURRENT_VERSION`;
-- an agent needs to leave the assigned scope;
-- a new file, service, or higher permission is required;
-- verification is uncertain or failed;
-- the automatic retry limit is exhausted;
-- a security-sensitive situation requires a human decision.
-
-A notification should not merely say **“something failed.”** It should contain enough information for the person to make a decision:
-
-```text
-TASK_ID
-STATUS
-CURRENT_VERSION
-WHAT_HAPPENED
-EVIDENCE
-WHAT_WAS_TRIED
-WHAT_NEEDS_HUMAN_DECISION
-SAFE_NEXT_OPTIONS
-```
+Agents do not need access to each other's chat memory. Instead, reserve a small orchestration area inside the repository.
 
 For example:
 
 ```text
-TASK_ID: UI-024
-STATUS: HUMAN_REVIEW_REQUIRED
-CURRENT_VERSION: def456
+PROJECT/
+├── orchestration/
+│   ├── current-task.md
+│   └── handoffs/
+│       ├── TASK-001-codex.md
+│       ├── TASK-001-claude.md
+│       └── TASK-001-test.md
+│
+├── src/
+└── tests/
+```
 
-WHAT_HAPPENED:
-The repository version changed after Claude's finding.
+This box is not a command. It shows an example folder structure that can be created in the repository.
 
-EVIDENCE:
+The files serve different purposes:
+
+- `orchestration/current-task.md` → the **canonical task state** showing the current stage;
+- `orchestration/handoffs/TASK-001-codex.md` → record of Codex's work and evidence;
+- `orchestration/handoffs/TASK-001-claude.md` → Claude review result;
+- `orchestration/handoffs/TASK-001-test.md` → test/verification result.
+
+For example, after Codex finishes, its handoff record could contain:
+
+```text
+TASK_ID: TASK-001
+SOURCE_AGENT: Codex
 INPUT_VERSION: abc123
-CURRENT_VERSION: def456
+OUTPUT_VERSION: def456
+STATUS: IMPLEMENTATION_COMPLETE
 
-WHAT_NEEDS_HUMAN_DECISION:
-Should the task be restarted against the new version?
+CHANGED:
+- src/navigation.py
+
+PRESERVE:
+- existing login flow
+
+VERIFIED:
+- existing automated tests passed
+
+SKIPPED_CHECKS:
+- visual check not performed
+
+NEXT_AGENT: Claude
+NEXT_ACTION: review the change against the task boundaries
 ```
 
-#### If ChatGPT is the orchestrator, notification can also be handled in ChatGPT
+This record is not Codex's memory. It is **shared project state stored in the repository.** ChatGPT, Claude, or another agent can therefore join later without needing the previous agent's conversation history.
 
-When ChatGPT is the orchestrator, human notification does not have to rely only on a GitHub comment. For eligible users, ChatGPT **event-triggered tasks** can respond to supported Pull Request activity in a connected GitHub repository.
+#### What does ChatGPT do here?
 
-Set this up inside ChatGPT:
+The ChatGPT orchestrator should not redo each agent's work. It reads the shared record and checks whether the handoff is safe.
 
 ```text
-ChatGPT
-  ↓
-Settings → Apps
-  ↓
-connect GitHub and authorize repository access
-  ↓
-open Work
-  ↓
-define the GitHub event + condition + task for ChatGPT
-  ↓
-Scheduled
-  ↓
-review the created task
+Codex completed the work
+        ↓
+Codex updated its handoff file
+        ↓
+current-task.md was updated
+        ↓
+ChatGPT orchestrator read the record
+        ↓
+check INPUT_VERSION / OUTPUT_VERSION / STATUS / evidence
+        ↓
+ ┌───────────────────────────────┐
+ │                               │
+handoff is safe              problem found
+ │                               │
+ ▼                               ▼
+run NEXT_AGENT               stop automation
+for example Claude           notify the human
 ```
 
-This box is not code; it shows the path through the ChatGPT interface.
+The primary state ChatGPT reads is **our own task files**. Pull Request comments, Issues, or agent chat memory are not the canonical task state.
 
-An orchestrator task could use this logic:
+#### How can ChatGPT automation follow these files?
+
+There are two approaches.
+
+**Method 1 — Scheduled / monitoring task**
+
+After connecting the GitHub app in ChatGPT, a scheduled task can periodically inspect the orchestration records in our repository.
+
+Example task logic:
 
 ```text
-TRIGGER:
-Supported Pull Request activity occurs in an authorized repository.
-
 CHECK:
-Does the result require a human decision?
-- did verification fail?
-- is there a version mismatch?
-- does the task need to leave its allowed scope?
-- has the retry limit been reached?
+orchestration/current-task.md
 
-ACTION:
-If no decision is required, record the result.
-If a human decision is required, summarize the situation and notify the user.
+IF:
+STATUS moved to a new stage
+
+VERIFY:
+- is TASK_ID correct?
+- is INPUT_VERSION the expected version?
+- does the required handoff file exist?
+- is there evidence in VERIFIED?
+- are SKIPPED_CHECKS acceptable?
+
+THEN:
+- if safe, perform the NEXT_AGENT / NEXT_ACTION step;
+- if human judgment is required, stop and notify me;
+- if nothing changed, do nothing.
 ```
 
-This task is not written into `.github/workflows/`. Define it in the **Trigger, Condition, and Prompt fields of the event-triggered task created in ChatGPT Work**.
+This text is not written into a repository workflow file. It is the instruction for a **scheduled/monitoring task created in ChatGPT**. The task can use the connected GitHub app within the repository access it has been granted.
 
-For ChatGPT task notifications, open **Settings → Notifications** and enable supported push, email, or other notification options.
+**Method 2 — Use GitHub activity to wake ChatGPT**
 
-Keep the two automation layers separate:
+Current ChatGPT GitHub event-triggered tasks can start from supported **Pull Request activity**. If the project already transports agent changes through PRs, that event can be used only as a **wake-up signal** for ChatGPT.
+
+ChatGPT's job is not to comment on the PR:
 
 ```text
-GitHub Agentic Workflows
-→ runs agent work such as Codex / Claude / Gemini
-
-ChatGPT event-triggered task
-→ can perform orchestration checks on supported GitHub events
-→ can notify the human
-→ can start an allowed next action when connected tools and permissions support it
-```
-
-Seeing a GitHub event does not give ChatGPT unlimited GitHub authority. The task can use only authorized repositories and granted permissions, and an action that requires approval can pause the task.
-
-#### Notification through GitHub
-
-Where the notification is sent depends on the system. **If you want to stay inside GitHub, a Pull Request comment or Issue is one of the simplest starting points.** Define the allowed safe output in the frontmatter of the relevant `.github/workflows/<name>.md`. For example, to allow a PR comment:
-
-```yaml
-safe-outputs:
-  add-comment:
-    max: 1
-```
-
-This does **not** mean “always send a comment.” It gives the workflow the controlled ability to create a comment. The workflow task text must separately define the conditions that produce a `HUMAN_REVIEW_REQUIRED` result.
-
-Whether a GitHub comment reaches a person as a notification depends on that user's GitHub notification/subscription settings. Direct email, Slack, or another external channel requires a separate integration that can access that channel.
-
-Rather than notifying a human about every small agent action, notifications are more useful at **completion, stop, failure, and decision-required thresholds**. Too many notifications can hide the important ones.
-
-Orchestration should therefore answer not only:
-
-```text
-"Which agent is next?"
-```
-
-but, when needed:
-
-```text
-"Should automation stop here?"
-"Should the human be notified?"
-"Is human approval required before continuing?"
-```
-
-### 16. Start with one small automated handoff
-
-Do not connect every agent at once.
-
-A good first target is:
-
-```text
-Codex sent the change to GitHub
+PR activity occurs
         ↓
-PR opened
+ChatGPT task starts
         ↓
-Claude started reviewing automatically
+read orchestration/current-task.md
+        ↓
+read the relevant handoff record
+        ↓
+verify version + status + evidence
+        ↓
+decide next agent / stop / human notification
 ```
 
-Once that transition is reliable, add the next steps one at a time:
+In other words:
+
+> **The PR event may be the trigger; our task and handoff files remain the source of orchestration state.**
+
+ChatGPT's GitHub event triggers are not a general repository webhook for every file change. If the architecture does not use PRs, a **scheduled monitoring task** is a clearer starting point.
+
+#### When does the human enter the loop?
+
+The ChatGPT orchestrator can continue routine, verified handoffs according to its rules. It should stop and notify the user when, for example:
+
+- `INPUT_VERSION` does not match the current version;
+- a required handoff file is missing;
+- verification failed or is uncertain;
+- `SKIPPED_CHECKS` contains a critical skipped check;
+- an agent needs to leave its allowed scope;
+- higher authority is required;
+- the retry limit is exhausted;
+- `NEXT_AGENT` or `NEXT_ACTION` is ambiguous.
+
+A notification should not merely say **“something failed.”** It should include at least the `TASK_ID`, current version, what happened, evidence, what was tried, and the decision required from the user.
+
+This removes the need for a person to manually carry every agent handoff. The human enters only when the automation cannot make a safe decision.
+
+### 16. Automate only one agent handoff first
+
+Instead of automating the entire agent chain at once, begin with one handoff.
+
+For example:
+
+```text
+Codex completed the task
+        ↓
+orchestration/handoffs/TASK-001-codex.md was created
+        ↓
+orchestration/current-task.md
+changed to NEXT_AGENT: Claude
+        ↓
+ChatGPT orchestrator checked the record
+        ↓
+Claude review started
+```
+
+After that single transition works reliably, add the next steps one at a time:
 
 ```text
 Claude → Codex correction
 Codex → Claude re-review
-Review → tests
+Review → normal automated tests
 Tests → verification
+Verification → complete / human decision
 ```
 
 At every handoff, preserve at least:
@@ -1706,6 +1704,7 @@ TASK_ID
 INPUT_VERSION
 CURRENT_VERSION
 SOURCE_AGENT
+STATUS
 NEXT_AGENT
 FINDINGS
 EVIDENCE
@@ -1716,9 +1715,9 @@ NEXT_ACTION
 
 The goal is not only to run agents in sequence.
 
-> **Safe automation should verify that the right task moves to the right agent with the right version and the right boundaries.**
+> **Safe automation should verify that the right task moves to the next agent with the correct version, evidence, and boundaries.**
 
-> **Note:** GitHub Agentic Workflows is in public preview at the time of writing. Recheck the current GitHub documentation for engine, trigger, permission, safe-output, and authentication options during setup.
+> **Note:** GitHub Agentic Workflows and ChatGPT connected-app/task features are evolving product capabilities. Recheck current documentation for engines, triggers, permissions, safe outputs, connected apps, and task options when implementing the real setup.
 
 ## When to use it
 
