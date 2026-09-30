@@ -766,15 +766,79 @@ Workflow yalnız bilgisayarda hazırlanıp GitHub'a gönderilmezse GitHub onu ç
 
 ### 3. Agent anahtarlarını kodun içine yazma
 
-Codex, Claude veya Gemini için gereken gizli bilgiler repository dosyalarına yazılmamalıdır.
+Codex, Claude veya Gemini gibi bir AI engine (AI motoru) API anahtarı kullanacaksa gerçek anahtar **repository dosyalarına, kaynak koda veya workflow metnine yazılmaz.** Anahtar GitHub'ın **Actions secrets (gizli değerler)** alanında saklanır.
 
-GitHub'da:
+#### Anahtar nereden alınır?
 
-**Settings → Secrets and variables → Actions**
+Kullanılan AI hizmetinin kendi hesabından bir API anahtarı oluşturulur:
 
-alanında **secret (gizli değer)** olarak saklanır.
+```text
+Codex   → OpenAI hesabından API anahtarı
+Claude  → Anthropic hesabından API anahtarı
+Gemini  → Google AI Studio'dan API anahtarı
+```
 
-Güncel Agentic Workflows yapısında kullanılan başlıca değerler:
+Ardından bu değer GitHub'a secret olarak kaydedilir.
+
+#### GitHub'da nereye yazılır?
+
+GitHub web sitesinde otomasyonun çalışacağı repository'yi açın ve şu yolu izleyin:
+
+```text
+Repository
+   ↓
+Settings
+   ↓
+Secrets and variables
+   ↓
+Actions
+   ↓
+New repository secret
+```
+
+Açılan ekranda iki temel alan bulunur:
+
+```text
+Name
+→ workflow'un anahtarı hangi adla bulacağını belirtir
+
+Secret
+→ AI sağlayıcısından aldığınız gerçek API anahtarıdır
+```
+
+Örneğin Claude için:
+
+```text
+Name:
+ANTHROPIC_API_KEY
+
+Secret:
+[Anthropic hesabından aldığınız gerçek anahtar]
+```
+
+Codex için:
+
+```text
+Name:
+OPENAI_API_KEY
+
+Secret:
+[OpenAI hesabından aldığınız gerçek anahtar]
+```
+
+Gemini için:
+
+```text
+Name:
+GEMINI_API_KEY
+
+Secret:
+[Google AI Studio'dan aldığınız gerçek anahtar]
+```
+
+Son olarak **Add secret** seçilir.
+
+GitHub Agentic Workflows için güncel temel adlar şunlardır:
 
 ```text
 Codex   → OPENAI_API_KEY veya CODEX_API_KEY
@@ -782,9 +846,43 @@ Claude  → ANTHROPIC_API_KEY
 Gemini  → GEMINI_API_KEY
 ```
 
-Gerçek anahtar değeri `AGENTS.md`, workflow, görev paketi veya kaynak kod içine eklenmez.
+Codex tarafında `CODEX_API_KEY` ve `OPENAI_API_KEY` desteklenir; ikisi de tanımlıysa `CODEX_API_KEY` öncelikli kullanılır.
 
-Bu anahtar agentın AI hizmetini çalıştırmak içindir. GitHub'da dosya okuma, PR güncelleme veya başka workflow başlatma yetkileri ise ayrıca GitHub izinleriyle kontrol edilir.
+#### Workflow anahtarı nasıl kullanır?
+
+Mantık şöyledir:
+
+```text
+AI sağlayıcısından anahtar alınır
+        ↓
+GitHub Actions Secrets alanına kaydedilir
+        ↓
+workflow çalışır
+        ↓
+GitHub secret değerini çalışma sırasında güvenli biçimde sağlar
+        ↓
+AI engine kimlik doğrulaması yapılır
+```
+
+Böylece gerçek anahtar repository'deki normal dosyalarda görünmez.
+
+Gerçek anahtar değeri şu alanlara **yazılmamalıdır**:
+
+```text
+AGENTS.md
+workflow'un normal metni
+görev paketi
+README
+kaynak kod
+commit mesajı
+Issue / Pull Request yorumu
+```
+
+Anahtarı Terminal/PowerShell üzerinden kaydetmek de mümkündür; ancak bu rehberde yeni başlayanlar için GitHub web arayüzündeki yol esas alınmıştır.
+
+> **GitHub Copilot farklı çalışabilir:** Kuruluşa bağlı GitHub Copilot kullanımında `copilot-requests: write` izniyle ayrıca bir AI sağlayıcı API anahtarı gerekmeyebilir. Kullanılan engine ve hesap yapısına göre güncel kimlik doğrulama yöntemi kontrol edilmelidir.
+
+Buradaki API anahtarı **AI hizmetine kimlik doğrulamak** içindir. Agentın GitHub'da dosya okuma, PR güncelleme, yorum ekleme veya başka workflow başlatma yetkileri ise ayrıca GitHub izinleri ve workflow ayarlarıyla kontrol edilir.
 
 ### 4. Codex işi bitirdiğinde Claude değişikliği nasıl görür?
 
