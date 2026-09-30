@@ -1123,35 +1123,114 @@ B) Configure a suitable GitHub identity that allows
 
 For a first setup, **A**, explicit workflow-to-workflow routing, is easier to understand and debug.
 
-### 9. Do not use an AI agent for every test
+### 9. Should the test stage use an AI agent or a normal automated test?
 
-After Claude passes the review, move to tests:
+You do not need to start another AI agent for every test. First ask:
+
+> **Can a program determine the result of this check clearly, or does someone need to interpret the result in context?**
+
+Separate the checks into two types.
+
+#### 1. Checks with a clear result
+
+Some checks have an objective result. For example:
 
 ```text
-Claude review
-        ↓
-acceptable
-        ↓
-test / build / lint
-        ↓
-pass → VERIFIED
-fail → correction task
+Did the unit test pass?
+→ YES / NO
+
+Did the application build successfully?
+→ YES / NO
+
+Are there lint errors?
+→ YES / NO
+
+Did the type check pass?
+→ YES / NO
 ```
 
-Checks with clear deterministic results do not need another AI agent.
+An AI agent does not need to read the code and decide these results. Existing test commands, scripts, or **GitHub Actions** can run these checks automatically.
+
+For example, if the project already uses:
+
+```bash
+pytest
+```
+
+GitHub Actions can run the same command automatically and route the workflow according to whether it succeeds.
+
+The flow becomes:
+
+```text
+Codex made the change
+        ↓
+sent to GitHub
+        ↓
+normal automated test runs
+        ↓
+ ┌──────────────────────┐
+ │                      │
+TEST PASSED          TEST FAILED
+ │                      │
+ ▼                      ▼
+next check           correction task for Codex
+```
+
+The **normal automated test** here is not AI. It is the project's existing test tool being run automatically by GitHub Actions.
+
+#### 2. Checks that require interpretation
+
+Some questions cannot be answered by a test command returning only `PASS` or `FAIL`.
 
 For example:
 
 ```text
-unit test
-build
-lint
-type check
+Was the behavior requested by the user actually implemented?
+
+Did the change leave the assigned scope?
+
+Was existing working behavior changed unnecessarily?
+
+Could the code work technically while misunderstanding the request?
+
+Does the screen or user flow match the expected behavior?
 ```
 
-can usually run as normal GitHub Actions steps.
+For these checks, an **AI agent such as Claude, Gemini, or another suitable agent** can read the context and evaluate the result.
 
-Use an AI agent where interpretation is needed, such as reviewing whether a change stayed within scope or whether the implementation matches the requested behavior.
+Normal tests and AI agents are therefore not substitutes for each other. A reliable workflow will often use both:
+
+```text
+Code change
+      ↓
+NORMAL AUTOMATED CHECKS
+unit test / build / lint / type check
+      ↓
+pass
+      ↓
+AI REVIEW
+was the request implemented correctly?
+was scope preserved?
+is there a contextual problem?
+      ↓
+verification
+```
+
+The order can vary by project. For example, running cheap and fast automated tests before an AI review can avoid spending AI usage on a change that does not even build.
+
+In short:
+
+```text
+Can a command determine the answer clearly?
+        ↓
+YES → normal test / script / GitHub Actions
+
+Does the check require interpretation, context, or judgment?
+        ↓
+YES → AI agent
+```
+
+The goal is not to remove AI agents from testing. It is to **avoid using AI for work that existing tools can determine exactly, and use AI where interpretation or contextual evaluation is valuable.**
 
 ### 10. Trigger, orchestration, and agent are different roles
 
