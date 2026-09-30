@@ -1212,7 +1212,103 @@ max-ai-credits: 500
 
 Bu değer gerçek projede kullanılmadan önce seçilen modelin maliyeti ve istenen görev büyüklüğüne göre ayarlanmalıdır.
 
-### 15. İlk otomasyonda bütün sistemi birden kurma
+### 15. İnsana ne zaman haber verileceğini de otomatikleştir
+
+Tam otomasyonun amacı insanı sistemden tamamen çıkarmak değildir. Amaç, rutin geçişleri agentlara bırakırken **karar veya müdahale gerektiren durumları doğru kişiye görünür hale getirmektir.**
+
+Bu nedenle orkestrasyon akışında bir **insan bildirim / müdahale noktası** da tanımlanmalıdır.
+
+Örneğin:
+
+```text
+Agent görevi yürütüyor
+        ↓
+normal ve doğrulanmış sonuç
+        ↓
+otomasyon devam eder
+
+AMA
+
+sürüm uyuşmuyor
+veya
+doğrulama başarısız
+veya
+izin verilen kapsamın dışına çıkmak gerekiyor
+veya
+daha fazla yetki gerekiyor
+veya
+belirlenen tekrar deneme sınırı aşıldı
+        ↓
+OTOMASYONU DURDUR
+        ↓
+insana haber ver
+        ↓
+karar / onay bekle
+```
+
+İnsana haber verilmesi gereken durumlar proje riskine göre belirlenebilir. Özellikle şu durumlar iyi adaylardır:
+
+- görev başarıyla tamamlandı ve nihai sonuç hazır;
+- workflow veya agent art arda başarısız oldu;
+- `INPUT_VERSION` ile `CURRENT_VERSION` uyuşmuyor;
+- agent görev kapsamının dışına çıkmak istiyor;
+- yeni dosya, servis veya daha yüksek yetki gerekiyor;
+- doğrulama sonucu belirsiz veya başarısız;
+- otomatik tekrar deneme sınırı tükendi;
+- güvenlik açısından insan kararı gerektiren bir durum oluştu.
+
+Bildirim yalnızca **“hata oldu”** dememelidir. Karar verecek kişinin ne olduğunu anlayabilmesi için en az şu bilgileri taşımalıdır:
+
+```text
+TASK_ID
+STATUS
+CURRENT_VERSION
+WHAT_HAPPENED
+EVIDENCE
+WHAT_WAS_TRIED
+WHAT_NEEDS_HUMAN_DECISION
+SAFE_NEXT_OPTIONS
+```
+
+Örneğin:
+
+```text
+TASK_ID: UI-024
+STATUS: HUMAN_REVIEW_REQUIRED
+CURRENT_VERSION: def456
+
+WHAT_HAPPENED:
+Claude bulgusundan sonra repository sürümü değişti.
+
+EVIDENCE:
+INPUT_VERSION: abc123
+CURRENT_VERSION: def456
+
+WHAT_NEEDS_HUMAN_DECISION:
+Yeni sürüm üzerinde görevin yeniden başlatılması onaylanmalı mı?
+```
+
+Bildirimin nereye gönderileceği kullanılan sisteme göre değişebilir. GitHub üzerinde Issue, Pull Request yorumu veya belirlenmiş başka bir bildirim kanalı kullanılabilir. E-posta, Slack veya benzeri harici bir kanal kullanılacaksa ayrıca o kanala erişebilen bir entegrasyon gerekir.
+
+Her küçük agent hareketinde insana bildirim göndermek yerine **tamamlanma, durma, hata ve karar gerektiren eşikler** için bildirim oluşturmak daha kullanışlıdır. Aksi halde çok fazla bildirim önemli uyarıların gözden kaçmasına neden olabilir.
+
+Bu nedenle orkestrasyon yalnızca:
+
+```text
+"Sıradaki agent kim?"
+```
+
+sorusunu değil, gerektiğinde:
+
+```text
+"Burada otomasyon durmalı mı?"
+"İnsana haber verilmeli mi?"
+"Devam etmek için insan onayı gerekiyor mu?"
+```
+
+sorularını da cevaplamalıdır.
+
+### 16. İlk otomasyonda bütün sistemi birden kurma
 
 İlk hedef yalnızca tek bir geçiş olmalıdır:
 
