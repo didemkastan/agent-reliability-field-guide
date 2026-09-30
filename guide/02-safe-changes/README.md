@@ -708,14 +708,18 @@ Kimlik doğrulama
 → gerekli API anahtarı veya desteklenen kimlik doğrulama yöntemi hazır
 ```
 
-GitHub CLI için durum kontrol edilebilir:
+Buradaki `gh` ile başlayan komutlar **GitHub web sitesine veya proje dosyasına yazılmaz. Bilgisayarınızdaki komut ekranında çalıştırılır.** Windows kullanıyorsanız **PowerShell** veya **Windows Terminal**, macOS/Linux kullanıyorsanız **Terminal** açabilirsiniz.
+
+GitHub CLI, GitHub işlemlerini bu komut ekranından yapmamızı sağlayan araçtır. Önce Terminal/PowerShell'i açın ve GitHub CLI'ın kurulu ve hesabınıza bağlı olup olmadığını kontrol edin:
 
 ```bash
 gh --version
 gh auth status
 ```
 
-Gerekirse repository ve workflow yetkileriyle giriş yapılır:
+İlk komut GitHub CLI'ın kurulu olup olmadığını, ikinci komut ise GitHub hesabıyla bağlantı durumunu gösterir.
+
+Gerekirse aynı Terminal/PowerShell ekranında repository ve workflow yetkileriyle giriş yapılır:
 
 ```bash
 gh auth login --scopes repo,workflow
@@ -723,12 +727,14 @@ gh auth login --scopes repo,workflow
 
 ### 2. Repository'yi Agentic Workflows için hazırla
 
-GitHub Agentic Workflows uzantısı kurulabilir:
+GitHub Agentic Workflows uzantısı yine **aynı Terminal/PowerShell ekranında** kurulabilir:
 
 ```bash
 gh extension install github/gh-aw
 gh aw init
 ```
+
+İlk komut Agentic Workflows uzantısını kurar. İkinci komut bulunduğunuz repository'yi Agentic Workflows kullanımı için hazırlar. Bu nedenle komutları çalıştırmadan önce Terminal/PowerShell'de üzerinde çalışacağınız repository klasöründe olduğunuzdan emin olun.
 
 Agentlara ait workflow kaynakları `.github/workflows/` klasöründe tutulur.
 
@@ -748,13 +754,13 @@ Dosyanın üst bölümünde görevin **ne zaman başlayacağı, hangi agentın k
 
 `.lock.yml` dosyası GitHub Actions'ın çalıştıracağı derlenmiş sürümdür.
 
-Workflow ayarları değiştiğinde:
+Workflow ayarları değiştiğinde, repository klasöründe açık olan **Terminal/PowerShell** içinde:
 
 ```bash
 gh aw compile
 ```
 
-çalıştırılır ve kaynak `.md` ile oluşan `.lock.yml` birlikte GitHub'a gönderilir.
+çalıştırılır. Bu komut workflow'un GitHub Actions tarafından çalıştırılacak `.lock.yml` sürümünü üretir. Kaynak `.md` dosyası ile oluşan `.lock.yml` daha sonra birlikte GitHub'a gönderilir.
 
 Workflow yalnız bilgisayarda hazırlanıp GitHub'a gönderilmezse GitHub onu çalıştıramaz.
 
@@ -1159,16 +1165,27 @@ EVET → sıradaki aşama
 HAYIR → dur / hata kaydı oluştur
 ```
 
-Başarısız çalışma GitHub **Actions** ekranından incelenebilir.
+Başarısız çalışma önce GitHub web sitesindeki **Actions** sekmesinden incelenebilir.
 
-Agentic Workflows için son çalışmaları görmek ve tek bir çalışmayı ayrıntılı incelemek için örneğin:
+Daha ayrıntılı kontrol gerektiğinde bilgisayarınızdaki **Terminal/PowerShell** de kullanılabilir. Repository klasöründe Terminal/PowerShell'i açıp:
 
 ```bash
 gh aw logs
+```
+
+komutunu çalıştırarak Agentic Workflows çalışmalarını görebilirsiniz. İncelemek istediğiniz çalışmanın **RUN_ID (çalışma numarası)** bilgisini buradan aldıktan sonra:
+
+```bash
 gh aw audit <RUN_ID>
 ```
 
-kullanılabilir.
+komutundaki `<RUN_ID>` yerine gerçek çalışma numarasını yazın. Örneğin çalışma numarası `123456` ise:
+
+```bash
+gh aw audit 123456
+```
+
+Bu komutlar otomasyonu kurmak için değil, **kurulmuş otomasyonun nasıl çalıştığını kontrol etmek ve sorun olduğunda nedenini araştırmak için** kullanılır.
 
 ### 14. Otomasyonun maliyetini de sınırla
 
