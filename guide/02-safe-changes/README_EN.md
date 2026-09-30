@@ -1512,7 +1512,7 @@ Then send the updated `.md` and `.lock.yml` to GitHub.
 
 ### 15. If ChatGPT is the orchestrator, manage agent flow through shared task files
 
-When ChatGPT is the orchestrator in this guide, the main goal is **not to post comments on another Pull Request.** The goal is to keep the results of agents working on our own project in a shared, traceable place and let ChatGPT decide the next step from those records.
+When ChatGPT is the orchestrator, the results of agents working on our project are kept in a shared, traceable place, and ChatGPT reads those records to decide the next step.
 
 Agents do not need access to each other's chat memory. Instead, reserve a small orchestration area inside the repository.
 
