@@ -72,7 +72,7 @@ Bu nedenle iki soru birlikte sorulur:
 
 ## Kapsam nasıl kontrol edilir?
 
-İlk kapsam kontrolünü, değişikliği yapan agenttan farklı bir agent yapabilir. Örneğin Codex değişikliği yaptıysa Claude veya Gemini diff'i inceleyebilir. Ancak bir değişiklik ana dala alınmadan (**merge edilmeden**) önce son kapsam kontrolü ve kabul kararı insana aittir.
+İlk kapsam kontrolünü, değişikliği yapan agenttan farklı bir agent yapabilir. Örneğin Codex değişikliği yaptıysa Claude veya Gemini yapılan değişikliklerin farkını (**diff**) inceleyebilir. Ancak değişiklik ana projeye eklenmeden (**merge**) önce son kapsam kontrolü ve kabul kararı insana aittir.
 
 Kontrol sırasında CHANGE ile gerçekleşen değişiklik karşılaştırılır ve şu sorular cevaplanır:
 
@@ -81,15 +81,15 @@ Kontrol sırasında CHANGE ile gerçekleşen değişiklik karşılaştırılır 
 - DO NOT altında yasaklanan bir işlem yapılmış mı?
 - Görevi tamamlamak için gerekmeyen ek bir değişiklik yapılmış mı?
 
-Agentın kendi raporu tek başına doğrulama değildir. Gerçek değişiklik farkı (**diff**) kontrol edilir.
+Agentın kendi raporu tek başına doğrulama değildir. Gerçekte hangi dosya ve satırların değiştiği (**diff**) ayrıca kontrol edilir.
 
-### GitHub'da diff kontrolü
+### GitHub'da değişiklikleri kontrol et
 
-Değişiklik GitHub'da bir Pull Request (PR) içindeyse PR'ı aç ve **Files changed** sekmesine gir. Burada değişen dosyaları ve satırları görürsün.
+Değişiklik GitHub'da ayrı bir değişiklik önerisi (**Pull Request / PR**) olarak duruyorsa PR'ı aç ve **Files changed** sekmesine gir. Burada hangi dosyaların ve satırların değiştiğini görürsün.
 
-### Bilgisayarda diff kontrolü
+### Bilgisayarda değişiklikleri kontrol et
 
-Komutları bilgisayarındaki repository klasöründe Terminal veya PowerShell içinde çalıştır.
+Komutları bilgisayarındaki proje klasöründe (**repository**) Terminal veya PowerShell içinde çalıştır.
 
 **TERMİNALDE ÇALIŞTIR**
 
@@ -100,12 +100,12 @@ git diff
 ```
 
 - `git status` hangi dosyaların değiştiğini gösterir.
-- `git diff --stat` değişiklikleri dosya bazında özetler.
-- `git diff` değişen satırları gösterir.
+- `git diff --stat` değişen dosyaların kısa bir özetini gösterir.
+- `git diff` hangi satırların değiştiğini ayrıntılı gösterir.
 
-> Bu komutlardaki normal `git diff`, henüz commit edilmemiş çalışma alanı değişikliklerini kontrol etmek için kullanılır.
+Bu üç komut, değişiklikler henüz Git geçmişine kaydedilmeden önceki durumu kontrol etmek için kullanılır. Git'te bu kayıt işlemine **commit (değişikliği kaydetme)** denir.
 
-Agent değişiklikleri commit (kaydedilmiş değişiklik) haline getirdiyse son commit'i görmek için:
+Agent değişiklikleri Git geçmişine kaydettiyse (**commit yaptıysa**), en son kaydı görmek için:
 
 **TERMİNALDE ÇALIŞTIR**
 
@@ -113,9 +113,9 @@ Agent değişiklikleri commit (kaydedilmiş değişiklik) haline getirdiyse son 
 git show HEAD
 ```
 
-Buradaki `HEAD`, üzerinde çalıştığın branch'teki en son commit'i ifade eder.
+Buradaki **HEAD (en son kayıt)**, üzerinde çalışılan dalın en son kaydedilmiş değişikliğini gösterir.
 
-Agent aynı branch'te birden fazla commit yaptıysa yalnızca son commit'e bakmak yeterli değildir. Çalıştığın branch'in ana daldan ayrıldıktan sonraki bütün farkını görmek için:
+Agent aynı çalışma dalında (**branch**) birden fazla kayıt (**commit**) oluşturduysa yalnızca son kayda bakmak yeterli değildir. Çalışılan dal ile ana dal (**main**) arasındaki bütün farkı görmek için:
 
 **TERMİNALDE ÇALIŞTIR**
 
@@ -123,9 +123,9 @@ Agent aynı branch'te birden fazla commit yaptıysa yalnızca son commit'e bakma
 git diff main...HEAD
 ```
 
-> Ana dalın adı `main` değilse komutta kendi ana dal adını kullan. Örneğin ana dal `master` ise `git diff master...HEAD` yaz.
+> Projenin ana dalının adı `main` değilse komutta o adı kullan. Örneğin ana dal `master` ise `git diff master...HEAD` yaz.
 
-> **Diff satırlarını okumakta zorlanıyorsan:** En azından değişen dosya listesini BEKLENEN listeyle karşılaştır. Beklemediğin bir dosya görürsen aşağıdaki **Seçenek 1** ile agenta kapsam dışı değişikliği açıklat ve kontrol ettir.
+> **Değişiklik satırlarını (diff) okumakta zorlanıyorsan:** En azından değişen dosya listesini BEKLENEN listeyle karşılaştır. Beklemediğin bir dosya görürsen aşağıdaki **Seçenek 1** ile agenta kapsam dışı değişikliği açıklat ve kontrol ettir.
 
 ## Beklenmeyen değişiklik bulunursa ne yapılır?
 
@@ -136,16 +136,16 @@ Beklenmeyen değişiklik otomatik olarak kabul edilmez. Önce neden oluştuğu b
 **AGENTA YAPIŞTIR**
 
 ```text
-Başlangıçtaki CHANGE / PRESERVE / DO NOT sınırlarıyla mevcut diff'i karşılaştır.
+Başlangıçtaki CHANGE / PRESERVE / DO NOT sınırlarıyla gerçekleşen değişiklikleri (diff) karşılaştır.
 Kapsam dışında kalan değişiklikleri listele.
 Her beklenmeyen değişikliğin neden oluştuğunu açıkla.
 Görevin tamamlanması için gerekli değilse yalnızca kapsam dışı değişikliği geri al.
 Kapsamı kendiliğinden genişletme.
 ```
 
-Düzeltmeden sonra diff yeniden kontrol edilir.
+Düzeltmeden sonra değişiklik farkı (diff) yeniden kontrol edilir.
 
-### Seçenek 2 — Commit edilmemiş dosyayı yerelde geri al
+### Seçenek 2 — Henüz kaydedilmemiş yerel değişikliği geri al
 
 Önce ilgili dosyanın farkını gör:
 
@@ -155,7 +155,7 @@ Düzeltmeden sonra diff yeniden kontrol edilir.
 git diff config.yaml
 ```
 
-Dosyadaki **tüm commit edilmemiş yerel değişiklikleri silmek istediğinden eminsen**:
+Dosyadaki **Git geçmişine henüz kaydedilmemiş tüm yerel değişiklikleri silmek istediğinden eminsen**:
 
 **TERMİNALDE ÇALIŞTIR**
 
@@ -163,7 +163,7 @@ Dosyadaki **tüm commit edilmemiş yerel değişiklikleri silmek istediğinden e
 git restore config.yaml
 ```
 
-> **Dikkat:** `git restore config.yaml` dosyadaki commit edilmemiş değişiklikleri silebilir. Emin değilsen çalıştırma. Değişiklik zaten commit edildiyse bu komutu çözüm olarak kullanma. Bu durumda **Seçenek 1**'i kullan ve agenta kapsam dışı değişikliği yeni bir commit ile geri aldır.
+> **Dikkat:** `git restore config.yaml`, dosyadaki henüz kaydedilmemiş değişiklikleri silebilir. Emin değilsen çalıştırma. Değişiklik Git geçmişine zaten kaydedildiyse (**commit edildiyse**) bu komutu çözüm olarak kullanma. Bu durumda **Seçenek 1**'i kullan ve agenta kapsam dışı değişikliği yeni bir kayıtla (**commit**) geri aldır.
 
 ## Kapsam agentlar arasında nasıl korunur?
 
@@ -200,7 +200,7 @@ UNEXPECTED_CHANGES
 SCOPE_STATUS
 ```
 
-Kalıcı ortak kuralların `AGENTS.md` gibi proje talimatlarında nasıl tutulacağı ve sonraki agenta nasıl aktarılacağı [Agentlar Arası Görev Devri](../03-agent-handoffs/README.md) bölümünde ele alınır.
+Kalıcı ortak kuralların `AGENTS.md` gibi proje talimatlarında nasıl tutulacağı ve sonraki agenta nasıl aktarılacağı [Agentlar Arası Görev Devri](../03-agent-handoffs/README.md) bölümünde ele alınacaktır.
 
 ## Kullanılabilir görev talimatı
 
@@ -252,10 +252,10 @@ Kolayca geri alınabilen, gerçek proje davranışını etkilemeyen küçük den
 
 1. Değişiklik başlamadan **CHANGE / PRESERVE / DO NOT** belirlenir.
 2. Agent yalnızca gereken **en küçük değişikliği** yapar.
-3. Gerçekleşen değişiklik **diff** üzerinden kontrol edilir.
+3. Gerçekte değişen dosya ve satırlar (**diff**) kontrol edilir.
 4. Beklenmeyen değişikliğin nedeni incelenir ve gerekli değilse geri alınır.
 5. Kapsam bilgisi görevle birlikte sonraki agenta taşınır.
-6. Bağımsız agent kontrolü kullanılabilir; **merge öncesi son kabul insana aittir.**
+6. Bağımsız agent kontrolü kullanılabilir; değişiklik ana projeye eklenmeden (**merge**) önce son kabul insana aittir.
 
 ## Sonraki adımlar
 
