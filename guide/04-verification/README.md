@@ -93,14 +93,10 @@ Sistem agenttan OBSERVED (Gözlemlenen), INTERPRETED (Yorumlanan), ACTION (Yapı
 
 Bu örnekte her bilgi ayrı bir alanda tutulduğu için sistem yapılan işlem ile doğrulama sonucunu birbirinden ayırabilir. `VERIFIED` alanı boşsa veya doğrulamanın yapılmadığını belirtiyorsa görev yalnızca agentın “tamamlandı” demesine dayanarak doğrulanmış kabul edilmemelidir.
 
-### Kullanıcı ne zaman bu kuralı kullanmalı?
-
-Kullanıcı bu kuralı özellikle agenttan **bir şeyi değiştirmesini veya doğru çalıştığını göstermesini istediğinde** devreye almalıdır. Dosya veya kod değişikliği, test, build, yapılandırma değişikliği, araç kullanımı ve başka bir agenta devredilecek işler buna örnektir.
-
-Önemli görevlerde doğrulama kaydına hangi dosya veya sürümün kontrol edildiği ve kontrolün hangi çalışma ortamında yapıldığı da eklenebilir.
-
 ## Ne zaman kullanılır?
 
-Bu ayrım özellikle agent dosya değiştirdiğinde, test çalıştırdığında, çıktı oluşturduğunda, başka bir araç kullandığında veya işi başka bir agenta devrettiğinde önemlidir.
+Bu kural, agenttan **bir şeyi değiştirmesi veya doğru çalıştığını göstermesi istendiğinde** özellikle yararlıdır. Dosya veya kod değişikliği, test, build, yapılandırma değişikliği, araç kullanımı ve başka bir agenta devredilecek işler buna örnektir.
+
+Önemli görevlerde hangi dosya veya sürümün kontrol edildiği ve doğrulamanın hangi çalışma ortamında yapıldığı da kaydedilebilir.
 
 Düşük riskli ve kolayca geri alınabilen işlemlerde daha kısa bir kontrol yeterli olabilir. Örneğin bir README dosyasındaki yazım hatasını düzeltirken değişikliğin dosyada doğru göründüğünü yeniden kontrol etmek yeterli olabilir; ayrıca kapsamlı bir test çalıştırmak gerekmeyebilir.
