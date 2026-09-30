@@ -101,11 +101,24 @@ File count alone is not enough. A protected section may have changed inside an e
 
 ## Where should the prompt go when using multiple agents?
 
-When several agents work on the same project, it is better to keep shared safe-change rules in **one persistent project rule** instead of copying them separately into every chat. This reduces the risk of different agents gradually receiving different versions of the rules.
+When several agents work on the same project, the user should not have to say **“read the rules first”** at the start of every task. Shared rules should be defined once, and each agent should be connected to them through its project startup mechanism.
 
-For example, a project can use a shared file such as `AGENT_RULES.md`. However, the presence of that file in the project does not mean every agent will read it automatically. Check which project instruction each tool loads automatically and make the shared rule available through that entry point.
+The shared rules can be kept in one **canonical project instruction**. For example:
 
-Task-specific information should be provided when assigning the task rather than added permanently to the shared rule:
+```text
+PROJECT/
+├── AGENTS.md          ← shared rules for all agents
+├── [Agent A entry]    ← connected to the AGENTS.md rules
+├── [Agent B entry]    ← connected to the AGENTS.md rules
+├── [Agent C entry]    ← connected to the AGENTS.md rules
+└── ...
+```
+
+The important point is not the file name itself but having **one shared source of rules**. Different agent tools may load project instructions from different files or settings, so each agent's startup mechanism should be connected to the shared rules.
+
+> **The presence of a file in the project does not mean every agent reads it automatically. During setup, confirm that each agent actually loads the shared rules.**
+
+Once this connection is configured correctly, the shared rules do not need to be repeated in every task prompt. Only information specific to the current task is supplied:
 
 ```text
 TASK:
@@ -121,9 +134,31 @@ DO NOT:
 - Do not change other files.
 ```
 
-With this structure, **persistent rules** remain shared across agents, while task-specific information such as **TASK, CHANGE, PRESERVE, and DO NOT** is supplied only for the relevant task.
+This creates a clear separation:
 
-In an automated multi-agent system, the same approach can be applied through the orchestrator. The orchestrator passes the shared rules and task-specific boundaries to the agent performing the work. If the task is handed to another agent, the relevant scope and protected areas should travel with the handoff record.
+```text
+SHARED / PERSISTENT
+AGENTS.md
+- safe-change rules
+- verification rules
+- general preservation constraints
+
+TASK-SPECIFIC
+TASK / CHANGE / PRESERVE / DO NOT
+- boundaries of the current task only
+```
+
+A startup check can also be recorded in a multi-agent workflow:
+
+```text
+INSTRUCTION_SOURCE: AGENTS.md
+INSTRUCTION_VERSION: v1.3
+INSTRUCTIONS_LOADED: YES
+```
+
+This makes the instruction source visible instead of merely assuming that the agent had access to the rules. When the rules change, additional information such as a version or hash can also be used.
+
+In an automated multi-agent system, the orchestrator can handle this step by passing the shared rules and task-specific boundaries to the agent performing the work. If the task is handed to another agent, the relevant scope and protected areas travel with the handoff record.
 
 ## Use in automation
 
