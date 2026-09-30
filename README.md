@@ -8,7 +8,7 @@ Yayımlanmış bölümlerin başlıklarına tıklayarak ulaşabilirsiniz.
 2. [**Agentlar Arası Görev Devri**](guide/03-agent-handoffs/README.md) — Bir agentın yaptığı işi diğerine gerekli bilgilerle birlikte aktarma.
 3. [**Handoff Receipt (Görev Devri Kayıt Şablonu)**](patterns/handoff-receipt.md) — Görev devrinde kullanılabilecek hazır kayıt yapısı.
 4. [**Verification (Doğrulama)**](guide/04-verification/README.md) — “Tamamlandı” demek ile sonucu gerçekten doğrulamak arasındaki fark.
-5. [**Güvenli Değişiklik ve Agent Otomasyonu**](guide/02-safe-changes/README.md) — Değişiklikleri görev sınırları içinde tutma ve agentlar arası geçişleri GitHub üzerinden güvenli biçimde otomatikleştirme.
+5. **Güvenli Değişiklik ve Agent Otomasyonu** — Düzenleniyor.
 6. **Retry (Yeniden deneme)** — Yakında.
 7. **Memory & Context (Hafıza ve bağlam)** — Yakında.
 8. **Security & Authority (Güvenlik ve yetki)** — Yakında.
