@@ -160,6 +160,41 @@ Bu kayıt, agentın yalnızca kurallara erişebildiğini varsaymak yerine hangi 
 
 Otomatik bir çoklu-agent sisteminde bu işi orkestratör üstlenebilir: ortak kuralları ve göreve özel sınırları işi yapacak agenta aktarır. Görev başka bir agenta devredildiğinde de ilgili kapsam ve korunacak alanlar görev devri kaydıyla birlikte taşınır.
 
+### Örnek: ChatGPT, Codex, Claude ve GitHub ile görev akışı
+
+Örneğin aynı yazılım projesinde ChatGPT, Codex ve Claude birlikte kullanılıyor olsun. GitHub burada bir agent değil; dosyaların, sürümlerin ve değişiklik geçmişinin tutulduğu ortak çalışma alanıdır.
+
+Basit bir görev dağılımı şöyle kurulabilir:
+
+```text
+GitHub
+└── Kanonik proje dosyaları + AGENTS.md
+              ↓
+ChatGPT
+└── İsteği analiz eder ve görev sınırını hazırlar.
+    TASK / CHANGE / PRESERVE / DO NOT
+              ↓
+Codex
+└── Kuralları ve görev sınırını alır.
+    Gerekli kod değişikliğini yapar.
+    CHANGED / PRESERVED / SCOPE_STATUS kaydını üretir.
+              ↓
+GitHub
+└── Değişiklik ve güncel sürüm ortak çalışma alanına kaydedilir.
+              ↓
+Claude
+└── Güncel sürümü ve görev devri kaydını alır.
+    Yapılan değişikliği ve korunması gereken alanları inceler.
+    Eksik veya beklenmeyen bir değişiklik varsa bildirir.
+              ↓
+GitHub
+└── Doğrulanmış sonuç ve güncel proje durumu korunur.
+```
+
+Bu örnekte ChatGPT görev hazırlama ve yönlendirme, Codex uygulama, Claude ikinci inceleme rolündedir. Bu roller sabit olmak zorunda değildir; göreve göre değiştirilebilir. Önemli olan her agentın aynı kanonik kuralları ve güncel görev durumunu almasıdır.
+
+Bu akışın otomatik olabilmesi için ayrıca bir **orkestratör veya tetikleme mekanizması** gerekir. Agentların aynı GitHub repository'sine erişebilmesi, tek başına bir agentın işi bitirdiğinde diğerinin otomatik olarak başlayacağı anlamına gelmez.
+
 ## Otomasyonda kullanım
 
 Otomatik bir iş akışında beklenen dosyalar görev başlamadan önce tanımlanabilir. İşlem sonunda sistem gerçekten değişen dosyaları bu listeyle karşılaştırabilir.
