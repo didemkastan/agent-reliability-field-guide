@@ -15,7 +15,7 @@
 ## Birkaç kelime
 
 - **Repository (repo):** Projenin dosyalarının ve değişiklik geçmişinin tutulduğu çalışma alanı.
-- **Commit:** Değişiklikların kaydedilmiş bir anlık görüntüsü.
+- **Commit:** Değişikliklerin kaydedilmiş bir anlık görüntüsü.
 - **Diff (değişiklik farkı):** Bir dosyada hangi satırların silindiğini ve eklendiğini gösteren karşılaştırma.
 - **Kapsam:** Görevin sınırı; agentın neye dokunabileceğini ve neyi koruması gerektiğini belirler.
 
