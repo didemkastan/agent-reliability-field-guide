@@ -519,89 +519,101 @@ For the workflow to advance automatically between agents, an **orchestrator or t
 
 ## Safe Agent Handoffs and Automation Setup
 
-In an automated workflow, expected files can be defined before the task starts. After the task, the system can compare that list with the files that actually changed.
+So far, we have seen what information should travel with a task when it moves from one agent to another. Now we can look at how the same handoff can happen without requiring the user to carry every message manually.
 
-If an unexpected file was modified, the change can be held for review instead of being accepted automatically. Stricter workflows can also compare changed lines with the areas that were allowed to change.
-
-### How can agents hand work off without a human?
-
-Giving an agent access to a GitHub repository is not the same as giving it the ability to start another agent automatically. A human-free handoff needs three separate layers:
+The goal is simple:
 
 ```text
-GitHub event
-PR / push / label / workflow result
+One agent finishes
         ↓
-TRIGGER
-GitHub Actions
+GitHub detects the event
         ↓
-ROUTING RULE
-which state → which task?
+the next task starts
         ↓
-AGENT EXECUTION
-Codex / Claude / Gemini
-        ↓
-STRUCTURED RESULT
-        ↓
-new GitHub event
-        ↓
-next stage
+the next agent works
 ```
 
-The agent also needs a programmatic execution path. This may be an API, CLI, GitHub integration, or another execution mechanism supported by the agent platform. Repository access alone does not provide that mechanism.
+The user no longer needs to keep saying **“Codex is done; now start Claude”** or **“Claude found a problem; send it back to Codex.”**
 
-GitHub **Agentic Workflows** is one current option for building this pattern on GitHub Actions. It is still in **public preview**, so setup and syntax may change over time. The current version supports agent engines including GitHub Copilot, Claude Code, OpenAI Codex, and Google Gemini.
+### First, understand the handoff
 
-### Example: automated Codex → Claude → Codex loop
+Connecting an agent to a GitHub repository does not automatically give it the ability to start another agent.
 
-Suppose Codex implements a task, Claude reviews the change, and Codex automatically receives the correction task when Claude finds a problem:
+Something still needs to start the next step. In this example, **GitHub Actions** does that job.
+
+When something happens in GitHub — for example, a Pull Request (PR) is opened, a new commit is added to a PR, or a specific label is applied — GitHub Actions can start the matching workflow.
+
+```text
+Something happens in GitHub
+        ↓
+GitHub Actions detects it
+        ↓
+the next task is selected
+        ↓
+the relevant agent runs
+        ↓
+the result returns to GitHub
+        ↓
+the next handoff can begin
+```
+
+Keep two ideas separate:
+
+- **GitHub access:** lets an agent read project files and, if permitted, change them.
+- **Automatic triggering:** starts the next task when a defined event occurs.
+
+The agent service must also support being started from an external mechanism. That may be provided through an API, command-line tool, or ready-made GitHub integration.
+
+GitHub **Agentic Workflows** is one option for building these flows on GitHub Actions. At the time of writing, it is in **public preview**, so the current GitHub documentation should be checked before using the setup examples below.
+
+### Example flow: Codex → Claude → Codex
+
+In this example, Codex changes the code and Claude reviews the change. If Claude finds a problem, the task returns to Codex.
 
 ```text
 Task
   ↓
-Codex / Developer
+Codex makes the change
   ↓
-creates Pull Request
+Pull Request opens
   ↓
-PR opened / synchronize
+GitHub Actions starts
   ↓
-GitHub Actions triggers
+Claude reviews the change
   ↓
-Claude / Review
-  ↓
- ┌──────────────────────┐
- │                      │
-issue found            acceptable
- │                      │
- ▼                      ▼
-agent:fix-required   agent:review-passed
+ ┌─────────────────────┐
+ │                     │
+problem found       no problem
+ │                     │
+ ▼                     ▼
+back to Codex       run tests
  │
  ▼
-GitHub Actions
+Codex fixes it
  │
  ▼
-Codex / Fix
+PR is updated
  │
  ▼
-PR branch updated
- │
- ▼
-synchronize event
- │
- └──────────────→ Claude reviews again
+Claude reviews again
 ```
 
-The user no longer carries messages such as **“Codex finished; now start Claude”** or **“Claude found a problem; send it back to Codex.”** GitHub events and workflow rules perform the transition.
+The important point is that **the agents do not need to send messages directly to each other.** The task state in GitHub and the workflow rules can decide which step comes next.
 
-### 1. Prepare the repository for agentic workflows
+Now we can build the flow step by step.
 
-GitHub CLI should be installed and authenticated for the repository. Then install the GitHub Agentic Workflows extension:
+### 1. Prepare the automation area in GitHub
+
+First, the **GitHub CLI**, GitHub's command-line tool, should be installed and authorized for the repository.
+
+If GitHub Agentic Workflows is being used, its extension can be prepared with:
 
 ```bash
 gh extension install github/gh-aw
 gh aw init
 ```
 
-Workflow sources are stored as Markdown under `.github/workflows/`. Frontmatter defines the trigger, agent engine, permissions, and safe outputs; the Markdown body defines the task.
+Automated agent tasks are stored under `.github/workflows/`.
 
 For example:
 
@@ -615,17 +627,27 @@ For example:
 └── fix.lock.yml
 ```
 
-The `.lock.yml` files are generated by `gh aw compile`. When workflow frontmatter changes, recompile it and commit the generated lock file together with the Markdown source:
+The Markdown files describe **which agent should do what and when**.
+
+The settings at the top of a file define when the task starts, which agent is used, and what permissions it has. The normal text below those settings describes the task for the agent.
+
+The `.lock.yml` files are compiled versions used by the system. When the source workflow changes, they can be regenerated with:
 
 ```bash
 gh aw compile
 ```
 
-### 2. Store agent credentials safely
+### 2. Do not put agent keys in the code
 
-Credentials required by an agent engine should not be written into repository files. Store them under GitHub **Settings → Secrets and variables → Actions**.
+If a service such as Codex, Claude, or Gemini requires an API key, do not write that value into normal repository files.
 
-For example, the current GitHub Agentic Workflows setup can use:
+Store it in GitHub under:
+
+**Settings → Secrets and variables → Actions**
+
+as a **secret**.
+
+Depending on the setup, examples may include:
 
 ```text
 Codex   → CODEX_API_KEY or OPENAI_API_KEY
@@ -633,11 +655,17 @@ Claude  → ANTHROPIC_API_KEY
 Gemini  → GEMINI_API_KEY
 ```
 
-Never place the real secret value in `AGENTS.md`, a workflow file, a task package, or source code.
+Never put the real key value in `AGENTS.md`, a task file, a workflow, or source code.
 
-### 3. Trigger Claude review from the PR event
+### 3. Start Claude when Codex finishes
 
-A PR created or updated by Codex can automatically start a Claude review workflow:
+When Codex finishes a change and opens a PR, GitHub can treat that as an event.
+
+We can define a rule such as:
+
+> **When a new PR opens, or new code is added to the PR, start Claude's review.**
+
+Example workflow:
 
 ```markdown
 ---
@@ -674,13 +702,30 @@ If the change is acceptable, report the checks performed and request the
 `agent:review-passed` label.
 ```
 
-The `opened` event runs on the first PR creation, while `synchronize` runs again when new commits are pushed to the PR branch.
+The two technical event names simply tell GitHub **when to run**:
 
-### 4. How does Claude's finding start Codex automatically?
+- `opened` → run when the PR is first opened.
+- `synchronize` → run again when a new commit is added to the same PR.
 
-The review label can act both as state and as the trigger for the next workflow.
+Claude then produces one of two simple states:
 
-For example, the Codex correction workflow can run only when the `agent:fix-required` label is applied:
+```text
+agent:fix-required
+= a correction is needed
+
+agent:review-passed
+= the review passed
+```
+
+Those states can be used to start the next step.
+
+### 4. Send the task back to Codex when Claude finds a problem
+
+Now we can define the second handoff:
+
+> **If Claude produces `agent:fix-required`, start the Codex correction task.**
+
+Example:
 
 ```markdown
 ---
@@ -701,69 +746,94 @@ safe-outputs:
 
 # Fix
 
-Review the findings on the triggering PR.
+Review the findings on the PR.
 
 First:
-1. Record the current PR HEAD commit as INPUT_VERSION.
-2. Confirm that the review finding is still valid on this version.
-3. Apply the shared rules in AGENTS.md and the PRESERVE boundaries.
+1. Record the current PR version as INPUT_VERSION.
+2. Revalidate the finding against the current code.
+3. Preserve the AGENTS.md rules and PRESERVE boundaries.
 
-If the finding is confirmed, make only the smallest necessary fix.
+If the issue is confirmed, make the smallest necessary fix.
 Run the relevant tests.
-Do not change code for an unconfirmed finding.
+If the issue is not confirmed, do not change the code.
 
 Return CHANGED, PRESERVED, VERIFIED,
 SKIPPED_CHECKS, and SCOPE_STATUS.
 ```
 
-When Codex updates the PR branch, the new commit produces a `synchronize` event. That event runs the Claude review workflow again, allowing the correction loop to continue without the user carrying messages.
+We are not telling Codex **“Claude said it, so it must be true; fix it.”**
 
-### 5. Move to tests after review passes
+Codex first checks the current PR version and confirms that Claude's finding is still valid. Only then does it change the code if needed.
 
-When Claude produces the `agent:review-passed` state, it can trigger a separate test workflow:
+When Codex sends the correction to the PR, GitHub sees a new commit. The `synchronize` rule from the previous step runs, so Claude reviews the updated change again.
+
+The loop can therefore continue without the user carrying messages:
+
+```text
+Claude found a problem
+        ↓
+Codex verified and fixed it
+        ↓
+PR was updated
+        ↓
+Claude checked again
+```
+
+### 5. Start tests when Claude passes the review
+
+If Claude finds no problem, it can produce the `agent:review-passed` state.
+
+The next rule can then be:
+
+> **If the review passes, run the tests.**
 
 ```text
 agent:review-passed
         ↓
-GitHub Actions
-        ↓
 test / build / lint
         ↓
-PASS → VERIFIED
-FAIL → agent:fix-required or separate failure task
+pass → VERIFIED
+fail → correction task
 ```
 
-Deterministic checks do not require another AI agent. Unit tests, linting, builds, and similar checks can run as normal GitHub Actions steps. Use an agent only where contextual interpretation or judgment is actually required.
+Not every check needs another AI agent. Unit tests, builds, and lint checks have clear results and can usually run as normal GitHub Actions steps.
 
-### 6. Keep the trigger separate from the orchestrator
+AI agents are more useful when the task requires interpretation, such as reviewing whether a change stayed within scope or whether the implementation matches the requested behavior.
 
-In this architecture:
+### 6. A trigger and an orchestrator are not the same thing
+
+These two ideas can easily be confused.
+
+In simple terms:
 
 ```text
-GitHub event
-= "something happened"
-
 Trigger
-= "start the matching workflow"
+= "start now"
 
-Routing rule
-= "which stage should run after this result?"
+Orchestration
+= "who should start now, and with which task?"
 
 Agent
-= "perform the assigned task"
+= "do the assigned task"
 ```
 
-For example, the `agent:fix-required` label can mean **“run Codex now.”** The `agent:review-passed` state can start the test stage.
+For example, when the `agent:fix-required` state appears in GitHub, GitHub Actions can start the Codex workflow. GitHub Actions is acting as the **trigger**.
 
-If a separate ChatGPT orchestrator is used, it also needs a programmatic integration through which it can be invoked. If no such integration exists, GitHub Actions and workflow states can perform the automated routing inside GitHub. This keeps the conceptual **“ChatGPT is the orchestrator”** role separate from the mechanism that is actually executing automation in GitHub.
+The **workflow rule** decides which result should go to which agent.
 
-### 7. Do not give agents unrestricted write access
+If ChatGPT is also used as an orchestrator, there must be an integration that allows the automation to invoke ChatGPT. Without that connection, GitHub Actions and the workflow rules can manage the automated handoffs inside GitHub.
 
-Use the minimum permissions required. A controlled workflow usually has the agent propose changes through a PR rather than writing directly to `main`.
+So saying **“ChatGPT is the orchestrator”** does not by itself mean that ChatGPT is automatically running inside GitHub.
 
-GitHub Agentic Workflows **safe outputs** can apply an agent's proposed write operation in a separate permission-controlled step. Examples include `create-pull-request`, `push-to-pull-request-branch`, and restricted label operations.
+### 7. Give agents only the permissions they need
 
-The file scope can also be constrained:
+Once automation is enabled, agents may act without waiting for the user. Their permissions should therefore be kept as narrow as possible.
+
+For example, allowing an agent to work through a PR is usually more controlled than allowing it to change the `main` branch directly.
+
+GitHub Agentic Workflows **safe outputs** can be used to limit the write actions an agent may request. For example, an agent may be allowed to create a PR, update the current PR branch, or use only specific labels.
+
+The task can also define file boundaries:
 
 ```text
 ALLOWED_FILES:
@@ -776,36 +846,39 @@ PROTECTED:
 - dependency / package files
 ```
 
-Do not automatically allow an agent to modify security, workflow, or instruction files that are unnecessary for its task.
+A navigation task should not automatically give an agent permission to modify unrelated workflow, security, or dependency files.
 
-### 8. Prevent duplicate work on the same task
+### 8. Prevent the same task from starting twice
 
-Two agent runs working on the same task at the same time can overwrite or invalidate each other's work. GitHub Actions `concurrency` or the appropriate agentic-workflow locking mechanism can restrict simultaneous work for the same task.
+Automation can accidentally trigger the same task more than once. If two agent runs modify the same files at the same time, they can interfere with each other.
 
-For example:
+For that reason, limit how many runs may work on the same `TASK_ID` or PR at once.
 
-```text
-CONCURRENCY_KEY:
-TASK_ID or PR_NUMBER
+GitHub Actions **concurrency**, which controls simultaneous runs, can be used for this.
 
-UI-024 is running
-        ↓
-second UI-024 arrives
-        ↓
-queue / cancel / revalidate
-```
-
-### 9. Do not automate the entire multi-agent system at once
-
-Start with one handoff:
+The idea is simple:
 
 ```text
-Codex created PR
+UI-024 is already running
         ↓
-Claude reviewed automatically
+a second UI-024 arrives
+        ↓
+queue / cancel / recheck
 ```
 
-After that transition is reliable, add:
+### 9. Start automation with one small handoff
+
+Do not connect every agent at once in the first experiment. Start by automating one handoff that is easy to observe.
+
+A good first target is:
+
+```text
+Codex created a PR
+        ↓
+Claude started reviewing automatically
+```
+
+Once that transition works reliably, add the next steps one at a time:
 
 ```text
 Claude → Codex correction
@@ -814,7 +887,7 @@ Review → tests
 Tests → verification
 ```
 
-At every new handoff, preserve at least:
+At every handoff, preserve at least:
 
 ```text
 TASK_ID
@@ -829,9 +902,9 @@ SKIPPED_CHECKS
 NEXT_ACTION
 ```
 
-The automation should therefore do more than run agents in sequence. It should preserve **which task, which version, which evidence, and which boundaries moved into the next stage.**
+The goal is not only to run agents in sequence. **The next step should also receive the task version, the finding being transferred, the areas that must be preserved, and any checks that were not completed.**
 
-> **Note:** GitHub Agentic Workflows is in public preview at the time of writing. Recheck the current GitHub documentation for engine, trigger, permission, and safe-output options before setup.
+> **Note:** GitHub Agentic Workflows is in public preview at the time of writing. During setup, check GitHub's current engine, trigger, permission, and safe-output options.
 
 ## When to use it
 
