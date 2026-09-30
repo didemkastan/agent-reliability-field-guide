@@ -1,41 +1,32 @@
 # Güvenli Değişiklik
 
-[🇬🇧 English](README_EN.md)
+[English](README_EN.md)
 
-> Bu bölüm tek bir şeyi öğretir: **agenttan bir değişiklik istediğinde, yalnızca istediğin şeyin değişmesini nasıl sağlarsın?**
-> Agentlar arasında görev devri ve otomasyon ayrı bölümlerde ele alınır.
+> Bu bölüm tek bir şeyi öğretir: **çoklu-agent çalışma akışında bir değişiklik yapılırken yalnızca istenen alanın değişmesini ve korunması gereken yerlerin bozulmamasını nasıl sağlarız?**
 
-## Bu sayfadaki kutular nasıl okunur?
-
-- 👁 **Örnek:** Sadece okumak içindir.
-- 📋 **Agenta yapıştır:** Agentın sohbet veya prompt alanına yazılır.
-- 📄 **Dosyaya yaz:** Belirtilen dosyanın içine yazılır.
-- 💻 **Terminalde çalıştır:** Bilgisayarındaki Terminal (macOS/Linux) veya PowerShell (Windows) ekranında çalıştırılır.
-
-## Birkaç kelime
-
-- **Repository (repo):** Projenin dosyalarının ve değişiklik geçmişinin tutulduğu çalışma alanı.
-- **Commit:** Değişikliklerin kaydedilmiş bir anlık görüntüsü.
-- **Diff (değişiklik farkı):** Bir dosyada hangi satırların silindiğini ve eklendiğini gösteren karşılaştırma.
-- **Kapsam:** Görevin sınırı; agentın neye dokunabileceğini ve neyi koruması gerektiğini belirler.
+Bu rehberde çalışma yapısı **ChatGPT, Codex, Claude, Gemini ve GitHub** üzerinden ele alınır. Agentların görevleri nasıl devraldığı ve bu yapının nasıl otomatikleştirileceği sonraki bölümlerde açıklanacaktır.
 
 ## Problem
 
-Agenttan küçük bir değişiklik istediğinde, istediğin şeyi yaparken başka yerleri de değiştirebilir.
+Bir agenta küçük bir değişiklik verildiğinde, agent istenen sonucu üretirken görevin dışındaki alanları da değiştirebilir.
 
-Örneğin yalnızca bir bağlantının düzeltilmesini istersin; agent aynı dosyadaki metinleri de yeniden düzenler veya başka dosyalara dokunur. Bağlantı düzelmiştir ama değişiklik artık istediğinden daha geniştir.
+Bu durum çoklu-agent akışında daha önemli hale gelir. İlk agentın yaptığı gereksiz bir değişiklik sonraki agenta aktarılabilir; sonraki agent da bu değişikliği doğru kabul ederek çalışmasına devam edebilir.
+
+Sonuçta asıl görev doğru yapılmış olsa bile istenmeyen değişiklikler agentlar arasında taşınabilir.
 
 ## Temel kural
 
-> **Değişiklikten önce neyin değişebileceğini ve neyin korunacağını belirle. İstenen sonuç için gereken en küçük değişikliği yap.**
+> **Değişiklik başlamadan önce neyin değişebileceğini, neyin korunacağını ve neyin yapılmaması gerektiğini açıkça belirle. İstenen sonuç için gereken en küçük değişikliği yap.**
+
+Bu sınır yalnızca değişikliği yapan agent için değil, görevi daha sonra inceleyecek veya devralacak agentlar için de geçerlidir.
 
 ## Değişiklik sınırı: üç alan
 
-- **CHANGE (Değiştir):** Yapılmasını istediğin değişiklik.
-- **PRESERVE (Koru):** Aynı kalması gereken yerler.
-- **DO NOT (Yapma):** Bu görevde yapılmaması gerekenler.
+- **CHANGE (Değiştir):** Yapılması istenen değişiklik.
+- **PRESERVE (Koru):** Aynı kalması gereken alanlar.
+- **DO NOT (Yapma):** Bu görev sırasında yapılmaması gerekenler.
 
-📋 **Agenta yapıştır**
+**Agenta verilecek görev örneği**
 
 ```
 CHANGE:
@@ -51,191 +42,156 @@ DO NOT:
 - İlgisiz metinleri yeniden yazma.
 ```
 
-Liste uzun olmak zorunda değildir. Küçük bir işte yalnızca kritik sınırları yazmak yeterlidir.
+Liste uzun olmak zorunda değildir. Önemli olan, görevin sınırının değişiklik başlamadan önce görünür olmasıdır.
 
 ## En küçük değişiklik
 
-Bir yazım hatası tek satırda düzeliyorsa aynı anda paragrafı yeniden yazmaya veya dosyanın biçimini değiştirmeye gerek yoktur.
+Bir yazım hatası tek satırda düzeltilebiliyorsa aynı anda paragrafı yeniden yazmaya veya başka dosyaları düzenlemeye gerek yoktur.
 
-Agent kapsam dışında başka bir sorun fark ederse onu kendiliğinden düzeltmek yerine **bildirmelidir**. Kapsamı genişletme kararı kullanıcıya aittir.
+Agent görev sırasında kapsam dışında başka bir sorun fark ederse onu kendiliğinden düzeltmek yerine **bildirmelidir**.
 
-## Örnek: beklenen ve gerçekleşen
+Kapsamın genişletilmesine ihtiyaç varsa bu yeni durum önce görünür hale getirilir. Böylece sonraki agent, başlangıçtaki görev ile sonradan fark edilen yeni ihtiyacı birbirine karıştırmaz.
 
-İstenen: README dosyasındaki tek bir bağlantının değişmesi.
+## Beklenen ve gerçekleşen değişiklik
 
-👁 **Örnek**
+İstenen değişiklik yalnızca `README.md` dosyasındaki bir bağlantının güncellenmesiyse beklenen kapsam şöyledir:
 
 ```
 BEKLENEN                GERÇEKLEŞEN
 README.md               README.md
-                        config.yaml     ← beklenmiyordu
-                        package.json    ← beklenmiyordu
+                        config.yaml     <- beklenmiyordu
+                        package.json    <- beklenmiyordu
 ```
 
-Bağlantı doğru düzelmiş olsa bile diğer iki dosya görevin parçası değildir. Beklenmeyen değişiklikler incelenmeli; gerekli değilse geri alınmalıdır.
+Bağlantı doğru düzelmiş olsa bile diğer iki dosya başlangıçtaki görevin parçası değildir.
 
-## Kapsamı nasıl kontrol edersin?
+Bu nedenle yalnızca **“istenen sonuç oluştu mu?”** sorusu yeterli değildir.
 
-İş bitince iki soruya bak:
+İkinci soru da sorulmalıdır:
 
-1. **Hangi dosyalar değişti?** Beklediğin listeyle aynı mı?
-2. **Dosyaların içinde ne değişti?** Korunması gereken bir bölüme dokunulmuş mu?
+> **“Yalnızca izin verilen değişiklikler mi yapıldı?”**
 
-Yalnızca dosya sayısına bakmak yetmez. Doğru dosyanın yanlış satırı da değişmiş olabilir.
+## Kapsam nasıl kontrol edilir?
 
-### GitHub'da kontrol
+İş tamamlandığında iki şey karşılaştırılır:
 
-Pull Request sayfasında **Files changed** sekmesini aç. Burada PR içindeki değişen dosyaları ve satırları görebilirsin.
+1. **Beklenen değişiklikler:** Görev başında CHANGE alanında tanımlananlar.
+2. **Gerçekleşen değişiklikler:** Agentın gerçekten değiştirdiği dosya ve alanlar.
 
-### Bilgisayarında: henüz commit edilmemiş değişiklik
+Kontrol sırasında şunlara bakılır:
 
-Repo klasöründe:
+- Beklenmeyen bir dosya değişmiş mi?
+- PRESERVE alanındaki bir bölüm değiştirilmiş mi?
+- DO NOT altında yasaklanan bir işlem yapılmış mı?
+- Görevi tamamlamak için gerekmeyen ek bir değişiklik yapılmış mı?
 
-💻 **Terminalde çalıştır**
+Yalnızca agentın kendi raporuna güvenilmez. Mümkün olduğunda gerçek değişiklik farkı (**diff**) üzerinden kontrol yapılır.
 
-```bash
-git status
-git diff --stat
-git diff
-```
+## Çoklu-agent akışında kapsam kaydı
 
-- `git status` çalışma alanının durumunu gösterir.
-- `git diff --stat` henüz commit edilmemiş değişikliklerin dosya bazında özetini verir.
-- `git diff` henüz commit edilmemiş değişikliklerin satır farkını gösterir.
+CHANGE / PRESERVE / DO NOT bilgisi yalnızca ilk görev mesajında kalmamalıdır.
 
-> ⚠️ Agent değişikliği zaten commit ettiyse normal `git diff` boş görünebilir. Bu, değişiklik yapılmadığı anlamına gelmez.
-
-### Değişiklik zaten commit edildiyse
-
-Son committe ne değiştiğini görmek için:
-
-💻 **Terminalde çalıştır**
-
-```bash
-git show --stat HEAD
-git show HEAD
-```
-
-- `git show --stat HEAD` son committe değişen dosyaları özetler.
-- `git show HEAD` son commitin satır farkını gösterir.
-
-Bir PR kullanıyorsan en kolay kontrol yine GitHub'daki **Files changed** sekmesidir.
-
-### Beklenmeyen değişikliği geri almadan önce
-
-Değişiklik **henüz commit edilmemişse** ve dosyadaki tüm yerel değişiklikleri gerçekten silmek istediğinden eminsen:
-
-💻 **Terminalde çalıştır**
-
-```bash
-git restore config.yaml
-```
-
-> ⚠️ `git restore config.yaml` bu dosyadaki commit edilmemiş değişiklikleri geri alınamaz biçimde silebilir. Emin değilsen çalıştırma; önce `git diff config.yaml` ile neyin değiştiğini incele.
->
-> Değişiklik zaten commit edildiyse bu komutu çözüm olarak kullanma. Önce commit farkını incele ve uygun geri alma yöntemini ayrıca belirle.
-
-## Kullanılabilir prompt
-
-📋 **Agenta yapıştır**
+Görev bir agenttan diğerine geçtiğinde aynı kapsam bilgisi de görevle birlikte taşınmalıdır.
 
 ```
-Göreve başlamadan önce kapsamı belirle: hangi dosya veya bölümlerin
-değişeceğini ve nelerin korunacağını yaz.
-
-Yalnızca görevi tamamlamak için gereken en küçük değişikliği yap.
-Görevle ilgisi olmayan dosyaları, metinleri, ayarları, bağımlılıkları
-veya çalışan mevcut davranışları değiştirme.
-
-Kapsam dışında bir sorun fark edersen düzeltme; ayrıca bildir.
-Görevi bitirmek için kapsamın dışına çıkmak zorunlu hale gelirse,
-değişiklik yapmadan önce dur ve nedenini açıkla.
-
-İş bitince yaptığın değişiklikleri başlangıçtaki kapsamla karşılaştır.
-Mümkünse diff üzerinden kontrol et. Kapsam dışı bir değişiklik varsa
-açıkça belirt.
-
-Sonunda şu kaydı ver:
-CHANGED: gerçekte değiştirilenler
-PRESERVED: korunduğunu kontrol ettiklerin
-UNEXPECTED_CHANGES: beklenmeyen değişiklikler (yoksa: none)
-SCOPE_STATUS: değişiklik görev sınırında kaldı mı?
+GÖREV
+  |
+  +-- CHANGE
+  +-- PRESERVE
+  +-- DO NOT
+  |
+  v
+Agent çalışması
+  |
+  v
+Gerçekleşen değişiklik
+  |
+  v
+Kapsam kontrolü
+  |
+  v
+Sonraki agenta görev + kapsam + sonuç
 ```
 
-> **Agentın raporu tek başına kanıt değildir.** Son kontrolü mümkün olduğunda gerçek diff üzerinden yap.
+Böylece sonraki agent yalnızca ortaya çıkan dosyayı değil, **hangi değişikliğin izinli olduğunu ve hangi alanların korunması gerektiğini** de görür.
 
-## Birden fazla agent kullanıyorsan kurallar nereye yazılır?
+Görev devrinin nasıl kaydedileceği ve sürüm bilgisinin nasıl taşınacağı sonraki bölümde ele alınacaktır.
 
-Her görevde aynı kalıcı kuralları tekrar yazmak yerine ortak kuralları tek bir proje talimatında tutabilirsin. Basit bir kurulumda repository kökünde `AGENTS.md` kullanılabilir.
-
-👁 **Örnek**
+## Kullanılabilir görev talimatı
 
 ```
-PROJE/
-├── AGENTS.md
-├── src/
-└── ...
+Göreve başlamadan önce kapsamı kontrol et.
+
+CHANGE:
+Yalnızca burada belirtilen değişiklikleri yap.
+
+PRESERVE:
+Burada belirtilen dosya, bölüm ve çalışan davranışları koru.
+
+DO NOT:
+Burada yasaklanan alanlara veya işlemlere dokunma.
+
+İstenen sonucu üretmek için gereken en küçük değişikliği yap.
+
+Kapsam dışında başka bir sorun fark edersen kendiliğinden düzeltme.
+Ayrıca bildir.
+
+Görevi tamamlamak için kapsamın dışına çıkmak zorunlu hale gelirse
+değişiklik yapmadan önce dur ve nedenini belirt.
+
+İş bitince gerçekleşen değişiklikleri başlangıçtaki kapsamla karşılaştır.
+
+Sonuç kaydı:
+CHANGED: Gerçekte değiştirilenler
+PRESERVED: Korunduğu kontrol edilenler
+UNEXPECTED_CHANGES: Beklenmeyen değişiklikler (yoksa: none)
+SCOPE_STATUS: Değişiklik görev sınırında kaldı mı?
 ```
 
-📄 **Dosyaya yaz:** `AGENTS.md`
+> **Agentın “kapsamda kaldım” demesi tek başına doğrulama değildir.** Mümkün olduğunda gerçekleşen değişiklikler ayrıca kontrol edilmelidir.
 
-Bu dosyanın içine güvenli değişiklik kurallarını ve projede sürekli korunması gereken sınırları normal Markdown metni olarak yaz.
+## Bu kural agentlar arasında nasıl korunur?
 
-> ⚠️ **Dosyanın repoda bulunması, her agentın onu otomatik olarak okuduğu anlamına gelmez.** Araçların proje talimatlarını yükleme yöntemleri farklıdır ve zamanla değişebilir.
+Bu rehberde kullanılan ChatGPT, Codex, Claude ve Gemini aynı görevin farklı aşamalarında çalışabilir. GitHub ise ortak çalışma alanı olarak kullanılabilir.
 
-| Araç | Varsayılan proje talimatı | Ortak kurala bağlama |
-|---|---|---|
-| Codex CLI | `AGENTS.md` | Repository kökündeki kuralları kullanabilir. |
-| Claude Code | `CLAUDE.md` | Ortak kuralları Claude'un proje talimatına bağla veya ilgili kuralları orada tut. |
-| Gemini CLI | `GEMINI.md` | `GEMINI.md` kullan veya `context.fileName` ayarıyla ortak dosya adını yapılandır. |
-| Sohbet arayüzleri | Araca göre değişir | Proje talimatını ekle veya gerekli dosyayı konuşmaya ver. |
+Bu bölümde önemli olan hangi agentın hangi rolü üstlendiği değil, **görev sınırının agent değiştiğinde kaybolmamasıdır**.
 
-Kurulumdan sonra aracın gerçekten hangi talimatları yüklediğini kendi güncel mekanizmasıyla kontrol et.
-
-### Talimat dosyasının yüklendiğini nasıl kontrol edersin?
-
-`AGENTS.md` içine kısa ve benzersiz bir kontrol satırı koyabilirsin:
-
-📄 **Dosyaya yaz:** `AGENTS.md`
+Her geçişte en az şu bilgiler korunur:
 
 ```
-KURAL-SÜRÜMÜ: v1.3
+CHANGE
+PRESERVE
+DO NOT
+CHANGED
+UNEXPECTED_CHANGES
+SCOPE_STATUS
 ```
 
-Yeni bir görevin başında agenttan bu satırı aynen aktarmasını iste.
+Bir sonraki agent, önceki agentın yaptığı değişikliği otomatik olarak doğru kabul etmez. Önce görev sınırı ile gerçekleşen değişikliği karşılaştırır.
 
-> Satırı doğru aktaramıyorsa talimat dosyasının yüklendiğini **varsayma**. Doğru aktarması ise yararlı bir başlangıç kontrolüdür; kritik işlerde tek başına kesin kanıt sayılmaz. Gerekirse kullanılan talimat dosyasının sürümünü veya hash'ini ayrıca kaydet.
-
-Kurallar doğru bağlandıktan sonra her görevde yalnızca o işe özel sınırları verirsin:
-
-👁 **Örnek**
-
-```
-ORTAK / KALICI  → proje talimatı
-  güvenli değişiklik kuralları
-  kalıcı proje sınırları
-
-GÖREVE ÖZEL     → görev mesajı
-  TASK / CHANGE / PRESERVE / DO NOT
-```
+Bu aktarımın hangi kayıt yapısıyla yapılacağı **Görev Devri Uygulaması** bölümünde ele alınacaktır.
 
 ## Ne zaman kullanılır?
 
-- Çalışan bir dosya veya kod üzerinde sınırlı bir düzeltme yapılırken
-- Belirli bölümlerin kesinlikle korunması gerektiğinde
-- Agentın yalnızca belirli dosyalara dokunması istendiğinde
+Bu kural çoklu-agent akışında bir agentın proje üzerinde değişiklik yaptığı her görevde kullanılabilir.
 
-Kolayca geri alınabilen küçük denemelerde ayrıntılı bir sınır kaydı gerekmeyebilir.
+Özellikle şu durumlarda önemlidir:
+
+- Çalışan bir kod veya dosya üzerinde sınırlı değişiklik yapılırken
+- Belirli alanların kesinlikle korunması gerektiğinde
+- Bir agentın yaptığı değişiklik başka bir agent tarafından devralınırken
+- Aynı görev birden fazla agent tarafından incelenirken veya doğrulanırken
 
 ## Özet
 
-1. İşe başlamadan **CHANGE / PRESERVE / DO NOT** yaz.
-2. Agenttan **en küçük değişikliği** ve kısa bir kapsam raporu iste.
-3. Commit edilmemiş ve commit edilmiş değişiklikleri doğru yöntemle ayır.
-4. Agent raporunu mümkün olduğunda **diff ile doğrula**.
-5. Beklenmeyen değişikliği otomatik olarak görevin parçası sayma.
+1. Değişiklik başlamadan **CHANGE / PRESERVE / DO NOT** belirlenir.
+2. Agent yalnızca gereken **en küçük değişikliği** yapar.
+3. Gerçekleşen değişiklik başlangıçtaki kapsamla karşılaştırılır.
+4. Beklenmeyen değişiklikler otomatik olarak görevin parçası kabul edilmez.
+5. Kapsam bilgisi görevle birlikte sonraki agenta taşınır.
+6. Agentın kendi raporu tek başına doğrulama sayılmaz.
 
 ## Sonraki adımlar
 
-- **Agentlar Arası Görev Devri:** Görev paketi, sürüm kontrolü ve dış agentla çalışma.
-- **Agent Otomasyonu:** Otomatik tetikleme ve agent geçişleri ayrı bölümde ele alınır.
+- **Görev Devri Uygulaması:** Görevin, kapsamın, sürüm bilgisinin ve sonuçların agentlar arasında nasıl taşınacağı.
+- **Agent Otomasyonu:** Güvenli görev devrinin otomatik tetikleyiciler ve kontrollü agent geçişleriyle nasıl uygulanacağı.
