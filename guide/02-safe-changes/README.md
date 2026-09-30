@@ -1126,35 +1126,114 @@ B) PR güncellemesinin yeni CI/workflow tetiklemesine
 
 İlk kurulumda **A yöntemi**, yani geçişlerin açıkça workflow'dan workflow'a yapılması, akışı anlamayı ve hata ayıklamayı kolaylaştırır.
 
-### 9. Testleri her zaman AI agenta yaptırma
+### 9. Test aşamasında AI agent mı, normal otomatik test mi kullanılmalı?
 
-Claude incelemeyi geçtiğinde test aşamasına geçilebilir:
+Her test için yeni bir AI agent çalıştırmak gerekmez. Önce şu soruyu sorun:
+
+> **Bu kontrolün doğru veya yanlış sonucu bir program tarafından kesin olarak belirlenebilir mi, yoksa sonucu anlamak için yorum yapmak mı gerekiyor?**
+
+İki farklı kontrol türünü ayıralım.
+
+#### 1. Sonucu kesin olan kontroller
+
+Bazı kontrollerin cevabı nettir. Örneğin:
 
 ```text
-Claude review
-        ↓
-uygun
-        ↓
-test / build / lint
-        ↓
-başarılı → VERIFIED
-başarısız → düzeltme görevi
+Unit test geçti mi?
+→ EVET / HAYIR
+
+Uygulama build edilebildi mi?
+→ EVET / HAYIR
+
+Kodda lint hatası var mı?
+→ VAR / YOK
+
+Type check geçti mi?
+→ EVET / HAYIR
 ```
 
-Sonucu açık olan kontroller için yeni bir AI agent çalıştırmak gerekmez.
+Bunlar için bir AI agentın kodu okuyup karar vermesine gerek yoktur. Mevcut test komutları, scriptler veya **GitHub Actions** bu kontrolleri otomatik olarak çalıştırabilir.
+
+Örneğin proje zaten şu komutu kullanıyorsa:
+
+```bash
+pytest
+```
+
+GitHub Actions aynı komutu otomatik çalıştırabilir ve komutun başarılı olup olmadığına göre akışı devam ettirebilir.
+
+Mantık:
+
+```text
+Codex değişikliği yaptı
+        ↓
+GitHub'a gönderildi
+        ↓
+normal otomatik test çalıştı
+        ↓
+ ┌──────────────────────┐
+ │                      │
+TEST GEÇTİ           TEST KALDI
+ │                      │
+ ▼                      ▼
+sonraki kontrol      Codex'e düzeltme görevi
+```
+
+Buradaki **normal otomatik test**, AI değildir. Projenin zaten kullandığı test aracının GitHub Actions tarafından otomatik çalıştırılmasıdır.
+
+#### 2. Yorum gerektiren kontroller
+
+Bazı soruların cevabı yalnızca bir test komutunun `PASS` veya `FAIL` sonucu ile anlaşılamaz.
 
 Örneğin:
 
 ```text
-unit test
-build
-lint
-type check
+Kullanıcının istediği davranış gerçekten uygulanmış mı?
+
+Değişiklik görev kapsamının dışına taşmış mı?
+
+Çalışan mevcut davranış gereksiz yere değiştirilmiş mi?
+
+Kod teknik olarak çalışsa bile istek yanlış yorumlanmış olabilir mi?
+
+Ekran veya kullanıcı akışı beklenen davranışla uyumlu mu?
 ```
 
-normal GitHub Actions adımlarıyla çalıştırılabilir.
+Bu tür kontrollerde bağlamı okuyup değerlendirebilen **Claude, Gemini veya başka bir AI agent** kullanılabilir.
 
-AI agentı; kodun istenen davranışa uyup uymadığını yorumlamak, kapsam dışı değişikliği değerlendirmek veya bağlama göre inceleme yapmak gerektiğinde kullanmak daha anlamlıdır.
+Dolayısıyla AI agent ile normal test birbirinin yerine geçen iki seçenek değildir. Çoğu güvenilir akışta ikisi birlikte kullanılır:
+
+```text
+Kod değişikliği
+      ↓
+NORMAL OTOMATİK KONTROLLER
+unit test / build / lint / type check
+      ↓
+başarılı
+      ↓
+AI İNCELEMESİ
+istek doğru uygulanmış mı?
+kapsam korunmuş mu?
+bağlamsal bir sorun var mı?
+      ↓
+doğrulama
+```
+
+Sıra projeye göre değişebilir. Örneğin ucuz ve hızlı otomatik testleri AI incelemesinden önce çalıştırmak, zaten build edilemeyen bir değişiklik için gereksiz AI kullanmayı önleyebilir.
+
+Kısaca:
+
+```text
+Cevabı bir komut kesin olarak verebiliyor mu?
+        ↓
+EVET → normal test / script / GitHub Actions
+
+Yorum, bağlam veya değerlendirme gerekiyor mu?
+        ↓
+EVET → AI agent
+```
+
+Amaç AI agentı testten çıkarmak değildir. **Kesin sonucu mevcut araçların verebildiği işi AI'a yaptırmamak; AI'ı yorumlama ve değerlendirme gereken yerde kullanmaktır.**
 
 ### 10. Tetikleyici, orkestrasyon ve agent farklı görevlerdir
 
