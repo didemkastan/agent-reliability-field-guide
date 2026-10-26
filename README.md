@@ -9,7 +9,7 @@ Yayımlanmış bölümlerin başlıklarına tıklayarak ulaşabilirsiniz.
 3. [**Handoff Receipt (Görev Devri Kayıt Şablonu)**](patterns/handoff-receipt.md) — Görev devrinde kullanılabilecek hazır kayıt yapısı.
 4. [**Verification (Doğrulama)**](guide/04-verification/README.md) — “Tamamlandı” demek ile sonucu gerçekten doğrulamak arasındaki fark.
 5. [**Güvenli Değişiklik**](guide/02-safe-changes/README.md) — Değiştirilebilecek alanları sınırlandırma, korunacak noktaları belirleme ve yalnızca gerekli değişikliği yapma.
-6. **Görev Devri Uygulaması** — Düzenleniyor.
+6. [**Görev Devri Uygulaması**](guide/06-handoff-practice/README.md) — Görevi agentlar arasında örnekle ve kontrollü biçimde aktarma.
 7. **Agent Otomasyonu** — Düzenleniyor.
 8. **Retry (Yeniden deneme)** — Yakında.
 9. **Memory & Context (Hafıza ve bağlam)** — Yakında.
