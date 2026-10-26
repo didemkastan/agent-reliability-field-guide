@@ -9,7 +9,7 @@ Published sections can be opened by clicking their titles.
 3. [**Handoff Receipt Template**](patterns/handoff-receipt_EN.md) — A ready-to-use structure for recording a handoff.
 4. [**Verification**](guide/04-verification/README_EN.md) — Understand the difference between reporting “done” and actually verifying the result.
 5. [**Safe Changes**](guide/02-safe-changes/README_EN.md) — Define what may change, preserve protected areas, and make only the necessary change.
-6. **Handoff Practice** — Being revised.
+6. [**Handoff Practice**](guide/06-handoff-practice/README_EN.md) — Transfer work between agents through a practical, controlled example.
 7. **Agent Automation** — Being revised.
 8. **Retries** — Coming soon.
 9. **Memory & Context** — Coming soon.
